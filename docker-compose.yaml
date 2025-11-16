@@ -7,7 +7,7 @@
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ./var/postgresql:/var/lib/postgresql
+      - pg_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD", "pg_isready"]
       interval: 10s
@@ -60,3 +60,6 @@
       start_period: 500ms
     depends_on:
       - reverse-proxy
+
+volumes:
+  pg_data:
