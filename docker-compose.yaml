@@ -16,8 +16,8 @@
   web:
     image: tuitionmanagementsystem
     build:
-      context: .
-      dockerfile: TuitionManagementSystem/Dockerfile
+      context: src/
+      dockerfile: src/TuitionManagementSystem/Dockerfile
     environment:
       ConnectionStrings__DefaultConnection: "Host=${DB_HOST};Port=${DB_PORT};Username=${DB_USER};Password=${DB_PASSWORD};Database=${DB_NAME}"
     env_file:
