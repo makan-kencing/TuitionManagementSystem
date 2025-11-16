@@ -1,0 +1,14 @@
+﻿#file: noinspection ComposeUnknownValues
+services:
+  db:
+    ports:
+       - "5432:5432"
+  web: !reset null  # remove service, run on local machine instead
+  anubis:
+    environment:
+      TARGET: "http://host.docker.internal:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  reverse-proxy:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -1,0 +1,62 @@
+﻿services:
+  db:
+    image: postgres
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ./var/postgresql:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  web:
+    image: tuitionmanagementsystem
+    build:
+      context: .
+      dockerfile: TuitionManagementSystem/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=${DB_HOST};Port=${DB_PORT};Username=${DB_USER};Password=${DB_PASSWORD};Database=${DB_NAME}"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 2s
+      start_period: 1s
+      timeout: 10s
+      retries: 3
+  reverse-proxy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      HOSTNAME: ${HOSTNAME}
+    volumes:
+      - ./deploy/caddy:/etc/caddy:ro
+      - ./var/caddy/config:/config
+      - ./var/caddy/data:/data
+  anubis:
+    image: ghcr.io/techarohq/anubis
+    environment:
+      BIND: ":8080"
+      DIFFICULTY: "4"
+      METRICS_BIND: ":9090"
+      SERVE_ROBOTS_TXT: "true"
+      TARGET: "http://web:8080"
+      OG_PASSTHROUGH: "true"
+      OG_EXPIRY_TIME: "24h"
+    healthcheck:
+      test: ["CMD", "anubis", "--healthcheck"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+      start_period: 500ms
+    depends_on:
+      - reverse-proxy

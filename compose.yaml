@@ -1,6 +1,0 @@
-﻿services:
-  tuitionmanagementsystem:
-    image: tuitionmanagementsystem
-    build:
-      context: .
-      dockerfile: TuitionManagementSystem/Dockerfile

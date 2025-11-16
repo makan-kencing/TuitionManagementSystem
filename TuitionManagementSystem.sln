@@ -4,9 +4,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuitionManagementSystem", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D6DB66E0-B361-412D-ACEC-5DFA9311441F}"
 	ProjectSection(SolutionItems) = preProject
-		compose.yaml = compose.yaml
+		docker-compose.yaml = docker-compose.yaml
 		.gitignore = .gitignore
 		.editorconfig = .editorconfig
+		README.md = README.md
+		docker-compose.dev.yaml = docker-compose.dev.yaml
+		.env = .env
 	EndProjectSection
 EndProject
 Global

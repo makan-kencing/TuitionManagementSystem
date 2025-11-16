@@ -1,0 +1,14 @@
+{
+    log default {
+        format console
+        output file /var/log/caddy/system.log
+        exclude http.log.access
+    }
+}
+
+{$HOSTNAME} {
+    reverse_proxy anubis:8080 {
+        header_up X-Real-Ip {remote_host}
+        header_up X-Http-Version {http.request.proto}
+    }
+}
