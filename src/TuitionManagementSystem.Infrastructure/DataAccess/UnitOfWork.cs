@@ -4,11 +4,11 @@ using Application.Services;
 
 public sealed class UnitOfWork(ApplicationDbContext context) : IUnitOfWork, IDisposable
 {
-    private bool _disposed;
+    private bool disposed;
 
     private void Dispose(bool disposing)
     {
-        if (this._disposed)
+        if (this.disposed)
         {
             return;
         }
@@ -18,7 +18,7 @@ public sealed class UnitOfWork(ApplicationDbContext context) : IUnitOfWork, IDis
             context.Dispose();
         }
 
-        this._disposed = true;
+        this.disposed = true;
     }
 
     public void Dispose()

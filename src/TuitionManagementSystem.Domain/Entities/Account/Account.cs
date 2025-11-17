@@ -1,16 +1,19 @@
-namespace TuitionManagementSystem.Domain.Security;
+namespace TuitionManagementSystem.Domain.Entities.Account;
 
 using System.ComponentModel.DataAnnotations;
 
-public abstract class User
+public class Account
 {
+    [Key]
     public int Id { get; set; }
 
+    [Required]
     public required string Username { get; set; }
 
-    [EmailAddress]
+    [Required]
+    [MaxLength(254)]
     public required string Email { get; set; }
 
-    [DataType(DataType.Password)]
+    [Required]
     public required string HashedPassword { get; set; }
 }

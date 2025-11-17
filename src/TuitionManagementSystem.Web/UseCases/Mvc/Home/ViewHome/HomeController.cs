@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.UseCases;
+namespace TuitionManagementSystem.Web.UseCases.Mvc.Home.ViewHome;
 
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;

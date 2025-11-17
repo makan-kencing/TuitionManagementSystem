@@ -1,9 +1,9 @@
 namespace TuitionManagementSystem.Infrastructure.DataAccess;
 
+using Domain.Entities.Account;
 using Microsoft.EntityFrameworkCore;
-using Entities;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public DbSet<User> Users { get; set; }
+    public DbSet<Account> Users { get; set; }
 }

@@ -1,17 +1,15 @@
-namespace TuitionManagementSystem.Web.UseCases;
+namespace TuitionManagementSystem.Web.UseCases.Mvc.Account.LoginAccount;
 
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using Extension;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ViewModels;
 
-public partial class AccountControlller(ILogger<AccountControlller> logger) : Controller
+public sealed partial class AccountController(ILogger<AccountController> logger) : Controller
 {
     [HttpPost]
-    public async Task<IActionResult> Login(LoginViewModel login, Uri? returnUrl)
+    public async Task<IActionResult> Login([FromBody][Required] LoginViewModel login, Uri? returnUrl)
     {
         // Do fetching user here
         var user = true;
@@ -45,30 +43,6 @@ public partial class AccountControlller(ILogger<AccountControlller> logger) : Co
         return this.LocalRedirect(returnUrl?.LocalPath ?? "/");
     }
 
-    [Authorize]
-    [HttpPost]
-    public async Task<IActionResult> Logout()
-    {
-        if (this.User.Identity == null)
-        {
-            return this.BadRequest();
-        }
-
-        this.Log_UserLogout(this.User.Identity.Name ?? string.Empty, DateTime.UtcNow);
-
-        await this.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-        return this.LocalRedirect(this.Request.GetReferrer() ?? "/");
-    }
-
-    public IActionResult AccessDenied()
-    {
-        return this.RedirectToAction("Error", "Home");
-    }
-
     [LoggerMessage(Level = LogLevel.Information, Message = "User {name} logged in at {time}.")]
     private partial void Log_UserLogin(string name, DateTime time);
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "User {name} logged out at {time}.")]
-    private partial void Log_UserLogout(string name, DateTime time);
 }
