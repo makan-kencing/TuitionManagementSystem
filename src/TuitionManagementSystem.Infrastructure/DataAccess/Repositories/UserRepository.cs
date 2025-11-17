@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Infrastructure.EntityFrameworkDataAccess.Repositories;
+namespace TuitionManagementSystem.Infrastructure.DataAccess.Repositories;
 
 using Entities;
 

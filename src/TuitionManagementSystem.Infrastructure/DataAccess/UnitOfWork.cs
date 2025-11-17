@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Infrastructure.EntityFrameworkDataAccess;
+namespace TuitionManagementSystem.Infrastructure.DataAccess;
 
 using Application.Services;
 

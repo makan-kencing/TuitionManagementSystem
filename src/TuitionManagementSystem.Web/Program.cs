@@ -2,7 +2,7 @@ namespace TuitionManagementSystem.Web;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Infrastructure.EntityFrameworkDataAccess;
+using Infrastructure.DataAccess;
 
 public static class Program
 {

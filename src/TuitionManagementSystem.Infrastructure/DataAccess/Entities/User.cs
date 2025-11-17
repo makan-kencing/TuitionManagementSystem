@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Infrastructure.EntityFrameworkDataAccess.Entities;
+namespace TuitionManagementSystem.Infrastructure.DataAccess.Entities;
 
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
