@@ -1,9 +1,9 @@
 namespace TuitionManagementSystem.Web;
 
-using Infrastructure.DataAccess;
+using Features.Authentication;
+using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Modules;
 
 public class Startup(IConfiguration configuration)
 {
@@ -13,8 +13,6 @@ public class Startup(IConfiguration configuration)
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
         services
-            .AddRepositories()
-            .AddUseCases()
             .AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString))
             .AddHttpContextAccessor()
@@ -28,7 +26,10 @@ public class Startup(IConfiguration configuration)
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                 options.SlidingExpiration = true;
+                options.EventsType = typeof(UserCookieAuthenticationEvents);
             });
+
+        services.AddScoped<UserCookieAuthenticationEvents>();
     }
 
     public void Configure(
