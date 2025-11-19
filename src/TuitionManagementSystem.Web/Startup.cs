@@ -1,5 +1,7 @@
 namespace TuitionManagementSystem.Web;
 
+using System.Reflection;
+using Features.Abstractions;
 using Features.Authentication;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -7,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 public class Startup(IConfiguration configuration)
 {
+    private static readonly Assembly AssemblyToScan = typeof(IFeatureMarker).Assembly;
+
     public void ConfigureServices(IServiceCollection services)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
@@ -18,6 +22,7 @@ public class Startup(IConfiguration configuration)
             .AddHttpContextAccessor()
             .AddEndpointsApiExplorer()
             .AddSwaggerGen()
+            .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(AssemblyToScan))
             .AddControllersWithViews();
 
         services
