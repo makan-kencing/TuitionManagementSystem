@@ -1,10 +1,14 @@
 namespace TuitionManagementSystem.Web;
 
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Features.Abstractions;
 using Features.Authentication;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
 public class Startup(IConfiguration configuration)
@@ -17,12 +21,29 @@ public class Startup(IConfiguration configuration)
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
         services
+            .Configure<KestrelServerOptions>(options => options.AddServerHeader = true)
+            .Configure<RouteOptions>(options => options.LowercaseUrls = true)
+            .Configure<JsonOptions>(jsonOptions =>
+            {
+                jsonOptions.JsonSerializerOptions.WriteIndented = false;
+                jsonOptions.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                jsonOptions.JsonSerializerOptions.ReadCommentHandling = JsonCommentHandling.Skip;
+                jsonOptions.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                jsonOptions.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                jsonOptions.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            });
+
+        services
+            .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(AssemblyToScan));
+
+        services
             .AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString))
             .AddHttpContextAccessor()
+            .AddResponseCompression()
             .AddEndpointsApiExplorer()
+            .AddProblemDetails()
             .AddSwaggerGen()
-            .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(AssemblyToScan))
             .AddControllersWithViews();
 
         services
@@ -52,6 +73,7 @@ public class Startup(IConfiguration configuration)
             .UseSwagger()
             .UseSwaggerUI()
             .UseHttpsRedirection()
+            .UseResponseCompression()
             .UseRouting()
             .UseAuthentication()
             .UseAuthorization()
