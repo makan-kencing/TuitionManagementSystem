@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Features.Abstractions;
 using Features.Authentication;
+using Features.Authentication.Login;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,11 @@ public class Startup(IConfiguration configuration)
             });
 
         services
-            .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(AssemblyToScan));
+            .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(AssemblyToScan))
+            .AddAutoMapper(cfg =>
+            {
+                cfg.CreateMap<LoginViewModel, LoginRequest>();
+            });
 
         services
             .AddDbContext<ApplicationDbContext>(options =>
