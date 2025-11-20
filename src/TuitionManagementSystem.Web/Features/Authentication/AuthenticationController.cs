@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Extensions;
 
-[Route("/")]
+[Route("/[action]")]
 public sealed class AuthenticationController(
     IMediator mediator,
     IMapper mapper) : Controller
@@ -19,22 +19,22 @@ public sealed class AuthenticationController(
     public IActionResult Login() => this.View();
 
     [HttpPost]
-    public async Task<IActionResult> Login([FromBody][Required] LoginViewModel login, Uri? returnUrl)
+    public async Task<IActionResult> Login([FromForm][Required] LoginViewModel login, Uri? returnUrl)
     {
         var result = await mediator.Send(mapper.Map<LoginRequest>(login));
 
-        if (result.IsOk())
+        if (!result.IsOk())
         {
-            return this.LocalRedirect(returnUrl?.LocalPath ?? "/");
+            // Error
+            this.ModelState.AddModelError("Invalid", "Username or password is incorrect.");
+            return this.View(login);
         }
 
-        if (result.IsUnauthorized() && result.Value.ErrorStatus == LoginResponseStatus.TwoFactorRequired)
+        if (result.Value.Status == LoginResponseStatus.TwoFactorRequired)
         {
             return this.View("TwoFactor", login);
         }
-
-        // Error
-        return this.View(result.Value);
+        return this.LocalRedirect(returnUrl?.LocalPath ?? "/");
     }
 
     [HttpPost]

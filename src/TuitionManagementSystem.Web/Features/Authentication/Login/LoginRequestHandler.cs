@@ -22,7 +22,7 @@ public sealed class LoginRequestHandler(
 
         if (user == null)
         {
-            return Result.Unauthorized();
+            return Result<LoginResponse>.Unauthorized();
         }
 
         var claims = new List<Claim>
@@ -42,6 +42,6 @@ public sealed class LoginRequestHandler(
             claimsPrincipal,
             authProperties);
 
-        return Result<LoginResponse>.Success(new LoginResponse());
+        return Result<LoginResponse>.Success(new LoginResponse(LoginResponseStatus.Success));
     }
 }
