@@ -39,11 +39,17 @@
             @if (User.Identity!.IsAuthenticated)
             {
                 var username = await db.Account
+                    .AsNoTracking()
                     .Where(a => a.Id == User.GetUserId())
                     .Select(a => a.Username)
                     .FirstAsync();
 
                 <div>@username</div>
+
+                @using (Html.BeginForm(controllerName: "Authentication", actionName: "Logout"))
+                {
+                    <button type="submit">Logout</button>
+                }
             }
             else
             {
