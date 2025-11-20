@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.EntityFrameworkCore
+@using TuitionManagementSystem.Web.Features.Authentication.Extensions
+@using TuitionManagementSystem.Web.Infrastructure.Persistence
+@inject ApplicationDbContext db
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
@@ -28,6 +33,22 @@
                     </li>
                 </ul>
             </div>
+        </div>
+
+        <div>
+            @if (User.Identity!.IsAuthenticated)
+            {
+                var username = await db.Account
+                    .Where(a => a.Id == User.GetUserId())
+                    .Select(a => a.Username)
+                    .FirstAsync();
+
+                <div>@username</div>
+            }
+            else
+            {
+                <a asp-controller="Authentication" asp-action="Login">Login</a>
+            }
         </div>
     </nav>
 </header>

@@ -1,5 +1,6 @@
 namespace TuitionManagementSystem.Web.Features.Authentication.Login;
 
+using System.Globalization;
 using System.Security.Claims;
 using Ardalis.Result;
 using Constants;
@@ -27,7 +28,9 @@ public sealed class LoginRequestHandler(
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Role, ""), new(InternalClaimTypes.UserId, ""), new(InternalClaimTypes.LastChanged, "")
+            new(ClaimTypes.Role, ""),
+            new(InternalClaimTypes.UserId, user.Id.ToString(CultureInfo.InvariantCulture)),
+            new(InternalClaimTypes.LastChanged, user.LastChanged.ToString("o", CultureInfo.InvariantCulture))
         };
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
