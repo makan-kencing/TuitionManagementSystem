@@ -26,6 +26,9 @@ public sealed class LoginRequestHandler(
             return Result<LoginResponse>.Unauthorized();
         }
 
+        // TODO: verify password with hash from db
+        // maybe 2fa
+
         var claims = new List<Claim>
         {
             new(ClaimTypes.Role, ""),
