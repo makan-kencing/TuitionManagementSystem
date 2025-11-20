@@ -1,0 +1,47 @@
+namespace TuitionManagementSystem.Web.Features.Authentication.Login;
+
+using System.Security.Claims;
+using Ardalis.Result;
+using Constants;
+using Infrastructure.Persistence;
+using MediatR;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+
+public sealed class LoginRequestHandler(
+    ApplicationDbContext db,
+    IHttpContextAccessor httpContextAccessor): IRequestHandler<LoginRequest, Result<LoginResponse>>
+{
+    public async Task<Result<LoginResponse>> Handle(LoginRequest request, CancellationToken cancellationToken)
+    {
+        var user = await db.Account
+            .AsNoTracking()
+            .Where(a => a.Username == request.Username)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (user == null)
+        {
+            return Result.Unauthorized();
+        }
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.Role, ""), new(InternalClaimTypes.UserId, ""), new(InternalClaimTypes.LastChanged, "")
+        };
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+        var authProperties = new AuthenticationProperties
+        {
+            IsPersistent = request.RememberMe
+        };
+
+        await httpContextAccessor.HttpContext!.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            claimsPrincipal,
+            authProperties);
+
+        return Result<LoginResponse>.Success(new LoginResponse());
+    }
+}

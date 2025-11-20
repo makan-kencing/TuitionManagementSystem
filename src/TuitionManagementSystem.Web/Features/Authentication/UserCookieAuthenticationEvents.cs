@@ -1,5 +1,6 @@
 namespace TuitionManagementSystem.Web.Features.Authentication;
 
+using Extensions;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -18,11 +19,10 @@ public class UserCookieAuthenticationEvents(
             return;
         }
 
-        var lastChanged = (from c in userPrincipal.Claims
-            where c.Type == "LastChanged"
-            select c.Value).FirstOrDefault();
+        var id = userPrincipal.GetUserId();
+        var lastChanged = userPrincipal.GetLastChanged();
 
-        if (string.IsNullOrEmpty(lastChanged))
+        if (id == null || lastChanged == null)
         {
             await InvalidateSession(context);
             return;
@@ -30,13 +30,11 @@ public class UserCookieAuthenticationEvents(
 
         var dbLastChanged = await db.Account
             .AsNoTracking()
-            .Where(a => a.Id == int.Parse((from c in userPrincipal.Claims
-                where c.Type == "Id"
-                select c.Value).First(), null))
+            .Where(a => a.Id == id)
             .Select(a => a.LastChanged)
             .FirstAsync();
 
-        if (string.IsNullOrEmpty(lastChanged) || dbLastChanged != DateTime.Parse(lastChanged, null))
+        if (dbLastChanged != lastChanged)
         {
             await InvalidateSession(context);
         }
