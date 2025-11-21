@@ -28,7 +28,8 @@ public class Startup(IConfiguration configuration)
                 jsonOptions.JsonSerializerOptions.ReadCommentHandling = JsonCommentHandling.Skip;
                 jsonOptions.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 jsonOptions.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                jsonOptions.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+                jsonOptions.JsonSerializerOptions.Converters.Add(
+                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
             });
 
         services
@@ -75,7 +76,7 @@ public class Startup(IConfiguration configuration)
         {
             app
                 .UseExceptionHandler("/Home/Error")
-                .UseHsts();  // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                .UseHsts(); // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         }
 
         app
