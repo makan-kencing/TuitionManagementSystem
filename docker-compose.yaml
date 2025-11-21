@@ -18,8 +18,6 @@
     build:
       context: src/
       dockerfile: src/TuitionManagementSystem/Dockerfile
-    environment:
-      ConnectionStrings__DefaultConnection: "Host=${DB_HOST};Port=${DB_PORT};Username=${DB_USER};Password=${DB_PASSWORD};Database=${DB_NAME}"
     env_file:
       - .env
     depends_on:
@@ -52,6 +50,8 @@
       TARGET: "http://web:8080"
       OG_PASSTHROUGH: "true"
       OG_EXPIRY_TIME: "24h"
+    volumes:
+      - ./deploy/anubis/botPolicy.yaml:/data/cfg/botPolicy.yaml:ro
     healthcheck:
       test: ["CMD", "anubis", "--healthcheck"]
       interval: 5s
