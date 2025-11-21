@@ -31,7 +31,7 @@ public sealed class LoginRequestHandler(
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Role, nameof(user.AccessRole)),
+            new(ClaimTypes.Role, user.AccessRole.ToString()),
             new(InternalClaimTypes.UserId, user.Id.ToString(CultureInfo.InvariantCulture)),
             new(InternalClaimTypes.LastChanged, user.LastChanged.ToString("o", CultureInfo.InvariantCulture))
         };
