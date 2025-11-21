@@ -39,7 +39,7 @@ public class Startup(IConfiguration configuration)
                 cfg.CreateMap<LoginViewModel, LoginRequest>();
             });
 
-        var connectionString =
+        var connectionString = configuration.GetConnectionString("DefaultConnection") ??
             $"Host={configuration["DB_HOST"]};" +
             $"Port={configuration["DB_PORT"]};" +
             $"Username={configuration["DB_USER"]};" +
