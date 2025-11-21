@@ -4,28 +4,27 @@
     ViewData["Title"] = "Login";
 }
 
-@using (Html.BeginForm())
-{
+<form asp-controller="Authentication" asp-action="Login">
     <div>
-        @Html.LabelFor(m => m.Username)
-        @Html.TextBoxFor(m => m.Username)
-        @Html.ValidationMessageFor(m => m.Username)
+        <label asp-for="Username"></label>
+        <input type="text" asp-for="Username"/>
+        <span asp-validation-for="Username"></span>
     </div>
 
     <div>
-        @Html.LabelFor(m => m.Password)
-        @Html.PasswordFor(m => m.Password)
-        @Html.ValidationMessageFor(m => m.Password)
+        <label asp-for="Password"></label>
+        <input type="text" asp-for="Password"/>
+        <span asp-validation-for="Password"></span>
     </div>
 
     <div>
-        @Html.LabelFor(m => m.RememberMe)
-        @Html.CheckBoxFor(m => m.RememberMe)
+        <label asp-for="RememberMe"></label>
+        <input type="checkbox" asp-for="RememberMe"/>
     </div>
 
     <button type="submit">Login</button>
 
     @Html.ValidationMessage("Invalid")
-}
+</form>
 
 
