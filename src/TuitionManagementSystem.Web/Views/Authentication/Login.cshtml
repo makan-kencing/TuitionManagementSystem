@@ -4,25 +4,27 @@
     ViewData["Title"] = "Login";
 }
 
-<form asp-controller="Authentication" asp-action="Login">
-    <div>
-        <label asp-for="Username"></label>
-        <input type="text" asp-for="Username"/>
-        <span asp-validation-for="Username"></span>
+<form asp-controller="Authentication" asp-action="Login" class="container">
+    <legend>Login</legend>
+
+    <div class="mb-3">
+        <label asp-for="Username" class="form-label"></label>
+        <input type="text" asp-for="Username" class="form-control" required autofocus/>
+        <span asp-validation-for="Username" class="form-text text-danger"></span>
     </div>
 
-    <div>
-        <label asp-for="Password"></label>
-        <input type="text" asp-for="Password"/>
-        <span asp-validation-for="Password"></span>
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input type="text" asp-for="Password" class="form-control" required/>
+        <span asp-validation-for="Password" class="form-text text-danger"></span>
     </div>
 
-    <div>
-        <label asp-for="RememberMe"></label>
-        <input type="checkbox" asp-for="RememberMe"/>
+    <div class="mb-3">
+        <input type="checkbox" asp-for="RememberMe" class="form-check-input"/>
+        <label asp-for="RememberMe" class="form-check-label"></label>
     </div>
 
-    <button type="submit">Login</button>
+    <button type="submit" class="btn btn-primary">Login</button>
 
     @Html.ValidationMessage("Invalid")
 </form>

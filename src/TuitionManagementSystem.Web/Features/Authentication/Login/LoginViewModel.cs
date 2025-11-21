@@ -6,13 +6,13 @@ using System.ComponentModel.DataAnnotations;
 public sealed class LoginViewModel
 {
     [Required]
-    [StringLength(30)]
+    [MaxLength(30)]
     [DisplayName("Username")]
     public required string Username { get; init;  }
 
     [Required]
     [DataType(DataType.Password)]
-    [StringLength(300)]
+    [MaxLength(300)]
     [DisplayName("Password")]
     public required string Password { get; init;  }
 
