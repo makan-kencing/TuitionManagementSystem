@@ -16,7 +16,7 @@ public sealed class LoginRequestHandler(
 {
     public async Task<Result<LoginResponse>> Handle(LoginRequest request, CancellationToken cancellationToken)
     {
-        var user = await db.Account
+        var user = await db.User
             .AsNoTracking()
             .Where(a => a.Username == request.Username)
             .FirstOrDefaultAsync(cancellationToken);
@@ -31,7 +31,7 @@ public sealed class LoginRequestHandler(
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Role, ""),
+            new(ClaimTypes.Role, nameof(user.AccessRole)),
             new(InternalClaimTypes.UserId, user.Id.ToString(CultureInfo.InvariantCulture)),
             new(InternalClaimTypes.LastChanged, user.LastChanged.ToString("o", CultureInfo.InvariantCulture))
         };

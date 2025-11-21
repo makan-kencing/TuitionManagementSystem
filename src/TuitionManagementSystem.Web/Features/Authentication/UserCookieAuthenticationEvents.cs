@@ -28,7 +28,7 @@ public class UserCookieAuthenticationEvents(
             return;
         }
 
-        var dbLastChanged = await db.Account
+        var dbLastChanged = await db.User
             .AsNoTracking()
             .Where(a => a.Id == id)
             .Select(a => a.LastChanged)

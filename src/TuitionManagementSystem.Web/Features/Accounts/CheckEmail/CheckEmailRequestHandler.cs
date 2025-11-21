@@ -10,7 +10,7 @@ public class CheckEmailRequestHandler(
 {
     public async Task<Result<CheckEmailResponse>> Handle(CheckEmailRequest request, CancellationToken cancellationToken)
     {
-        var exists = await db.Account
+        var exists = await db.User
             .AsNoTracking()
             .Where(a => a.Email == request.Email)
             .AnyAsync(cancellationToken);

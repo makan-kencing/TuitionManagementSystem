@@ -5,5 +5,5 @@ using Microsoft.EntityFrameworkCore;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public DbSet<Account> Account { get; set; }
+    public DbSet<User> User { get; set; }
 }

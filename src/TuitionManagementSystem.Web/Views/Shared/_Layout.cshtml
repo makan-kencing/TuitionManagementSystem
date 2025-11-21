@@ -38,7 +38,7 @@
         <div>
             @if (User.Identity!.IsAuthenticated)
             {
-                var username = await db.Account
+                var username = await db.User
                     .AsNoTracking()
                     .Where(a => a.Id == User.GetUserId())
                     .Select(a => a.Username)
