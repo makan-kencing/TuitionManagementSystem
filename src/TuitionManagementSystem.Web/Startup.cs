@@ -18,9 +18,6 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection") ??
-                               throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
         services
             .Configure<KestrelServerOptions>(options => options.AddServerHeader = true)
             .Configure<RouteOptions>(options => options.LowercaseUrls = true)
@@ -40,6 +37,13 @@ public class Startup(IConfiguration configuration)
             {
                 cfg.CreateMap<LoginViewModel, LoginRequest>();
             });
+
+        var connectionString =
+            $"Host={configuration["DB_HOST"]};" +
+            $"Port={configuration["DB_PORT"]};" +
+            $"Username={configuration["DB_USER"]};" +
+            $"Password={configuration["DB_PASSWORD"]};" +
+            $"Database={configuration["DB_NAME"]}";
 
         services
             .AddDbContext<ApplicationDbContext>(options =>
