@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Models;
+namespace TuitionManagementSystem.Web.Models.User;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

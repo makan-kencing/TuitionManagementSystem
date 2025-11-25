@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Models.User;
 
 public class ApplicationDbContext : DbContext
 {
