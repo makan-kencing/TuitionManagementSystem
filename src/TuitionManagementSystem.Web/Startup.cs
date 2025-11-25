@@ -9,6 +9,7 @@ using Features.Authentication.Login;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,7 +55,9 @@ public class Startup(IConfiguration configuration)
             .AddEndpointsApiExplorer()
             .AddProblemDetails()
             .AddSwaggerGen()
-            .AddControllersWithViews();
+            .AddControllersWithViews()
+            .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+            .AddDataAnnotationsLocalization();
 
         services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
