@@ -65,6 +65,15 @@
       ]
     },
     {
+      "library": "htmx.org@latest",
+      "destination": "wwwroot/lib/htmx",
+      "files": [
+        "dist/htmx.js",
+        "dist/htmx.min.js",
+        "LICENSE"
+      ]
+    },
+    {
       "library": "@microsoft/signalr@latest",
       "destination": "wwwroot/lib/signalr",
       "files": [
