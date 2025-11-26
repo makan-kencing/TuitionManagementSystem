@@ -8,7 +8,6 @@ using Logout;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web.Extensions;
 
 [Route("/[action]")]
 public sealed class AuthenticationController(
