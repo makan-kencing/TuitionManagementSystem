@@ -58,15 +58,14 @@ public class Startup(IConfiguration configuration)
             .AddRequestTimeouts()
             .AddCors()
             .AddAntiforgery()
-            .AddWebSockets(options =>
-            {
-                options.KeepAliveInterval = TimeSpan.FromMinutes(2);
-            })
             .AddResponseCompression()
             .AddResponseCaching()
             .AddControllersWithViews()
             .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
             .AddDataAnnotationsLocalization();
+
+        services
+            .AddSignalR();
 
         services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -108,7 +107,6 @@ public class Startup(IConfiguration configuration)
             .UseAuthorization()
             // .UseSession()
             .UseAntiforgery()
-            .UseWebSockets()
             .UseResponseCompression()
             .UseResponseCaching()
             .UseEndpoints(endpoints =>
