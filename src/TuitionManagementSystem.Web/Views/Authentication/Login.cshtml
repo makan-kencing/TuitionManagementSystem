@@ -9,18 +9,18 @@
 
     <div class="mb-3">
         <label asp-for="Username" class="form-label"></label>
-        <input type="text" asp-for="Username" class="form-control" required autofocus/>
+        <input asp-for="Username" class="form-control" required autofocus/>
         <span asp-validation-for="Username" class="form-text text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="Password" class="form-label"></label>
-        <input type="text" asp-for="Password" class="form-control" required/>
+        <input asp-for="Password" class="form-control" required/>
         <span asp-validation-for="Password" class="form-text text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <input type="checkbox" asp-for="RememberMe" class="form-check-input"/>
+        <input asp-for="RememberMe" class="form-check-input"/>
         <label asp-for="RememberMe" class="form-check-label"></label>
     </div>
 
