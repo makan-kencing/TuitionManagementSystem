@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.WebSockets;
 using Microsoft.EntityFrameworkCore;
 
 public class Startup(IConfiguration configuration)
@@ -51,10 +52,18 @@ public class Startup(IConfiguration configuration)
             .AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString))
             .AddHttpContextAccessor()
-            .AddResponseCompression()
-            .AddEndpointsApiExplorer()
             .AddProblemDetails()
             .AddSwaggerGen()
+            .AddEndpointsApiExplorer()
+            .AddRequestTimeouts()
+            .AddCors()
+            .AddAntiforgery()
+            .AddWebSockets(options =>
+            {
+                options.KeepAliveInterval = TimeSpan.FromMinutes(2);
+            })
+            .AddResponseCompression()
+            .AddResponseCaching()
             .AddControllersWithViews()
             .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
             .AddDataAnnotationsLocalization();
@@ -75,7 +84,12 @@ public class Startup(IConfiguration configuration)
         IApplicationBuilder app,
         IWebHostEnvironment env)
     {
-        if (!env.IsDevelopment())
+        // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0#order
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+        else
         {
             app
                 .UseExceptionHandler("/Home/Error")
@@ -83,20 +97,23 @@ public class Startup(IConfiguration configuration)
         }
 
         app
+            .UseHttpsRedirection()
+            .UseStaticFiles()
             .UseSwagger()
             .UseSwaggerUI()
-            .UseHttpsRedirection()
-            .UseResponseCompression()
             .UseRouting()
+            .UseRequestTimeouts()
+            .UseCors()
             .UseAuthentication()
             .UseAuthorization()
+            // .UseSession()
+            .UseAntiforgery()
+            .UseWebSockets()
+            .UseResponseCompression()
+            .UseResponseCaching()
             .UseEndpoints(endpoints =>
             {
-                endpoints.MapStaticAssets();
-                endpoints.MapControllerRoute(
-                        name: "default",
-                        pattern: "{controller=Home}/{action=Index}/{id?}")
-                    .WithStaticAssets();
+                endpoints.MapDefaultControllerRoute();
             });
     }
 }
