@@ -44,9 +44,9 @@ public sealed class AuthenticationController(
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> Logout([FromHeader] Uri? referer)
     {
         await mediator.Send(new LogoutRequest());
-        return this.LocalRedirect(this.Request.GetReferrer()?.LocalPath ?? "/");
+        return this.LocalRedirect(referer?.LocalPath ?? "/");
     }
 }
