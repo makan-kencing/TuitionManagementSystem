@@ -16,12 +16,12 @@ public sealed class LoginRequestHandler(
 {
     public async Task<Result<LoginResponse>> Handle(LoginRequest request, CancellationToken cancellationToken)
     {
-        var user = await db.User
+        var account = await db.Accounts
             .AsNoTracking()
             .Where(a => a.Username == request.Username)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (user == null)
+        if (account == null)
         {
             return Result<LoginResponse>.Unauthorized();
         }
@@ -31,9 +31,9 @@ public sealed class LoginRequestHandler(
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Role, user.AccessRole.ToString()),
-            new(InternalClaimTypes.UserId, user.Id.ToString(CultureInfo.InvariantCulture)),
-            new(InternalClaimTypes.LastChanged, user.LastChanged.ToString("o", CultureInfo.InvariantCulture))
+            new(ClaimTypes.Role, account.AccessRole.ToString()),
+            new(InternalClaimTypes.UserId, account.Id.ToString(CultureInfo.InvariantCulture)),
+            new(InternalClaimTypes.LastChanged, account.LastChanged.ToString("o", CultureInfo.InvariantCulture))
         };
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);

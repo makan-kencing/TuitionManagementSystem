@@ -8,6 +8,7 @@ using Features.Authentication;
 using Features.Authentication.Login;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -32,6 +33,11 @@ public class Startup(IConfiguration configuration)
                 jsonOptions.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 jsonOptions.JsonSerializerOptions.Converters.Add(
                     new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            })
+            .Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
 
         services
@@ -86,12 +92,14 @@ public class Startup(IConfiguration configuration)
         // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0#order
         if (env.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
+            app.UseDeveloperExceptionPage()
+                .UseForwardedHeaders();
         }
         else
         {
             app
                 .UseExceptionHandler("/Home/Error")
+                .UseForwardedHeaders()
                 .UseHsts(); // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         }
 

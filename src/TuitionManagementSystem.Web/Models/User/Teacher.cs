@@ -1,6 +1,6 @@
 namespace TuitionManagementSystem.Web.Models.User;
 
-public class Teacher
+public class Teacher : User
 {
 
 }
