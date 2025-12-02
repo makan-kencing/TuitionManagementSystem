@@ -13,5 +13,5 @@ public class Subject
     [StringLength(255)]
     public string? Description { get; set; }
 
-    public ICollection<Class> Classes { get; set; } = new List<Class>();
+    public ICollection<Course> Classes { get; set; } = new List<Course>();
 }

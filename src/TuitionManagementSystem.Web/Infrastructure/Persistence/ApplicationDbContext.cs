@@ -1,24 +1,27 @@
 namespace TuitionManagementSystem.Web.Infrastructure.Persistence;
 
 using System.Linq.Expressions;
+using Ical.Net.DataTypes;
 using Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Class;
 using Models.Payment;
 using Models.User;
 
-public class ApplicationDbContext : DbContext
+public sealed class ApplicationDbContext : DbContext
 {
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Student> Students { get; set; }
     public DbSet<Parent> Parents { get; set; }
     public DbSet<Teacher> Teachers { get; set; }
     public DbSet<Subject> Subjects { get; set; }
-    public DbSet<Class> Classes { get; set; }
+    public DbSet<Course> Courses { get; set; }
     public DbSet<Classroom> Classrooms { get; set; }
     public DbSet<Session> Sessions { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
+    public DbSet<ScheduleRecurrencePattern> ScheduleRecurrencePatterns { get; set; }
     public DbSet<Enrollment> Enrollments { get; set; }
     public DbSet<Attendance> Attendances { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
@@ -28,7 +31,6 @@ public class ApplicationDbContext : DbContext
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) =>
         this.ChangeTracker.CascadeDeleteTiming = CascadeTiming.OnSaveChanges;
 
-    // https://stackoverflow.com/questions/37932339/how-can-i-implement-soft-deletes-with-entity-framework-core-aka-ef7
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<BankPaymentMethod>();
@@ -40,6 +42,7 @@ public class ApplicationDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
+    // https://stackoverflow.com/questions/37932339/how-can-i-implement-soft-deletes-with-entity-framework-core-aka-ef7
     private static void ConfigureSoftDeleteFilter(ModelBuilder builder)
     {
         foreach (var softDeletableTypeBuilder in builder.Model.GetEntityTypes()

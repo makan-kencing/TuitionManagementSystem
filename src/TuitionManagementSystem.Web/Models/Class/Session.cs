@@ -7,7 +7,7 @@ public class Session
     [Key]
     public int Id { get; set; }
 
-    public required Class Class { get; set; }
+    public required Course Course { get; set; }
 
     public required DateTime StartAt { get; set; }
 

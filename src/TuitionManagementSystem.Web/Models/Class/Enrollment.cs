@@ -10,7 +10,7 @@ public class Enrollment
 
     public required Student Student { get; set; }
 
-    public required Class Class { get; set; }
+    public required Course Course { get; set; }
 
     public DateTime EnrolledAt { get; set; }= DateTime.Now;
 }

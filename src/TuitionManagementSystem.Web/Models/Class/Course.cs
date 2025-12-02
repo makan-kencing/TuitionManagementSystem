@@ -3,7 +3,7 @@ namespace TuitionManagementSystem.Web.Models.Class;
 using System.ComponentModel.DataAnnotations;
 using User;
 
-public class Class
+public class Course
 {
     [Key]
     public int Id { get; set; }
@@ -17,6 +17,8 @@ public class Class
     public required Subject Subject { get; set; }
 
     public required Classroom PreferredClassroom { get; set; }
+
+    public Schedule? Schedule { get; set; }
 
     public ICollection<Teacher> TeachersInCharge { get; set; } = new List<Teacher>();
 
