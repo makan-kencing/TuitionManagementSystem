@@ -1,6 +1,7 @@
 namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
+using Announcement;
 using User;
 
 public class Course
@@ -25,4 +26,10 @@ public class Course
     public ICollection<Session> Sessions { get; set; } = new List<Session>();
 
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+
+    public ICollection<Announcement.Announcement> Announcements { get; set; } = new List<Announcement.Announcement>();
+
+    public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
+
+    public ICollection<Material> Materials { get; set; } = new List<Material>();
 }

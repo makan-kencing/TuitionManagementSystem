@@ -7,8 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Class;
+using Models.Class.Announcement;
 using Models.Payment;
 using Models.User;
+using Attachment = Models.Class.Announcement.Attachment;
 
 public sealed class ApplicationDbContext : DbContext
 {
@@ -18,6 +20,11 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<Teacher> Teachers { get; set; }
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Course> Courses { get; set; }
+    public DbSet<Announcement> Announcements { get; set; }
+    public DbSet<Assignment> Assignments { get; set; }
+    public DbSet<Material> Materials { get; set; }
+    public DbSet<Submission> Submissions { get; set; }
+    public DbSet<Attachment> Attachments { get; set; }
     public DbSet<Classroom> Classrooms { get; set; }
     public DbSet<Session> Sessions { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
@@ -46,7 +53,8 @@ public sealed class ApplicationDbContext : DbContext
     private static void ConfigureSoftDeleteFilter(ModelBuilder builder)
     {
         foreach (var softDeletableTypeBuilder in builder.Model.GetEntityTypes()
-                     .Where(x => typeof(ISoftDeletable).IsAssignableFrom(x.ClrType)))
+                     .Where(x => typeof(ISoftDeletable).IsAssignableFrom(x.ClrType)
+                                 && x.BaseType == null))
         {
             var parameter = Expression.Parameter(softDeletableTypeBuilder.ClrType, "p");
 
