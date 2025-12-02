@@ -1,5 +1,6 @@
 namespace TuitionManagementSystem.Web;
 
+using System.Net;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -12,8 +13,8 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.AspNetCore.WebSockets;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 public class Startup(IConfiguration configuration)
 {
@@ -80,6 +81,8 @@ public class Startup(IConfiguration configuration)
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                 options.SlidingExpiration = true;
                 options.EventsType = typeof(UserCookieAuthenticationEvents);
+                options.LoginPath = "/login";
+                options.LogoutPath = "/logout";
             });
 
         services.AddScoped<UserCookieAuthenticationEvents>();
@@ -113,12 +116,26 @@ public class Startup(IConfiguration configuration)
             .UseCors()
             .UseAuthentication()
             .UseAuthorization()
+            .UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.ContentRootPath, "assets")),
+                RequestPath = "/assets",
+                OnPrepareResponse = ctx =>
+                {
+                    if (!ctx.Context.User.Identity!.IsAuthenticated)
+                    {
+                        ctx.Context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    }
+                }
+            })
             // .UseSession()
             .UseAntiforgery()
             .UseResponseCompression()
             .UseResponseCaching()
             .UseEndpoints(endpoints =>
             {
+                endpoints.MapStaticAssets();
                 endpoints.MapDefaultControllerRoute();
             });
     }
