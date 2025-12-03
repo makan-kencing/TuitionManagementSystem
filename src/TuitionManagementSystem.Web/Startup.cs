@@ -129,6 +129,19 @@ public class Startup(IConfiguration configuration)
                     }
                 }
             })
+            .UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.ContentRootPath, "uploads")),
+                RequestPath = "/uploads",
+                OnPrepareResponse = ctx =>
+                {
+                    if (!ctx.Context.User.Identity!.IsAuthenticated)
+                    {
+                        ctx.Context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    }
+                }
+            })
             // .UseSession()
             .UseAntiforgery()
             .UseResponseCompression()
