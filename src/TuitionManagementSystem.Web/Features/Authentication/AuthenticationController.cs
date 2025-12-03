@@ -40,7 +40,6 @@ public sealed class AuthenticationController(
     public async Task<IActionResult> TwoFactor() =>
         throw new NotImplementedException();
 
-
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> Logout([FromHeader] Uri? referer)

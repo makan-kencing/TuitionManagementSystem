@@ -1,6 +1,7 @@
 namespace TuitionManagementSystem.Web.Models.Payment;
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using User;
 
 public class Invoice
@@ -13,12 +14,15 @@ public class Invoice
 
     public required decimal Amount { get; set; }
 
+    public required int StudentId { get; set; }
     public required Student Student { get; set; }
 
-    public DateTime InvoicedAt { get; set; } = DateTime.Now;
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public required DateTime InvoicedAt { get; set; } = DateTime.Now;
 
-    public required DateTime DueAt { get; set; }
+    public DateTime? DueAt { get; set; }
 
+    public int? PaymentId { get; set; }
     public Payment? Payment { get; set; }
 
     public bool IsPaid() => this.Payment != null;

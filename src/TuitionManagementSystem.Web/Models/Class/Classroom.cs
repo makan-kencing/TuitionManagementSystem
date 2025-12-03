@@ -10,7 +10,7 @@ public class Classroom
     [StringLength(50)]
     public required string Location { get; set; }
 
-    public ICollection<Session> SessionsHeld { get; set; } = new List<Session>();
+    public virtual ICollection<Session> Sessions { get; set; } = [];
 
-    public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
+    public virtual ICollection<Schedule> Schedules { get; set; } = [];
 }

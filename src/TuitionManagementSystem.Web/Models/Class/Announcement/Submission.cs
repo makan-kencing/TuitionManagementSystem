@@ -1,6 +1,7 @@
 namespace TuitionManagementSystem.Web.Models.Class.Announcement;
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using User;
 
 public class Submission
@@ -15,9 +16,22 @@ public class Submission
     [StringLength(500)]
     public string? Content { get; set; }
 
-    public ICollection<File> Attachments { get; set; }= new List<File>();
-
     public int? Grade { get; set; }
 
-    public DateTime SubmittedAt { get; set; }= DateTime.Now;
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public required DateTime SubmittedAt { get; set; } = DateTime.Now;
+
+    public virtual ICollection<SubmissionFile> Attachments { get; set; } = [];
+}
+
+public class SubmissionFile
+{
+    [Key]
+    public int Id { get; set; }
+
+    public required int SubmissionId { get; set; }
+    public required Submission Submission { get; set; }
+
+    public required int FileId { get; set; }
+    public required File File { get; set; }
 }

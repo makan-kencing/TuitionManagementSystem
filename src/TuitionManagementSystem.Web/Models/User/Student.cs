@@ -3,13 +3,14 @@ namespace TuitionManagementSystem.Web.Models.User;
 using Class;
 using Payment;
 
-public class Student : User
+public class Student : User, IHasFamily
 {
+    public int? FamilyId { get; set; }
     public Family? Family { get; set; }
 
-    public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
+    public virtual ICollection<Attendance> Attendances { get; set; } = [];
 
-    public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+    public virtual ICollection<Enrollment> Enrollments { get; set; } = [];
 
-    public ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+    public virtual ICollection<Invoice> Invoices { get; set; } = [];
 }

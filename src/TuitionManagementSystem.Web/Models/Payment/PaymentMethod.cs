@@ -8,4 +8,6 @@ public abstract class PaymentMethod
     public int Id { get; set; }
 
     public abstract string GetSummaryText();
+
+    public virtual Payment? Payment { get; set; }
 }

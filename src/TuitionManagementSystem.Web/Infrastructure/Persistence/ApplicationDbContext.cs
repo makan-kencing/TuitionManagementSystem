@@ -17,10 +17,13 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<Teacher> Teachers { get; set; }
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Course> Courses { get; set; }
+    public DbSet<CourseTeacher> CourseTeachers { get; set; }
     public DbSet<Announcement> Announcements { get; set; }
+    public DbSet<AnnouncementFile> AnnouncementFiles { get; set; }
     public DbSet<Assignment> Assignments { get; set; }
     public DbSet<Material> Materials { get; set; }
     public DbSet<Submission> Submissions { get; set; }
+    public DbSet<SubmissionFile> SubmissionFiles { get; set; }
     public DbSet<File> Files { get; set; }
     public DbSet<Classroom> Classrooms { get; set; }
     public DbSet<Session> Sessions { get; set; }

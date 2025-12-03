@@ -15,21 +15,35 @@ public class Course
     [StringLength(255)]
     public string? Description { get; set; }
 
+    public required int SubjectId { get; set; }
     public required Subject Subject { get; set; }
 
+    public required int PreferredClassroomId { get; set; }
     public required Classroom PreferredClassroom { get; set; }
 
-    public Schedule? Schedule { get; set; }
+    public virtual Schedule? Schedule { get; set; }
 
-    public ICollection<Teacher> TeachersInCharge { get; set; } = new List<Teacher>();
+    public virtual ICollection<CourseTeacher> TeachersInCharge { get; set; } = [];
 
-    public ICollection<Session> Sessions { get; set; } = new List<Session>();
+    public virtual ICollection<Session> Sessions { get; set; } = [];
 
-    public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+    public virtual ICollection<Enrollment> Enrollments { get; set; } = [];
 
-    public ICollection<Announcement.Announcement> Announcements { get; set; } = new List<Announcement.Announcement>();
+    public virtual ICollection<Announcement.Announcement> Announcements { get; set; } = [];
 
-    public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
+    public virtual ICollection<Assignment> Assignments { get; set; } = [];
 
-    public ICollection<Material> Materials { get; set; } = new List<Material>();
+    public virtual ICollection<Material> Materials { get; set; } = [];
+}
+
+public class CourseTeacher
+{
+    [Key]
+    public int Id { get; set; }
+
+    public required int CourseId { get; set; }
+    public required Course Course { get; set; }
+
+    public required int TeacherId { get; set; }
+    public required Teacher Teacher { get; set; }
 }

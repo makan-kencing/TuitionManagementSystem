@@ -1,6 +1,7 @@
 namespace TuitionManagementSystem.Web.Models;
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class File
 {
@@ -19,5 +20,6 @@ public class File
 
     public User.User? CreatedBy { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public required DateTime CreatedAt { get; set; } = DateTime.Now;
 }

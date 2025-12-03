@@ -7,7 +7,13 @@ public class Family
     [Key]
     public int Id { get; set; }
 
-    public ICollection<Parent> Parents { get; set; } = new List<Parent>();
+    public virtual ICollection<Parent> Parents { get; set; } = [];
 
-    public ICollection<Student> Children { get; set; } = new List<Student>();
+    public virtual ICollection<Student> Children { get; set; } = [];
+}
+
+public interface IHasFamily
+{
+    public int? FamilyId { get; }
+    public Family? Family { get; }
 }

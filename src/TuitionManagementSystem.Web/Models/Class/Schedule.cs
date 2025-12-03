@@ -21,11 +21,14 @@ public class Schedule
 
     public required DateTime End { get; set; }
 
-    public ICollection<ScheduleRecurrencePattern> RecurrencePatterns { get; set; } = new List<ScheduleRecurrencePattern>();
+    public required int CourseId { get; set; }
+    public required Course Course { get; set; }
 
-    public ICollection<DateTime> RecurrenceDates { get; set; } = new List<DateTime>();
+    public virtual ICollection<ScheduleRecurrencePattern> RecurrencePatterns { get; set; } = [];
 
-    public ICollection<DateTime> ExceptionDates { get; set; } = new List<DateTime>();
+    public virtual ICollection<DateTime> RecurrenceDates { get; set; } = [];
+
+    public virtual ICollection<DateTime> ExceptionDates { get; set; } = [];
 
     public CalendarEvent ToICalendarEvent()
     {
@@ -64,26 +67,29 @@ public class ScheduleRecurrencePattern
     public int Interval { get; set; } = 1;
 
     // Calendar Based Rules
-    public ICollection<int> BySecond { get; set; } = new List<int>();
+    public ICollection<int> BySecond { get; set; } = [];
 
-    public ICollection<int> ByMinute { get; set; } = new List<int>();
+    public ICollection<int> ByMinute { get; set; } = [];
 
-    public ICollection<int> ByHour { get; set; } = new List<int>();
+    public ICollection<int> ByHour { get; set; } = [];
 
-    public ICollection<DayOfWeek> ByDay { get; set; } = new List<DayOfWeek>();
+    public ICollection<DayOfWeek> ByDay { get; set; } = [];
 
-    public ICollection<int> ByMonthDay { get; set; } = new List<int>();
+    public ICollection<int> ByMonthDay { get; set; } = [];
 
-    public ICollection<int> ByYearDay { get; set; } = new List<int>();
+    public ICollection<int> ByYearDay { get; set; } = [];
 
-    public ICollection<int> ByWeekNo { get; set; } = new List<int>();
+    public ICollection<int> ByWeekNo { get; set; } = [];
 
-    public ICollection<int> ByMonth { get; set; } = new List<int>();
+    public ICollection<int> ByMonth { get; set; } = [];
 
-    public ICollection<int> BySetPosition { get; set; } = new List<int>();
+    public ICollection<int> BySetPosition { get; set; } = [];
+
+    public required int ScheduleId { get; set; }
+    public required Schedule Schedule { get; set; }
 
     public RecurrencePattern ToIRecurrencePattern() =>
-        new RecurrencePattern
+        new()
         {
             Frequency = this.FrequencyType,
             Until = this.Until?.ToCalDateTime(),
@@ -104,6 +110,6 @@ public class ScheduleRecurrencePattern
 public static class ICalExtensions
 {
     public static CalDateTime ToCalDateTime(this DateTime dateTime) => new(dateTime);
-    public static WeekDay ToWeekDay(this DayOfWeek dayOfWeek) => new WeekDay(dayOfWeek);
+    public static WeekDay ToWeekDay(this DayOfWeek dayOfWeek) => new(dayOfWeek);
 }
 

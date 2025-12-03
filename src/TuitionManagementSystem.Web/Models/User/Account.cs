@@ -9,10 +9,10 @@ public class Account
     [Key]
     public int Id { get; set; }
 
-    [MaxLength(30)]
+    [StringLength(30)]
     public required string Username { get; set; }
 
-    [MaxLength(300)]
+    [StringLength(300)]
     public required string HashedPassword { get; set; }
 
     public required AccessRoles AccessRole { get; set; } = AccessRoles.User;
@@ -20,11 +20,10 @@ public class Account
     [MaxLength(254)]
     public required string? Email { get; set; }
 
-    public User? User { get; set; }
-
-    [Required]
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public DateTime LastChanged { get; set; } = DateTime.UtcNow;
+    public required DateTime LastChanged { get; set; } = DateTime.UtcNow;
 
     public DateTime? DeletedAt { get; set; }
+
+    public virtual User? User { get; set; }
 }
