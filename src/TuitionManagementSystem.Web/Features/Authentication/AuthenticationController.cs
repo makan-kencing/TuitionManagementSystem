@@ -18,7 +18,7 @@ public sealed class AuthenticationController(
     public IActionResult Login() => this.View();
 
     [HttpPost]
-    public async Task<IActionResult> Login([FromForm][Required] LoginViewModel login, Uri? returnUrl)
+    public async Task<IActionResult> Login([FromForm][Required] LoginViewModel login, [FromQuery] Uri? returnUrl)
     {
         var result = await mediator.Send(mapper.Map<LoginRequest>(login));
 
@@ -33,7 +33,7 @@ public sealed class AuthenticationController(
         {
             return this.View("TwoFactor", login);
         }
-        return this.LocalRedirect(returnUrl?.LocalPath ?? "/");
+        return this.LocalRedirect(returnUrl?.OriginalString ?? "/");
     }
 
     [HttpPost]

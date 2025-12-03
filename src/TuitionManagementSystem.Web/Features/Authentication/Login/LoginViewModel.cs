@@ -8,13 +8,13 @@ public sealed class LoginViewModel
     [Required]
     [MaxLength(30)]
     [DisplayName("Username")]
-    public required string Username { get; init;  }
+    public required string Username { get; init; }
 
     [Required]
     [DataType(DataType.Password)]
     [MaxLength(300)]
     [DisplayName("Password")]
-    public required string Password { get; init;  }
+    public required string Password { get; init; }
 
     [DisplayName("Remember Me")]
     public bool RememberMe { get; init; }

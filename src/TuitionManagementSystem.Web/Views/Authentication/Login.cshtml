@@ -4,7 +4,10 @@
     ViewData["Title"] = "Login";
 }
 
-<form asp-controller="Authentication" asp-action="Login" class="container">
+<form asp-controller="Authentication"
+      asp-action="Login"
+      asp-route-returnUrl="@Context.Request.Query["ReturnUrl"]"
+      class="container">
     <legend>Login</legend>
 
     <div class="mb-3">
