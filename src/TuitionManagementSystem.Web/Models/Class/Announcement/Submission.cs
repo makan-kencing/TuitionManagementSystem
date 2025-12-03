@@ -15,7 +15,7 @@ public class Submission
     [StringLength(500)]
     public string? Content { get; set; }
 
-    public ICollection<Attachment> Attachments { get; set; }= new List<Attachment>();
+    public ICollection<File> Attachments { get; set; }= new List<File>();
 
     public int? Grade { get; set; }
 

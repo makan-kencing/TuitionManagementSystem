@@ -14,7 +14,7 @@ public class Announcement : ISoftDeletable
     [StringLength(2000)]
     public string? Description { get; set; }
 
-    public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+    public ICollection<File> Attachments { get; set; } = new List<File>();
 
     public required Teacher CreatedBy { get; set; }
 

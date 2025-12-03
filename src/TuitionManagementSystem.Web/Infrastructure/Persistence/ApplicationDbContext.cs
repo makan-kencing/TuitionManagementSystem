@@ -1,16 +1,13 @@
 namespace TuitionManagementSystem.Web.Infrastructure.Persistence;
 
 using System.Linq.Expressions;
-using Ical.Net.DataTypes;
 using Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Class;
 using Models.Class.Announcement;
 using Models.Payment;
 using Models.User;
-using Attachment = Models.Class.Announcement.Attachment;
 
 public sealed class ApplicationDbContext : DbContext
 {
@@ -24,7 +21,7 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<Assignment> Assignments { get; set; }
     public DbSet<Material> Materials { get; set; }
     public DbSet<Submission> Submissions { get; set; }
-    public DbSet<Attachment> Attachments { get; set; }
+    public DbSet<File> Files { get; set; }
     public DbSet<Classroom> Classrooms { get; set; }
     public DbSet<Session> Sessions { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
