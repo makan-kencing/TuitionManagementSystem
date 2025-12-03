@@ -14,16 +14,16 @@ public class Invoice
 
     public required decimal Amount { get; set; }
 
-    public required int StudentId { get; set; }
+    [ForeignKey(nameof(Student) + "Id")]
     public required Student Student { get; set; }
+
+    [ForeignKey(nameof(Payment) + "Id")]
+    public Payment? Payment { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public required DateTime InvoicedAt { get; set; } = DateTime.Now;
 
     public DateTime? DueAt { get; set; }
-
-    public int? PaymentId { get; set; }
-    public Payment? Payment { get; set; }
 
     public bool IsPaid() => this.Payment != null;
 }

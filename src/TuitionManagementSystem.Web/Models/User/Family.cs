@@ -11,9 +11,3 @@ public class Family
 
     public virtual ICollection<Student> Children { get; set; } = [];
 }
-
-public interface IHasFamily
-{
-    public int? FamilyId { get; }
-    public Family? Family { get; }
-}

@@ -1,11 +1,12 @@
 namespace TuitionManagementSystem.Web.Models.User;
 
+using System.ComponentModel.DataAnnotations.Schema;
 using Class;
 using Payment;
 
 public class Student : User, IHasFamily
 {
-    public int? FamilyId { get; set; }
+    [ForeignKey(nameof(Family) + "Id")]
     public Family? Family { get; set; }
 
     public virtual ICollection<Attendance> Attendances { get; set; } = [];

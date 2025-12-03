@@ -15,12 +15,13 @@ public class Announcement : ISoftDeletable
     [StringLength(2000)]
     public string? Description { get; set; }
 
-    public required int? CourseId { get; set; }
-    [ForeignKey(nameof(CourseId))]
+    [ForeignKey(nameof(Course) + "Id")]
     public required Course Course { get; set; }
 
+    [ForeignKey(nameof(RelatedSession) + "Id")]
     public Session? RelatedSession { get; set; }
 
+    [ForeignKey(nameof(CreatedBy) + "Id")]
     public required Teacher CreatedBy { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
@@ -33,16 +34,4 @@ public class Announcement : ISoftDeletable
     public DateTime? DeletedAt { get; set; }
 
     public virtual ICollection<AnnouncementFile> Attachments { get; set; } = [];
-}
-
-public class AnnouncementFile
-{
-    [Key]
-    public int Id { get; set; }
-
-    public required int AnnouncementId { get; set; }
-    public required Announcement Announcement { get; set; }
-
-    public required int FileId { get; set; }
-    public required File File { get; set; }
 }

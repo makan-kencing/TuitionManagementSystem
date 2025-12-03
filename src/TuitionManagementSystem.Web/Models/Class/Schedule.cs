@@ -1,7 +1,7 @@
 namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
-using Ical.Net;
+using System.ComponentModel.DataAnnotations.Schema;
 using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 
@@ -21,7 +21,7 @@ public class Schedule
 
     public required DateTime End { get; set; }
 
-    public required int CourseId { get; set; }
+    [ForeignKey(nameof(Course) + "Id")]
     public required Course Course { get; set; }
 
     public virtual ICollection<ScheduleRecurrencePattern> RecurrencePatterns { get; set; } = [];
@@ -50,61 +50,6 @@ public class Schedule
 
         return calendarEvent;
     }
-}
-
-public class ScheduleRecurrencePattern
-{
-    [Key]
-    public int Id { get; set; }
-
-    public required FrequencyType FrequencyType { get; set; }
-
-    // Sequence Based Rules
-    public DateTime? Until { get; set; }
-
-    public int? Count { get; set; }
-
-    public int Interval { get; set; } = 1;
-
-    // Calendar Based Rules
-    public ICollection<int> BySecond { get; set; } = [];
-
-    public ICollection<int> ByMinute { get; set; } = [];
-
-    public ICollection<int> ByHour { get; set; } = [];
-
-    public ICollection<DayOfWeek> ByDay { get; set; } = [];
-
-    public ICollection<int> ByMonthDay { get; set; } = [];
-
-    public ICollection<int> ByYearDay { get; set; } = [];
-
-    public ICollection<int> ByWeekNo { get; set; } = [];
-
-    public ICollection<int> ByMonth { get; set; } = [];
-
-    public ICollection<int> BySetPosition { get; set; } = [];
-
-    public required int ScheduleId { get; set; }
-    public required Schedule Schedule { get; set; }
-
-    public RecurrencePattern ToIRecurrencePattern() =>
-        new()
-        {
-            Frequency = this.FrequencyType,
-            Until = this.Until?.ToCalDateTime(),
-            Count = this.Count,
-            Interval = this.Interval,
-            BySecond = this.BySecond.ToList(),
-            ByMinute = this.ByMinute.ToList(),
-            ByHour = this.ByHour.ToList(),
-            ByDay = this.ByDay.Select(v => v.ToWeekDay()).ToList(),
-            ByMonthDay = this.ByMonthDay.ToList(),
-            ByYearDay = this.ByYearDay.ToList(),
-            ByWeekNo = this.ByWeekNo.ToList(),
-            ByMonth = this.ByMonth.ToList(),
-            BySetPosition = this.BySetPosition.ToList()
-        };
 }
 
 public static class ICalExtensions

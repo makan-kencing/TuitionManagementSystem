@@ -8,7 +8,7 @@ public class Payment
     [Key]
     public int Id { get; set; }
 
-    public required int MethodId { get; set; }
+    [ForeignKey(nameof(Method) + "Id")]
     public required PaymentMethod Method { get; set; }
 
     public required decimal Amount { get; set; }

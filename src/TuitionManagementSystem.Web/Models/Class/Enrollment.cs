@@ -9,10 +9,10 @@ public class Enrollment
     [Key]
     public int Id { get; set; }
 
-    public required int StudentId { get; set; }
+    [ForeignKey(nameof(Student) + "Id")]
     public required Student Student { get; set; }
 
-    public required int CourseId { get; set; }
+    [ForeignKey(nameof(Course) + "Id")]
     public required Course Course { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]

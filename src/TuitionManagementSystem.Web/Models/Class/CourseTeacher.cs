@@ -2,8 +2,9 @@ namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using User;
 
-public class Session
+public class CourseTeacher
 {
     [Key]
     public int Id { get; set; }
@@ -11,10 +12,6 @@ public class Session
     [ForeignKey(nameof(Course) + "Id")]
     public required Course Course { get; set; }
 
-    [ForeignKey(nameof(Classroom) + "Id")]
-    public required Classroom Classroom { get; set; }
-
-    public required DateTime StartAt { get; set; }
-
-    public required DateTime EndAt { get; set; }
+    [ForeignKey(nameof(Teacher) + "Id")]
+    public required Teacher Teacher { get; set; }
 }

@@ -9,10 +9,10 @@ public class Attendance
     [Key]
     public int Id { get; set; }
 
-    public required int SessionId { get; set; }
+    [ForeignKey(nameof(Session) + "Id")]
     public required Session Session { get; set; }
 
-    public required int StudentId { get; set; }
+    [ForeignKey(nameof(Student) + "Id")]
     public required Student Student { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]

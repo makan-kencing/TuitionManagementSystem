@@ -18,6 +18,7 @@ public class File
 
     public required bool IsLocal { get; set; }
 
+    [ForeignKey(nameof(CreatedBy) + "Id")]
     public User.User? CreatedBy { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
