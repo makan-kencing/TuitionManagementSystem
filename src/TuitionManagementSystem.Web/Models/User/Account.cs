@@ -25,7 +25,6 @@ public class Account
 
     public File? ProfileImage { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public required DateTime LastChanged { get; set; } = DateTime.UtcNow;
 
     public DateTime? DeletedAt { get; set; }

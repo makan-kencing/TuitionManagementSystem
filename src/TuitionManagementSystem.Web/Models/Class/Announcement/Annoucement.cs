@@ -24,8 +24,7 @@ public class Announcement : ISoftDeletable
     [ForeignKey(nameof(CreatedBy) + "Id")]
     public required Teacher CreatedBy { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public required DateTime CreatedAt { get; set; } = DateTime.Now;
+    public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public required DateTime UpdatedAt { get; set; }
 

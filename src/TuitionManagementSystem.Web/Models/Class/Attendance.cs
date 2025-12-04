@@ -15,6 +15,5 @@ public class Attendance
     [ForeignKey(nameof(Student) + "Id")]
     public required Student Student { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public required DateTime TakenOn { get; set; } = DateTime.Now;
+    public required DateTime TakenOn { get; set; } = DateTime.UtcNow;
 }

@@ -20,8 +20,7 @@ public class Submission
 
     public int? Grade { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public required DateTime SubmittedAt { get; set; } = DateTime.Now;
+    public required DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
 
     public virtual ICollection<SubmissionFile> Attachments { get; set; } = [];
 }

@@ -15,6 +15,5 @@ public class Enrollment
     [ForeignKey(nameof(Course) + "Id")]
     public required Course Course { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public required DateTime EnrolledAt { get; set; } = DateTime.Now;
+    public required DateTime EnrolledAt { get; set; } = DateTime.UtcNow;
 }

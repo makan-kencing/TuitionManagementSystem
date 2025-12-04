@@ -20,8 +20,7 @@ public class Invoice
     [ForeignKey(nameof(Payment) + "Id")]
     public Payment? Payment { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public required DateTime InvoicedAt { get; set; } = DateTime.Now;
+    public required DateTime InvoicedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? DueAt { get; set; }
 
