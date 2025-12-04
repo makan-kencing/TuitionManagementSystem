@@ -12,6 +12,7 @@ using Models.User;
 public sealed class ApplicationDbContext : DbContext
 {
     public DbSet<Account> Accounts { get; set; }
+    public DbSet<AccountSession> AccountSessions { get; set; }
     public DbSet<Student> Students { get; set; }
     public DbSet<Parent> Parents { get; set; }
     public DbSet<Teacher> Teachers { get; set; }

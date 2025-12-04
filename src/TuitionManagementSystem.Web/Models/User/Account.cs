@@ -23,10 +23,14 @@ public class Account
     [MaxLength(254)]
     public required string? Email { get; set; }
 
+    public File? ProfileImage { get; set; }
+
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public required DateTime LastChanged { get; set; } = DateTime.UtcNow;
 
     public DateTime? DeletedAt { get; set; }
 
     public virtual User? User { get; set; }
+
+    public virtual ICollection<AccountSession> Sessions { get; set; } = [];
 }
