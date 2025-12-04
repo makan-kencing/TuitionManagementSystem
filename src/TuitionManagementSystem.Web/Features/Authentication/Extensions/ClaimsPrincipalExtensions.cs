@@ -2,13 +2,12 @@ namespace TuitionManagementSystem.Web.Features.Authentication.Extensions;
 
 using System.Globalization;
 using System.Security.Claims;
-using Constants;
 
 public static class ClaimsPrincipalExtensions
 {
     public static int? GetUserId(this ClaimsPrincipal user)
     {
-        var value = GetClaimValue(user, InternalClaimTypes.UserId);
+        var value = GetClaimValue(user, ClaimTypes.NameIdentifier);
         try
         {
             return string.IsNullOrEmpty(value)
@@ -23,7 +22,8 @@ public static class ClaimsPrincipalExtensions
 
     public static DateTime? GetLastChanged(this ClaimsPrincipal user)
     {
-        var value = GetClaimValue(user, InternalClaimTypes.LastChanged);
+
+        var value = GetClaimValue(user, ClaimTypes.Version);
         try
         {
             return value == null
