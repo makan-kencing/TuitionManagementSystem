@@ -11,40 +11,27 @@ public class UserCookieAuthenticationEvents(
 {
     public override async Task ValidatePrincipal(CookieValidatePrincipalContext context)
     {
-        var userPrincipal = context.Principal;
-
-        if (userPrincipal == null)
+        var principal = context.Principal;
+        if (principal == null)
         {
-            await InvalidateSession(context);
             return;
         }
 
-        var id = userPrincipal.GetUserId();
-        var lastChanged = userPrincipal.GetLastChanged();
-
-        if (id == null || lastChanged == null)
+        var sessionId = principal.GetGuid();
+        if (!await db.AccountSessions
+                .Where(s => s.SessionId == sessionId)
+                .AnyAsync())
         {
-            await InvalidateSession(context);
-            return;
+            context.RejectPrincipal();
+
+            await context.HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
-        var dbLastChanged = await db.Accounts
-            .AsNoTracking()
-            .Where(a => a.Id == id)
-            .Select(a => a.LastChanged)
-            .FirstAsync();
-
-        if (dbLastChanged != lastChanged)
-        {
-            await InvalidateSession(context);
-        }
-    }
-
-    private static async Task InvalidateSession(CookieValidatePrincipalContext context)
-    {
-        context.RejectPrincipal();
-
-        await context.HttpContext.SignOutAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme);
+        await db.AccountSessions
+            .Where(a => a.SessionId == sessionId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(a => a.LastIp, context.HttpContext.Connection.RemoteIpAddress)
+                .SetProperty(a => a.LastLogin, DateTime.UtcNow));
     }
 }

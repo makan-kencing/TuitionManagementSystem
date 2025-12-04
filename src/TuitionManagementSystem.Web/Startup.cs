@@ -8,6 +8,7 @@ using Features.Abstractions;
 using Features.Authentication;
 using Features.Authentication.Login;
 using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
@@ -86,6 +87,7 @@ public class Startup(IConfiguration configuration)
             });
 
         services.AddScoped<UserCookieAuthenticationEvents>();
+        services.AddTransient<IClaimsTransformation, AccountClaimsTransformer>();
     }
 
     public void Configure(

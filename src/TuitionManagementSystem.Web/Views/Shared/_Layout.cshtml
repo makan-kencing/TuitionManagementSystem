@@ -38,13 +38,7 @@
         <div>
             @if (User.Identity!.IsAuthenticated)
             {
-                var username = await db.Accounts
-                    .AsNoTracking()
-                    .Where(a => a.Id == User.GetUserId())
-                    .Select(a => a.Username)
-                    .FirstAsync();
-
-                <div>@username</div>
+                <div>@User.GetUsername()</div>
 
                 @using (Html.BeginForm(controllerName: "Authentication", actionName: "Logout"))
                 {
