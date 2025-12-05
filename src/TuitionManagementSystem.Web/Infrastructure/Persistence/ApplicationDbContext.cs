@@ -32,6 +32,7 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<ScheduleRecurrencePattern> ScheduleRecurrencePatterns { get; set; }
     public DbSet<Enrollment> Enrollments { get; set; }
     public DbSet<Attendance> Attendances { get; set; }
+    public DbSet<AttendanceCode> AttendanceCodes { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<PaymentMethod> PaymentMethods { get; set; }
