@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Auth.Login;
+namespace TuitionManagementSystem.Web.Features.Authentication.Login;
 
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
