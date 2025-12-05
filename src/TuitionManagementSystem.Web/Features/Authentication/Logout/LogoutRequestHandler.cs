@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Features.Authentication.Logout;
+namespace TuitionManagementSystem.Web.Auth.Logout;
 
 using Ardalis.Result;
 using MediatR;

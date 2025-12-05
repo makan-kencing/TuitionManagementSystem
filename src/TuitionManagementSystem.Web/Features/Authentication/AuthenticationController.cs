@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Features.Authentication;
+namespace TuitionManagementSystem.Web.Auth;
 
 using System.ComponentModel.DataAnnotations;
 using Ardalis.Result;

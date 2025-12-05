@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Features.Authentication.Extensions;
+namespace TuitionManagementSystem.Web.Auth.Extensions;
 
 using System.Globalization;
 using System.Security.Claims;
