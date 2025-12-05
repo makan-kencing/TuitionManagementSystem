@@ -11,7 +11,7 @@ public class AttendanceCode
     public int Id { get; set; }
 
     [StringLength(6)]
-    [RegularExpression("^\\d{6}$")]
+    [RegularExpression(@"^\d{6}$")]
     public required string Code { get; set; }
 
     [ForeignKey(nameof(Session) + "Id")]
