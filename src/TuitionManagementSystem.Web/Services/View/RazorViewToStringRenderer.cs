@@ -1,6 +1,8 @@
 namespace TuitionManagementSystem.Web.Services.View;
 
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,11 +12,12 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 public class RazorViewToStringRenderer(
     IRazorViewEngine viewEngine,
     ITempDataProvider tempDataProvider,
-    IHttpContextAccessor httpContextAccessor,
-    ActionContext actionContext) : IRazorViewToStringRenderer
+    IServiceProvider serviceProvider) : IRazorViewToStringRenderer
 {
-    public async Task<string> RenderViewToStringAsync<TModel>(string viewName, TModel model)
+    public async Task<string> RenderViewToStringAsync<TModel>([AspMvcView] string viewName, [AspMvcModelType] TModel model)
     {
+        var actionContext = this.GetActionContext();
+
         // Find the view using the view engine
         var viewResult = viewEngine.FindView(actionContext, viewName, false);
         if (!viewResult.Success)
@@ -30,7 +33,7 @@ public class RazorViewToStringRenderer(
         {
             Model = model
         };
-        var tempData = new TempDataDictionary(httpContextAccessor.HttpContext!, tempDataProvider);
+        var tempData = new TempDataDictionary(actionContext.HttpContext, tempDataProvider);
         var viewContext = new ViewContext(
             actionContext,
             view,
@@ -43,5 +46,12 @@ public class RazorViewToStringRenderer(
         // Render the view to a string
         await view.RenderAsync(viewContext);
         return writer.ToString();
+    }
+
+    private ActionContext GetActionContext()
+    {
+        var httpContext = new DefaultHttpContext();
+        httpContext.RequestServices = serviceProvider;
+        return new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
     }
 }
