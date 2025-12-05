@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Auth;
+namespace TuitionManagementSystem.Web.Services.Auth;
 
 using System.Globalization;
 using System.Security.Claims;

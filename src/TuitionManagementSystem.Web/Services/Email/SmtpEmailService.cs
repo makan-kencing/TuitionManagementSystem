@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Email;
+namespace TuitionManagementSystem.Web.Services.Email;
 
 using System.Configuration;
 using System.Net;

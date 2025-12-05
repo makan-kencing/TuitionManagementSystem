@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.View;
+namespace TuitionManagementSystem.Web.Services.View;
 
 public interface IRazorViewToStringRenderer
 {

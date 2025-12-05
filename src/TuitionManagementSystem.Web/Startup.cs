@@ -5,8 +5,9 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Features.Abstractions;
-using Auth;
-using Email;
+using Services.Auth;
+using Services.Email;
+using Services.View;
 using Features.Authentication.Login;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
@@ -17,7 +18,6 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using View;
 
 public class Startup(IConfiguration configuration)
 {

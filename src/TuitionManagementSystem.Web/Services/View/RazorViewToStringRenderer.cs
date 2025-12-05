@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.View;
+namespace TuitionManagementSystem.Web.Services.View;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
