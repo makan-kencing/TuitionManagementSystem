@@ -17,7 +17,7 @@ public sealed class LoginViewModel
     public required string Password { get; init; }
 
     [StringLength(6)]
-    [RegularExpression("^\\d{6}$")]
+    [RegularExpression(@"^\d{6}$")]
     [DisplayName("Two Factor Token")]
     public string? TwoFactorToken { get; set; }
 

@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Features.Authentication;
+namespace TuitionManagementSystem.Web.Services.Auth;
 
 using Extensions;
 using Infrastructure.Persistence;

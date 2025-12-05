@@ -5,7 +5,9 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Features.Abstractions;
-using Features.Authentication;
+using Services.Auth;
+using Services.Email;
+using Services.View;
 using Features.Authentication.Login;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
@@ -86,7 +88,11 @@ public class Startup(IConfiguration configuration)
                 options.LogoutPath = "/logout";
             });
 
+        services.AddSingleton<IEmailService, SmtpEmailService>();
+
         services.AddScoped<UserCookieAuthenticationEvents>();
+        services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+
         services.AddTransient<IClaimsTransformation, AccountClaimsTransformer>();
     }
 

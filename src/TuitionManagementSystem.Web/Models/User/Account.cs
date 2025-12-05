@@ -1,8 +1,7 @@
 namespace TuitionManagementSystem.Web.Models.User;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Features.Authentication.Constants;
+using Services.Auth.Constants;
 using Microsoft.EntityFrameworkCore;
 
 [Index(nameof(Username), IsUnique = true)]
