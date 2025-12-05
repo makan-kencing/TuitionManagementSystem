@@ -18,7 +18,7 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "SessionId",
                 table: "AccountSessions",
-                type: "uuid",
+                type: "uuid using \"SessionId\"::uuid",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
