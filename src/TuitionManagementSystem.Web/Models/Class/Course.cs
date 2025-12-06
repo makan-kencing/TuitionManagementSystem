@@ -2,7 +2,6 @@ namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Announcement;
 
 public class Course
 {
@@ -30,8 +29,4 @@ public class Course
     public virtual ICollection<Enrollment> Enrollments { get; set; } = [];
 
     public virtual ICollection<Announcement.Announcement> Announcements { get; set; } = [];
-
-    public virtual ICollection<Assignment> Assignments { get; set; } = [];
-
-    public virtual ICollection<Material> Materials { get; set; } = [];
 }
