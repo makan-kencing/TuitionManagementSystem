@@ -18,8 +18,16 @@
     build:
       context: src/
       dockerfile: src/TuitionManagementSystem/Dockerfile
-    env_file:
-      - .env
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=${DB_HOST};Port=${DB_PORT};Username=${DB_USER};Password=${DB_PASSWORD};Database=${DB_NAME}"
+      Smtp__Host: ${SMTP_HOST}
+      Smtp__Port: ${SMTP_PORT}
+      Smtp__Username: ${SMTP_USERNAME}
+      Smtp__Password: ${SMTP_PASSWORD}
+      Smtp__FromAddress: ${SMTP_FROM_ADDRESS}
+      Smtp__FromName: ${SMTP_FROM_NAME}
+      Stripe__PublishableKey: ${STRIPE_PK_KEY}
+      Stripe__SecretKey: ${STRIPE_SK_KEY}
     depends_on:
       - db
     healthcheck:
