@@ -3,5 +3,5 @@ using Ardalis.Result;
 using MediatR;
 
 
-public record GenerateAttendanceCodeRequest(string SessionId)
+public record GenerateAttendanceCodeRequest(int SessionId)
     : IRequest<Result<GenerateAttendanceCodeResponse>>;
