@@ -1,11 +1,7 @@
 ﻿namespace TuitionManagementSystem.Web.Features.Attendance.GenerateAttendanceCode;
-
+using Ardalis.Result;
 using MediatR;
 
-public class GenerateAttendanceCodeRequest : IRequest<GenerateAttendanceCodeResponse>
-{
-    public int SessionId { get; set; }
-}
 
-
-
+public record GenerateAttendanceCodeRequest(string SessionId)
+    : IRequest<Result<GenerateAttendanceCodeResponse>>;
