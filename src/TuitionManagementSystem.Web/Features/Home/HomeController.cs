@@ -2,7 +2,6 @@ namespace TuitionManagementSystem.Web.Features.Home;
 
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using TuitionManagementSystem.Models;
 
 public class HomeController(ILogger<HomeController> logger) : Controller
 {

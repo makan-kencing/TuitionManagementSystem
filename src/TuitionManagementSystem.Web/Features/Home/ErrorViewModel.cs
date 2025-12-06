@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Models;
+namespace TuitionManagementSystem.Web.Features.Home;
 
 public class ErrorViewModel
 {
