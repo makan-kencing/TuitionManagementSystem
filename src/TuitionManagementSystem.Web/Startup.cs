@@ -129,20 +129,7 @@ public class Startup(IConfiguration configuration)
             .UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(
-                    Path.Combine(env.ContentRootPath, "assets")),
-                RequestPath = "/assets",
-                OnPrepareResponse = ctx =>
-                {
-                    if (!ctx.Context.User.Identity!.IsAuthenticated)
-                    {
-                        ctx.Context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    }
-                }
-            })
-            .UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(env.ContentRootPath, "uploads")),
+                    Path.Combine(env.ContentRootPath, "assets", "uploads")),
                 RequestPath = "/uploads",
                 OnPrepareResponse = ctx =>
                 {
