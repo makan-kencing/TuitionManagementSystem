@@ -10,7 +10,7 @@ using TuitionManagementSystem.Web.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace TuitionManagementSystem.Web.Migrations
+namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20251205035207_AddAttendanceCodes")]

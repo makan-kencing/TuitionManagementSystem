@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace TuitionManagementSystem.Web.Migrations
+namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class AddAttendanceCodes : Migration
