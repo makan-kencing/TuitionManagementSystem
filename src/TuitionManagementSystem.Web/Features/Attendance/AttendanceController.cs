@@ -15,7 +15,7 @@ public class AttendanceController(IMediator mediator) : Controller
     [HttpPost("generate")]
     [TranslateResultToActionResult]
     public async Task<Result<GenerateAttendanceCodeResponse>> GenerateAttendanceCode(
-        [FromForm] string sessionId,
+        [FromForm] int sessionId,
         CancellationToken cancellationToken) => await mediator.Send(
         new GenerateAttendanceCodeRequest(
             sessionId),
