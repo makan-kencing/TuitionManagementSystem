@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Services.Payment;
 
 public class Startup(IConfiguration configuration)
 {
@@ -89,6 +90,7 @@ public class Startup(IConfiguration configuration)
             });
 
         services.AddSingleton<IEmailService, SmtpEmailService>();
+        services.AddSingleton<IPaymentService, StripePaymentService>();
 
         services.AddScoped<UserCookieAuthenticationEvents>();
         services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
