@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Models.Class;
 using Models.Class.Announcement;
+using Models.Notification;
 using Models.Payment;
 using Models.User;
 
@@ -36,6 +37,7 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<PaymentMethod> PaymentMethods { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) =>
         this.ChangeTracker.CascadeDeleteTiming = CascadeTiming.OnSaveChanges;
