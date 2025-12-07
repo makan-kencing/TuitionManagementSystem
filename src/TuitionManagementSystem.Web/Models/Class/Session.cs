@@ -17,4 +17,9 @@ public class Session
     public required DateTime StartAt { get; set; }
 
     public required DateTime EndAt { get; set; }
+
+    [ForeignKey(nameof(Code) + "Id")]
+    public AttendanceCode? Code { get; set; }
+
+    public DateTime? CodeGeneratedAt { get; set; }
 }

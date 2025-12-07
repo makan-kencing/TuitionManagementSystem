@@ -61,7 +61,8 @@ public class Startup(IConfiguration configuration)
 
         services
             .AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(connectionString))
+                options.UseNpgsql(connectionString)
+                    .UseAsyncSeeding(SeedData.InitializeAsync))
             .AddHttpContextAccessor()
             .AddProblemDetails()
             .AddSwaggerGen()
