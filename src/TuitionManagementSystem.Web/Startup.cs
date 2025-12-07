@@ -62,7 +62,10 @@ public class Startup(IConfiguration configuration)
         services
             .AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString)
-                    .UseAsyncSeeding(SeedData.InitializeAsync))
+                    .UseSeeding((context, _)
+                        => SeedData.InitializeAsync(context).GetAwaiter().GetResult())
+                    .UseAsyncSeeding(async (context, _, cancellationToken)
+                        => await SeedData.InitializeAsync(context, cancellationToken)))
             .AddHttpContextAccessor()
             .AddProblemDetails()
             .AddSwaggerGen()

@@ -22,7 +22,7 @@ public sealed class GenerateAttendanceCodeRequestHandler(ApplicationDbContext db
             return Result.NotFound("Session not found.");
         }
 
-        LastCodeId = (LastCodeId + 1) % 1_000_000;
+        LastCodeId = (LastCodeId % 1_000_000) + 1;
         var code = await db.AttendanceCodes
             .Where(at => at.Id == LastCodeId)
             .FirstAsync(cancellationToken);

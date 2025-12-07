@@ -8,7 +8,6 @@ public static class SeedData
 {
     public static async Task InitializeAsync(
         DbContext db,
-        bool _,
         CancellationToken cancellationToken = default)
     {
         var random = new Random();
@@ -16,7 +15,7 @@ public static class SeedData
         if (!await db.Set<AttendanceCode>()
                 .AnyAsync(cancellationToken))
         {
-            var codes = Enumerable.Range(0, 999_999)
+            var codes = Enumerable.Range(0, 1_000_000)
                 .OrderBy(_ => random.NextDouble())
                 .Select((v, index) => new AttendanceCode
                 {
