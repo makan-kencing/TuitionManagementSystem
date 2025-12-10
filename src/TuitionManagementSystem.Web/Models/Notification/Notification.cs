@@ -12,7 +12,7 @@ public class Notification
     [StringLength(500)]
     public required string Message { get; set; }
 
-    public Uri? ActionUrl { get; set; }
+    public virtual Uri? ActionUrl { get; set; }
 
     [ForeignKey(nameof(User) + "Id")]
     public required User User { get; set; }

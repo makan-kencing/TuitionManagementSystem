@@ -19,6 +19,8 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<Parent> Parents { get; set; }
     public DbSet<Teacher> Teachers { get; set; }
     public DbSet<Subject> Subjects { get; set; }
+    public DbSet<Family> Families { get; set; }
+    public DbSet<FamilyInvite> FamilyInvites { get; set; }
     public DbSet<Course> Courses { get; set; }
     public DbSet<CourseTeacher> CourseTeachers { get; set; }
     public DbSet<Announcement> Announcements { get; set; }
@@ -48,6 +50,8 @@ public sealed class ApplicationDbContext : DbContext
         modelBuilder.Entity<BankPaymentMethod>();
         modelBuilder.Entity<CardPaymentMethod>();
         modelBuilder.Entity<GenericPaymentMethod>();
+
+        modelBuilder.Entity<FamilyInviteNotification>();
 
         ConfigureSoftDeleteFilter(modelBuilder);
 
