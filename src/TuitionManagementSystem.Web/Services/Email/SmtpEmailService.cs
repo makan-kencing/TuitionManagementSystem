@@ -2,7 +2,7 @@ namespace TuitionManagementSystem.Web.Services.Email;
 
 using System.Configuration;
 using System.Net.Mail;
-using Configurations;
+using Options;
 
 public sealed class SmtpEmailService : IEmailService, IDisposable
 {

@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Configurations;
+namespace TuitionManagementSystem.Web.Options;
 
 using System.Configuration;
 using System.Net;

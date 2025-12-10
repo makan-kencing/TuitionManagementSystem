@@ -4,7 +4,7 @@ using System.Configuration;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Configurations;
+using Options;
 using Services.Auth;
 using Services.Email;
 using Services.View;

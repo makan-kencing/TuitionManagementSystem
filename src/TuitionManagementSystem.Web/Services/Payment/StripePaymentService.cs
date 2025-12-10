@@ -1,7 +1,7 @@
 namespace TuitionManagementSystem.Web.Services.Payment;
 
 using System.Configuration;
-using Configurations;
+using Options;
 using Stripe;
 
 public class StripePaymentService : IPaymentService
