@@ -1,10 +1,10 @@
 namespace TuitionManagementSystem.Web;
 
+using System.Configuration;
 using System.Net;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Features.Abstractions;
+using Configurations;
 using Services.Auth;
 using Services.Email;
 using Services.View;
@@ -24,7 +24,12 @@ using Services.Payment;
 
 public class Startup(IConfiguration configuration)
 {
-    private static readonly Assembly AssemblyToScan = typeof(IFeatureMarker).Assembly;
+    private readonly LuckyPennySoftwareOptions luckyPennySoftwareOptions = configuration
+        .GetSection("LuckyPennySoftware")
+        .Get<LuckyPennySoftwareOptions>() ?? throw new ConfigurationErrorsException();
+
+    private readonly string connectionString = configuration
+        .GetConnectionString("DefaultConnection") ?? throw new ConfigurationErrorsException();
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -48,23 +53,20 @@ public class Startup(IConfiguration configuration)
             });
 
         services
-            .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(AssemblyToScan))
+            .AddMediatR(cfg =>
+            {
+                cfg.LicenseKey = this.luckyPennySoftwareOptions.LicenseKey;
+                cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+            })
             .AddAutoMapper(cfg =>
             {
                 cfg.CreateMap<LoginViewModel, LoginRequest>();
                 cfg.CreateMap<CheckInviteResponse, FamilyInvite>();
             });
 
-        var connectionString = configuration.GetConnectionString("DefaultConnection") ??
-            $"Host={configuration["DB_HOST"]};" +
-            $"Port={configuration["DB_PORT"]};" +
-            $"Username={configuration["DB_USER"]};" +
-            $"Password={configuration["DB_PASSWORD"]};" +
-            $"Database={configuration["DB_NAME"]}";
-
         services
             .AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(connectionString)
+                options.UseNpgsql(this.connectionString)
                     .UseSeeding((context, _)
                         => SeedData.InitializeAsync(context).GetAwaiter().GetResult())
                     .UseAsyncSeeding(async (context, _, cancellationToken)
