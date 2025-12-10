@@ -512,6 +512,40 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.ToTable("Files");
                 });
 
+            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.FamilyInvite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FamilyId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RequesterId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FamilyId");
+
+                    b.HasIndex("RequesterId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FamilyInvites");
+                });
+
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -525,6 +559,11 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime?>("DeliveredAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(34)
+                        .HasColumnType("character varying(34)");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -545,6 +584,10 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
+
+                    b.HasDiscriminator().HasValue("Notification");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Payment.Invoice", b =>
@@ -716,9 +759,14 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Family");
+                    b.ToTable("Families");
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.User.User", b =>
@@ -764,6 +812,18 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.HasBaseType("TuitionManagementSystem.Web.Models.Class.Announcement.Announcement");
 
                     b.HasDiscriminator().HasValue("Material");
+                });
+
+            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.FamilyInviteNotification", b =>
+                {
+                    b.HasBaseType("TuitionManagementSystem.Web.Models.Notification.Notification");
+
+                    b.Property<int>("FamilyInviteId")
+                        .HasColumnType("integer");
+
+                    b.HasIndex("FamilyInviteId");
+
+                    b.HasDiscriminator().HasValue("FamilyInviteNotification");
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Payment.BankPaymentMethod", b =>
@@ -1058,6 +1118,33 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.Navigation("CreatedBy");
                 });
 
+            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.FamilyInvite", b =>
+                {
+                    b.HasOne("TuitionManagementSystem.Web.Models.User.Family", "Family")
+                        .WithMany()
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TuitionManagementSystem.Web.Models.User.Parent", "Requester")
+                        .WithMany()
+                        .HasForeignKey("RequesterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TuitionManagementSystem.Web.Models.User.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Family");
+
+                    b.Navigation("Requester");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.Notification", b =>
                 {
                     b.HasOne("TuitionManagementSystem.Web.Models.User.User", "User")
@@ -1126,6 +1213,17 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.FamilyInviteNotification", b =>
+                {
+                    b.HasOne("TuitionManagementSystem.Web.Models.Notification.FamilyInvite", "FamilyInvite")
+                        .WithMany()
+                        .HasForeignKey("FamilyInviteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FamilyInvite");
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.User.Parent", b =>

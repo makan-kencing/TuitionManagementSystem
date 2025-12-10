@@ -9,6 +9,7 @@ using Services.Auth;
 using Services.Email;
 using Services.View;
 using Features.Authentication.Login;
+using Features.Family.CheckInvite;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Models.Notification;
 using Services.Payment;
 
 public class Startup(IConfiguration configuration)
@@ -50,6 +52,7 @@ public class Startup(IConfiguration configuration)
             .AddAutoMapper(cfg =>
             {
                 cfg.CreateMap<LoginViewModel, LoginRequest>();
+                cfg.CreateMap<CheckInviteResponse, FamilyInvite>();
             });
 
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
