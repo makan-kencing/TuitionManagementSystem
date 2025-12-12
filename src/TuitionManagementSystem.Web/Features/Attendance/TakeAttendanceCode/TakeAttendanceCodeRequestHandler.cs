@@ -22,16 +22,16 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db ,IHttpCont
             .Include(s => s.Code)
             .Include(s => s.Course)
             .Where(s => s.Code.Code == request.Code)
-            .OrderByDescending(s => s.StartAt)
-            .ThenByDescending(s => s.EndAt)
+            .OrderByDescending(s => s.CodeGeneratedAt)
             .FirstOrDefaultAsync(cancellationToken);
         var accountId = httpContextAccessor.HttpContext!.User.GetUserId();
         var student =await db.Students
             .Where(s=> s.Account.Id == accountId)
             .FirstOrDefaultAsync(cancellationToken);
-        var currentEnrollment =await db.Enrollments
+        var isEnroll =await db.Enrollments
             .Where(e=>e.Student.Id == student.Id)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Where(e=>e.Course.Id==session.Course.Id)
+            .AnyAsync(cancellationToken);
        var existingAttendance = await db.Attendances
            .AnyAsync(a => a.Student.Id == student.Id
                        && a.Session.Id == session.Id,
@@ -41,14 +41,19 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db ,IHttpCont
             return Result.NotFound("Attendance code not found");
         }
 
-        if (! this.CheckWithinTheTime(session) || !this.CheckWithEnrollment(currentEnrollment,session))
+        if (! this.CheckWithinTheTime(session) )
         {
-            return Result.NotFound("Attendance not take in a time");
+            return Result.Invalid();
+        }
+
+        if (isEnroll)
+        {
+            return Result.Invalid();
         }
 
         if (!existingAttendance)
         {
-            return Result.NotFound("Attendance not take in a time");
+            return Result.Conflict("Attendance is already taken");
         }
 
 
@@ -59,7 +64,7 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db ,IHttpCont
 
         return Result<TakeAttendanceCodeResponse>.Success(new ()
         {
-            SessionId = session.Code.Code
+            SessionId = session.Id
         });
     }
 
@@ -68,14 +73,5 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db ,IHttpCont
         var currentTime = DateTime.Now;
         return currentTime >= session.StartAt && currentTime <= session.EndAt;
     }
-
-    private bool CheckWithEnrollment(Enrollment currentEnrollment , Session session)
-    {
-        if (currentEnrollment.Course == session.Course) {return true;}
-        return false;
-    }
-
-
-
 
 }

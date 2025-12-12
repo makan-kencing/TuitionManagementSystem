@@ -2,5 +2,5 @@
 
 public class TakeAttendanceCodeResponse
 {
-    public string SessionId { get; set; }
+    public int SessionId { get; set; }
 }
