@@ -2,6 +2,7 @@ namespace TuitionManagementSystem.Web.Services.Auth.Extensions;
 
 using System.Globalization;
 using System.Security.Claims;
+using Constants;
 
 public static class ClaimsPrincipalExtensions
 {
@@ -44,6 +45,9 @@ public static class ClaimsPrincipalExtensions
         var value = user.FindFirstValue(ClaimTypes.Thumbprint);
         return value == null ? null : Guid.Parse(value);
     }
+
+    public static string? GetUserType(this ClaimsPrincipal user) =>
+        user.FindFirstValue(InternalClaimTypes.UserType);
 }
 
 
