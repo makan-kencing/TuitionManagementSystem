@@ -8,7 +8,6 @@ using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Models.Notification;
-using Models.User;
 
 public class SendFamilyInviteCommandHandler(
     ApplicationDbContext db,
@@ -46,7 +45,7 @@ public class SendFamilyInviteCommandHandler(
         {
             case null:
                 return Result.NotFound();
-            case not IHasFamily or IHasFamily { Family: not null }:
+            case { Family: not null }:
                 return Result.Forbidden();
         }
 

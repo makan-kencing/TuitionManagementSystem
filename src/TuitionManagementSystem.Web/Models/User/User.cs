@@ -9,6 +9,9 @@ public abstract class User
     [Key]
     public int Id { get; set; }
 
+    [ForeignKey(nameof(Family) + "Id")]
+    public Family? Family { get; set; }
+
     [ForeignKey(nameof(Account) + "Id")]
     public required Account Account { get; set; }
 
