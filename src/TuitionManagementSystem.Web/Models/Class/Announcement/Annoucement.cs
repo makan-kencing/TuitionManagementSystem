@@ -24,11 +24,11 @@ public class Announcement : ISoftDeletable
     [ForeignKey(nameof(CreatedBy) + "Id")]
     public required Teacher CreatedBy { get; set; }
 
-    public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public required DateTime UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public required DateTime PublishedAt { get; set; }  // for drafting purposes
+    public DateTime? PublishedAt { get; set; }  // for drafting purposes
 
     public DateTime? DeletedAt { get; set; }
 

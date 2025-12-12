@@ -15,5 +15,5 @@ public class Attendance
     [ForeignKey(nameof(Student) + "Id")]
     public required Student Student { get; set; }
 
-    public required DateTime TakenOn { get; set; } = DateTime.UtcNow;
+    public DateTime TakenOn { get; set; } = DateTime.UtcNow;
 }

@@ -24,7 +24,7 @@ public class Account
 
     public File? ProfileImage { get; set; }
 
-    public required DateTime LastChanged { get; set; } = DateTime.UtcNow;
+    public DateTime LastChanged { get; set; } = DateTime.UtcNow;
 
     public DateTime? DeletedAt { get; set; }
 

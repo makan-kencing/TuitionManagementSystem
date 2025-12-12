@@ -20,7 +20,7 @@ public class Submission
 
     public int? Grade { get; set; }
 
-    public required DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
+    public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
 
     public virtual ICollection<SubmissionFile> Attachments { get; set; } = [];
 }

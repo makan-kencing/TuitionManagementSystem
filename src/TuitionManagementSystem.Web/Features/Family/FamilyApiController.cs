@@ -12,6 +12,6 @@ public class FamilyApiController(IMediator mediator) : ApiController
 {
     [HttpPost]
     [Route("invite")]
-    public async Task<Result<SendFamilyInviteResponse>> Invite([FromForm] SendFamilyInviteViewModel model) =>
-        await mediator.Send(new SendFamilyInviteCommand(model));
+    public async Task<Result<SendFamilyInviteResponse>> Invite([FromForm] SendFamilyInviteCommand model) =>
+        await mediator.Send(model);
 }

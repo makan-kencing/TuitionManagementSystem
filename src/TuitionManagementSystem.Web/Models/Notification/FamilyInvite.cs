@@ -19,7 +19,7 @@ public class FamilyInvite
 
     public required InviteStatus Status { get; set; } = InviteStatus.Pending;
 
-    public required DateTime RequestedAt { get; set; } = DateTime.UtcNow;
+    public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
 }
 
 public enum InviteStatus

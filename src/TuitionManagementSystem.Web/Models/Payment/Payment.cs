@@ -13,7 +13,7 @@ public class Payment
 
     public required decimal Amount { get; set; }
 
-    public required DateTime PaidAt { get; set; } = DateTime.UtcNow;
+    public DateTime PaidAt { get; set; } = DateTime.UtcNow;
 
     public virtual ICollection<Invoice> Invoices { get; set; } = [];
 }

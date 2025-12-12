@@ -15,7 +15,7 @@ public class AccountSession
 
     public IPAddress? LastIp { get; set; }
 
-    public required DateTime LastLogin { get; set; } = DateTime.UtcNow;
+    public DateTime LastLogin { get; set; } = DateTime.UtcNow;
 
     [ForeignKey(nameof(Account) + "Id")]
     public required Account Account { get; set; }

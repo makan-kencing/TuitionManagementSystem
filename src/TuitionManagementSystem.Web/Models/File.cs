@@ -21,5 +21,5 @@ public class File
     [ForeignKey(nameof(CreatedBy) + "Id")]
     public User.User? CreatedBy { get; set; }
 
-    public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

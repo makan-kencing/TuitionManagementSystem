@@ -17,7 +17,7 @@ public class Notification
     [ForeignKey(nameof(User) + "Id")]
     public required User User { get; set; }
 
-    public required DateTime NotifiedAt { get; set; } = DateTime.UtcNow;
+    public DateTime NotifiedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? DeliveredAt { get; set; }
 

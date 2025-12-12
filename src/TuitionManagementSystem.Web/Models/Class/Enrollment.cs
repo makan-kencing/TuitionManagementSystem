@@ -15,5 +15,5 @@ public class Enrollment
     [ForeignKey(nameof(Course) + "Id")]
     public required Course Course { get; set; }
 
-    public required DateTime EnrolledAt { get; set; } = DateTime.UtcNow;
+    public DateTime EnrolledAt { get; set; } = DateTime.UtcNow;
 }
