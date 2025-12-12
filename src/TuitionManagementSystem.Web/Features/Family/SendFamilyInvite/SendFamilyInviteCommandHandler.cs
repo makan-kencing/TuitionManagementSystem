@@ -4,12 +4,12 @@ using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
 
-public class SendFamilyInviteRequestHandler(
+public class SendFamilyInviteCommandHandler(
     ApplicationDbContext db,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<SendFamilyInviteRequest, Result<SendFamilyInviteResponse>>
+    IHttpContextAccessor httpContextAccessor) : IRequestHandler<SendFamilyInviteCommand, Result<SendFamilyInviteResponse>>
 {
     public Task<Result<SendFamilyInviteResponse>> Handle(
-        SendFamilyInviteRequest request,
+        SendFamilyInviteCommand command,
         CancellationToken cancellationToken)
     {
         // TODO

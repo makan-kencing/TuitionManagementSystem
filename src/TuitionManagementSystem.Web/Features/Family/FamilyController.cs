@@ -46,7 +46,7 @@ public class FamilyController(IMediator mediator) : Controller
     [HttpPost]
     public async Task<IActionResult> Accept()
     {
-        var result = await mediator.Send(new AcceptInviteRequest());
+        var result = await mediator.Send(new AcceptInviteCommand());
 
         return this.RedirectToAction("Index");
     }
@@ -54,7 +54,7 @@ public class FamilyController(IMediator mediator) : Controller
     [HttpPost]
     public async Task<IActionResult> Decline()
     {
-        var result = await mediator.Send(new DeclineInviteRequest());
+        var result = await mediator.Send(new DeclineInviteCommand());
 
         return this.RedirectToAction("Index");
     }
