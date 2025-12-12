@@ -6,6 +6,7 @@ using Ardalis.Result;
 using Ardalis.Result.AspNetCore;
 using GenerateAttendanceCode;
 using MediatR;
+using TakeAttendanceCode;
 
 public class AttendanceController(IMediator mediator) : Controller
 {
@@ -19,4 +20,12 @@ public class AttendanceController(IMediator mediator) : Controller
             sessionId),
         cancellationToken);
 
+    [HttpPost("take")]
+    [TranslateResultToActionResult]
+    public async Task<Result<TakeAttendanceCodeResponse>>TakeAttendanceCode(
+        [FromForm] string code,
+        CancellationToken cancellationToken) => await mediator.Send(
+        new TakeAttendanceCodeRequest(
+            code),
+        cancellationToken);
 }
