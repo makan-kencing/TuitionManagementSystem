@@ -4,15 +4,12 @@ namespace TuitionManagementSystem.Web.Features.Family;
 
 using AcceptInvite;
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
 using CheckInvite;
 using DeclineInvite;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using ViewChild;
 using ViewFamily;
 
-[Authorize]
 public class FamilyController(IMediator mediator) : Controller
 {
     [HttpGet]

@@ -76,9 +76,7 @@ public class Startup(IConfiguration configuration)
             .AddHttpContextAccessor()
             .AddProblemDetails()
             .AddSwaggerGen()
-            .AddEndpointsApiExplorer()
             .AddRequestTimeouts()
-            .AddCors()
             .AddAntiforgery()
             .AddResponseCompression()
             .AddResponseCaching()
@@ -90,6 +88,10 @@ public class Startup(IConfiguration configuration)
             .AddSignalR();
 
         services
+            .AddAuthorization(options =>
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build())
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
             {

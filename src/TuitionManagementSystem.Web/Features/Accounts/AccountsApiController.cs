@@ -5,10 +5,12 @@ using Ardalis.Result;
 using Ardalis.Result.AspNetCore;
 using CheckEmail;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/account")]
+[AllowAnonymous]
 public sealed class AccountsApiController(ILogger<AccountsApiController> logger, IMediator mediator) : Controller
 {
     [HttpGet("email/{email}")]

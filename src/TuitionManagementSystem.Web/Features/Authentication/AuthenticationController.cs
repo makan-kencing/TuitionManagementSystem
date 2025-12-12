@@ -15,9 +15,11 @@ public sealed class AuthenticationController(
     IMapper mapper) : Controller
 {
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult Login() => this.View();
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromForm][Required] LoginViewModel login, [FromQuery] Uri? returnUrl)
     {
         var result = await mediator.Send(mapper.Map<LoginRequest>(login));
@@ -40,7 +42,6 @@ public sealed class AuthenticationController(
     public async Task<IActionResult> TwoFactor() =>
         throw new NotImplementedException();
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Logout([FromHeader] Uri? referer)
     {

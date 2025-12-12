@@ -6,9 +6,7 @@ using Ardalis.Result;
 using Ardalis.Result.AspNetCore;
 using GenerateAttendanceCode;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 
-[Authorize]
 public class AttendanceController(IMediator mediator) : Controller
 {
 
