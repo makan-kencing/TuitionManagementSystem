@@ -17,7 +17,7 @@ public class FamilyInvite
 
     public required Parent Requester { get; set; }
 
-    public required InviteStatus Status { get; set; } = InviteStatus.Pending;
+    public InviteStatus Status { get; set; } = InviteStatus.Pending;
 
     public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
 }
