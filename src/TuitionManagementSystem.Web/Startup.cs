@@ -9,10 +9,12 @@ using Services.Auth;
 using Services.Email;
 using Services.View;
 using Features.Authentication.Login;
+using Features.Family;
 using Features.Family.CheckInvite;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -100,6 +102,7 @@ public class Startup(IConfiguration configuration)
 
         services.AddSingleton<IEmailService, SmtpEmailService>();
         services.AddSingleton<IPaymentService, StripePaymentService>();
+        services.AddSingleton<IAuthorizationHandler, FamilyAuthorizationHandler>();
 
         services.AddScoped<UserCookieAuthenticationEvents>();
         services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
