@@ -8,6 +8,7 @@ using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Models.User;
 
@@ -15,6 +16,8 @@ public sealed class LoginRequestHandler(
     ApplicationDbContext db,
     IHttpContextAccessor httpContextAccessor) : IRequestHandler<LoginRequest, Result<LoginResponse>>
 {
+    private static readonly PasswordHasher<object> ph = new();
+
     public async Task<Result<LoginResponse>> Handle(LoginRequest request, CancellationToken cancellationToken)
     {
         var account = await db.Accounts
@@ -62,15 +65,14 @@ public sealed class LoginRequestHandler(
 
     private static bool VerifyPassword([NotNullWhen(true)] Account? account, string password)
     {
-        // TODO: implement password verification logic
-        // IMPORTANT: do password checking on dummy password and return false when account is null
-        if (account == null)
-        {
-            // do dummy verify password to simulate time taken if record exists
-            return false;
-        }
+        //dummy verify password to simulate time taken if record exists
+        const string dummyHash = "AQAAAAIAAYagAAAAEGyBGBzs6LQiyNF3QVuXc6Cz0yVIGikGDI6GdsXMFG6eDzkN0617JG54Tz/Zp/V35g==";
 
-        return true;
+        var hashToCheck = account?.HashedPassword ?? dummyHash;
+
+        var result = ph.VerifyHashedPassword(0, hashToCheck, password);
+
+        return account != null && result == PasswordVerificationResult.Success;
     }
 
     private static bool HasTwoFactor(Account account)
