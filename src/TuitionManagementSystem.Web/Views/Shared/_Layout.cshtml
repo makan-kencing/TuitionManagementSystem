@@ -29,21 +29,36 @@
             </div>
         </div>
 
-        <div>
+        <div class="dropdown">
             @if (User.Identity!.IsAuthenticated)
             {
-                <div>@User.GetUsername()</div>
+                <a class="btn btn-outline-primary dropdown-toggle d-flex align-items-center"
+                   href="#" role="button"
+                   id="userDropdown"
+                   data-bs-toggle="dropdown"
+                   aria-expanded="false">
 
-                @using (Html.BeginForm(controllerName: "Authentication", actionName: "Logout"))
-                {
-                    <button type="submit">Logout</button>
-                }
+                    @* TODO: get user profile *@
+                    <span class="me-2">@User.GetUsername()</span>
+                    <img src="/images/default-avatar.png" alt="Avatar" class="rounded-circle" width="30" height="30"/>
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    @* TODO: user profile *@
+                    <li><a class="dropdown-item">Profile</a></li>
+                    <li>
+                        @using (Html.BeginForm(controllerName: "Authentication", actionName: "Logout"))
+                        {
+                            <button type="submit" class="dropdown-item">Logout</button>
+                        }
+                    </li>
+                </ul>
             }
-            else
-            {
-                <a asp-controller="Authentication" asp-action="Login">Login</a>
-            }
-        </div>
+    else
+    {
+        <a asp-controller="Authentication" asp-action="Login" class="btn btn-primary">Login</a>
+    }
+</div>
     </nav>
 </header>
 <div class="container">
