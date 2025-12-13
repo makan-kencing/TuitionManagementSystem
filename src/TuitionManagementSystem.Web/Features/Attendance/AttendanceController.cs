@@ -4,6 +4,7 @@ namespace TuitionManagementSystem.Web.Features.Attendance;
 
 using Ardalis.Result;
 using Ardalis.Result.AspNetCore;
+using DeleteAttendance;
 using GenerateAttendanceCode;
 using MediatR;
 using TakeAttendanceCode;
@@ -28,4 +29,12 @@ public class AttendanceController(IMediator mediator) : Controller
         new TakeAttendanceCodeRequest(
             code),
         cancellationToken);
+
+    [HttpDelete("delete/{attendanceId}/student/{studentId} ")]
+    [TranslateResultToActionResult]
+    public async Task<Result<DeleteAttendanceResponse>> DeleteAttendance(
+        [FromRoute] int attendanceId, [FromRoute]  int studentId,
+        CancellationToken cancellationToken) => await mediator.Send(
+            new DeleteAttendanceRequest(
+                attendanceId,studentId),cancellationToken);
 }
