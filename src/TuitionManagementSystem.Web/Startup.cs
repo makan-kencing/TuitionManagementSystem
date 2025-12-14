@@ -20,8 +20,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using Models.Notification;
+using Services.File;
 using Services.Payment;
 
 public class Startup(IConfiguration configuration)
@@ -104,6 +104,7 @@ public class Startup(IConfiguration configuration)
 
         services.AddSingleton<IEmailService, SmtpEmailService>();
         services.AddSingleton<IPaymentService, StripePaymentService>();
+        services.AddSingleton<IFileService, PhysicalFileService>();
         services.AddSingleton<IAuthorizationHandler, FamilyAuthorizationHandler>();
 
         services.AddScoped<UserCookieAuthenticationEvents>();
@@ -114,7 +115,8 @@ public class Startup(IConfiguration configuration)
 
     public void Configure(
         IApplicationBuilder app,
-        IWebHostEnvironment env)
+        IWebHostEnvironment env,
+        IFileService fileService)
     {
         // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0#order
         if (env.IsDevelopment())
@@ -142,16 +144,8 @@ public class Startup(IConfiguration configuration)
             .UseAuthorization()
             .UseStaticFiles(new StaticFileOptions
             {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(env.ContentRootPath, "assets", "uploads")),
-                RequestPath = "/uploads",
-                OnPrepareResponse = ctx =>
-                {
-                    if (!ctx.Context.User.Identity!.IsAuthenticated)
-                    {
-                        ctx.Context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    }
-                }
+                FileProvider = fileService.FileProvider,
+                RequestPath = fileService.MappedPath
             })
             // .UseSession()
             .UseAntiforgery()
