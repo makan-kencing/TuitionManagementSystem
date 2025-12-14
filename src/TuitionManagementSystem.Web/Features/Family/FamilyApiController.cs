@@ -5,6 +5,7 @@ using Ardalis.Result;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RemoveMember;
 using SendFamilyInvite;
 
 [Authorize]
@@ -14,4 +15,9 @@ public class FamilyApiController(IMediator mediator) : ApiController
     [Route("invite")]
     public async Task<Result<SendFamilyInviteResponse>> Invite([FromForm] SendFamilyInviteCommand model) =>
         await mediator.Send(model);
+
+    [HttpDelete]
+    [Route("member/{id:required:int}")]
+    public async Task<Result> RemoveMember([FromRoute] int id) =>
+        await mediator.Send(new RemoveMemberCommand(id));
 }
