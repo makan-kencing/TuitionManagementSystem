@@ -30,11 +30,10 @@ public class AttendanceController(IMediator mediator) : Controller
             code),
         cancellationToken);
 
-    [HttpDelete("delete/{attendanceId}/student/{studentId} ")]
+    [HttpDelete("delete/{attendanceId}")]
     [TranslateResultToActionResult]
     public async Task<Result<DeleteAttendanceResponse>> DeleteAttendance(
-        [FromRoute] int attendanceId, [FromRoute]  int studentId,
+        [FromRoute] int attendanceId,
         CancellationToken cancellationToken) => await mediator.Send(
-            new DeleteAttendanceRequest(
-                attendanceId,studentId),cancellationToken);
+            new DeleteAttendanceRequest(attendanceId),cancellationToken);
 }
