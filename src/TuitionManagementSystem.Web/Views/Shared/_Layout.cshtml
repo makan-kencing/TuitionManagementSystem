@@ -1,4 +1,6 @@
-﻿@using TuitionManagementSystem.Web.Services.Auth.Extensions
+﻿@using System.Security.AccessControl
+@using TuitionManagementSystem.Web.Services.Auth.Constants
+@using TuitionManagementSystem.Web.Services.Auth.Extensions
 
 <!DOCTYPE html>
 <html lang="en">
@@ -8,6 +10,10 @@
     <title>@ViewData["Title"] - TuitionManagementSystem</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+          integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/TuitionManagementSystem.Web.styles.css" asp-append-version="true"/>
 </head>
@@ -16,51 +22,91 @@
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container-fluid">
             <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TuitionManagementSystem</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Subject" asp-action="Index">Home</a>
+                        <a class="nav-link text-dark" asp-controller="Course" asp-action="Index">Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-controller="Coursework" asp-action="Index">Courseworks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-controller="Teacher" asp-action="Index">Teachers</a>
                     </li>
                 </ul>
             </div>
+
+            <div class="d-flex align-items-center gap-2">
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <a class="btn btn-outline-secondary" asp-controller="Notification" asp-action="Index">
+                        <i class="fa-solid fa-bell"></i>
+                    </a>
+
+                    <div class="dropdown">
+                        <a class="btn btn-outline-secondary"
+                           href="#" role="button"
+                           id="userDropdown"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            @if (User.GetProfileImageUri() is not null)
+                            {
+                                <img src="@User.GetProfileImageUri()" alt=""
+                                     class="rounded-circle" width="30" height="30"/>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-user"></i>
+                            }
+
+                            <span class="me-2">@User.GetUsername()</span>
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item" asp-controller="Profile" asp-action="Index">My Account</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Enrollment"
+                                   asp-action="Index">Enrollments</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Family" asp-action="Index">Family</a>
+                            </li>
+                            @if (User.IsInRole(nameof(AccessRoles.Administrator)))
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Admin" asp-action="Index"></a>/a>
+                                </li>
+                            }
+                            <li class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Authentication" asp-action="Logout">
+                                    <button type="submit" class="dropdown-item">Sign Out</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <a asp-controller="Authentication" asp-action="Login" class="btn btn-primary">Sign In</a>
+                }
+            </div>
         </div>
-
-        <div class="dropdown">
-            @if (User.Identity!.IsAuthenticated)
-            {
-                <a class="btn btn-outline-primary dropdown-toggle d-flex align-items-center"
-                   href="#" role="button"
-                   id="userDropdown"
-                   data-bs-toggle="dropdown"
-                   aria-expanded="false">
-
-                    <span class="me-2">@User.GetUsername()</span>
-                    <img src="@{ User.GetProfileImageUri() ?? "images/default-avatar.png"}" alt="Avatar" class="rounded-circle" width="30" height="30"/>
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                    <li><a class="dropdown-item">Profile</a></li>
-                    <li>
-                        <form asp-controller="Authentication" asp-action="Logout">
-                            <button type="submit" class="dropdown-item">Logout</button>
-                        </form>
-                    </li>
-                </ul>
-            }
-    else
-    {
-        <a asp-controller="Authentication" asp-action="Login" class="btn btn-primary">Login</a>
-    }
-</div>
     </nav>
 </header>
+
 <div class="container">
     <main role="main" class="pb-3">
         @RenderBody()
@@ -72,6 +118,7 @@
         &copy; 2025 - TuitionManagementSystem
     </div>
 </footer>
+
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/htmx/dist/htmx.min.js"></script>
 <script src="~/lib/signalr/dist/browser/signalr.js"></script>
