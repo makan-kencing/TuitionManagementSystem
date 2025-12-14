@@ -22,4 +22,6 @@ public class Session
     public AttendanceCode? Code { get; set; }
 
     public DateTime? CodeGeneratedAt { get; set; }
+
+    public virtual ICollection<Attendance> Attendances { get; set; } = [];
 }
