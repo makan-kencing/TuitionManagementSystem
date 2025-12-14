@@ -19,7 +19,7 @@ public class AccountClaimsTransformer(ApplicationDbContext db) : IClaimsTransfor
         }
 
         var account = await db.Accounts
-            .Where(a => a.Id == principal.GetUserId())
+            .Where(a => a.Id == principal.GetAccountId())
             .Include(a => a.User)
             .Include(a => a.ProfileImage)
             .FirstOrDefaultAsync();
