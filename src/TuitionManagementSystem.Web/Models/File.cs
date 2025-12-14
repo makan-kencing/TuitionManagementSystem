@@ -16,7 +16,8 @@ public class File
 
     public required Uri Uri { get; set; }
 
-    public required bool IsLocal { get; set; }
+    [StringLength(255)]
+    public string? CanonicalPath { get; set; }
 
     [ForeignKey(nameof(CreatedBy) + "Id")]
     public User.User? CreatedBy { get; set; }
