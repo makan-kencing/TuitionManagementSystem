@@ -4,30 +4,26 @@ using TuitionManagementSystem.Web.Features.Attendance.AttendanceSummary;
 
 namespace TuitionManagementSystem.Web.Features.Attendance;
 
+using Ardalis.Result;
+using Services.Auth.Extensions;
+
 public class AttendanceController(IMediator mediator) : Controller
 {
-    [HttpGet("student/attendance")]
-    public async Task<IActionResult> StudentAttendance(
+    public async Task<IActionResult> Index(
         CancellationToken cancellationToken)
     {
-        var studentIdClaim = User.FindFirst("StudentId");
-
-        if (studentIdClaim == null)
+        var userId = this.User.GetUserId() ?? -1;
+        if (userId == -1)
         {
-            return Unauthorized();
+            return this.Unauthorized();
         }
 
-        var studentId = int.Parse(studentIdClaim.Value);
-
-        var result = await mediator.Send(
-            new AttendanceSummaryRequest(studentId),
-            cancellationToken);
-
-        if (!result.IsSuccess)
+        var result = await mediator.Send(new GetAttendanceSummaryRequest(userId!), cancellationToken);
+        if (result.IsNotFound())
         {
-            return NotFound();
+            return this.NotFound();
         }
 
-        return View(result.Value);
+        return this.View(result.Value);
     }
 }

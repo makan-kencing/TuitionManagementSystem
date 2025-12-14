@@ -12,37 +12,27 @@ using TakeAttendanceCode;
 
 public class AttendanceApiController(IMediator mediator) : Controller
 {
-
     [HttpPost("generate")]
-    [TranslateResultToActionResult]
     public async Task<Result<GenerateAttendanceCodeResponse>> GenerateAttendanceCode(
         [FromForm] int sessionId,
-        CancellationToken cancellationToken) => await mediator.Send(
-        new GenerateAttendanceCodeRequest(
-            sessionId),
-        cancellationToken);
+        CancellationToken cancellationToken) =>
+        await mediator.Send(new GenerateAttendanceCodeRequest(sessionId), cancellationToken);
 
     [HttpPost("take")]
-    [TranslateResultToActionResult]
-    public async Task<Result<TakeAttendanceCodeResponse>>TakeAttendanceCode(
+    public async Task<Result<TakeAttendanceCodeResponse>> TakeAttendanceCode(
         [FromForm] string code,
-        CancellationToken cancellationToken) => await mediator.Send(
-        new TakeAttendanceCodeRequest(
-            code),
-        cancellationToken);
+        CancellationToken cancellationToken) =>
+        await mediator.Send(new TakeAttendanceCodeRequest(code), cancellationToken);
 
     [HttpDelete("delete/{attendanceId}")]
-    [TranslateResultToActionResult]
     public async Task<Result<DeleteAttendanceResponse>> DeleteAttendance(
         [FromRoute] int attendanceId,
-        CancellationToken cancellationToken) => await mediator.Send(
-            new DeleteAttendanceRequest(attendanceId),cancellationToken);
+        CancellationToken cancellationToken) =>
+        await mediator.Send(new DeleteAttendanceRequest(attendanceId), cancellationToken);
 
-   /* [HttpGet("summary/{studentId}")]
-    [TranslateResultToActionResult]
-    public async Task<Result<AttendanceSummaryViewModel>> AttendanceSummary(
+    [HttpGet("summary/{studentId}")]
+    public async Task<Result<GetAttendanceSummaryResponse>> AttendanceSummary(
         [FromRoute] int studentId,
-        CancellationToken cancellationToken) => await mediator.Send(
-        new AttendanceSummaryRequest(studentId),cancellationToken);
-        */
+        CancellationToken cancellationToken) =>
+        await mediator.Send(new GetAttendanceSummaryRequest(studentId), cancellationToken);
 }
