@@ -14,7 +14,6 @@ public sealed class DeleteAttendanceRequestHandler(ApplicationDbContext db
     {
         var checkAttendance = await db.Attendances
             .Where(ad => ad.Id == request.AttendanceId)
-            .Where(ad=>ad.Student.Id == request.StudentId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (checkAttendance==null)
