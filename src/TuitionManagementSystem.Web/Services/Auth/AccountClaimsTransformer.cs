@@ -37,12 +37,15 @@ public class AccountClaimsTransformer(ApplicationDbContext db) : IClaimsTransfor
 
         if (account.User is not null)
         {
-            claims.Add(new(InternalClaimTypes.UserType, account.User.GetType().Name));
+            claims.AddRange([
+                new Claim(InternalClaimTypes.UserId, account.User.Id.ToString(CultureInfo.InvariantCulture)),
+                new Claim(InternalClaimTypes.UserType, account.User.GetType().Name)
+            ]);
         }
 
         if (account.ProfileImage is not null)
         {
-            claims.Add(new(ClaimTypes.Uri, account.ProfileImage.Uri.ToString()));
+            claims.Add(new Claim(ClaimTypes.Uri, account.ProfileImage.Uri.ToString()));
         }
 
         var identity = principal.Identity as ClaimsIdentity;

@@ -11,6 +11,21 @@ public static class ClaimsPrincipalExtensions
 
     public static int? GetUserId(this ClaimsPrincipal user)
     {
+        var value = user.FindFirstValue(InternalClaimTypes.UserId);
+        try
+        {
+            return string.IsNullOrEmpty(value)
+                ? null
+                : int.Parse(value, CultureInfo.InvariantCulture);
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+    }
+
+    public static int? GetAccountId(this ClaimsPrincipal user)
+    {
         var value = user.FindFirstValue(ClaimTypes.NameIdentifier);
         try
         {
