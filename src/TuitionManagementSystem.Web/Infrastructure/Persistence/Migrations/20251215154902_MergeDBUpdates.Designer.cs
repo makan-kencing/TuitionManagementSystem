@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TuitionManagementSystem.Web.Infrastructure.Persistence;
@@ -12,9 +13,11 @@ using TuitionManagementSystem.Web.Infrastructure.Persistence;
 namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251215154902_MergeDBUpdates")]
+    partial class MergeDBUpdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -319,7 +322,8 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.HasIndex("StudentId", "CourseId");
+                    b.HasIndex("StudentId", "CourseId")
+                        .IsUnique();
 
                     b.ToTable("Enrollments");
                 });
@@ -648,9 +652,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<int?>("PaymentId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.Property<int>("StudentId")

@@ -1,6 +1,8 @@
 namespace TuitionManagementSystem.Web.Models.Payment;
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Class;
 using User;
 
 public class Invoice
@@ -15,6 +17,8 @@ public class Invoice
 
     public int StudentId { get; set; }
 
+    public int EnrollmentId { get; set; }
+
     public int? PaymentId { get; set; }
 
     public DateTime InvoicedAt { get; set; } = DateTime.UtcNow;
@@ -23,38 +27,23 @@ public class Invoice
 
     public DateTime? CancelledAt { get; set; }
 
+    public InvoiceStatus Status { get; set; } = InvoiceStatus.Pending;
+
+    [ForeignKey(nameof(StudentId))]
     public Student Student { get; set; } = null!;
 
+    [ForeignKey(nameof(EnrollmentId))]
+    public Enrollment Enrollment { get; set; } = null!;
+
+    [ForeignKey(nameof(PaymentId))]
     public Payment? Payment { get; set; }
-
-    public InvoiceStatus InvoiceStatus
-    {
-        get
-        {
-            if (this.Payment is not null)
-            {
-                return InvoiceStatus.Paid;
-            }
-
-            if (DateTime.UtcNow > this.DueAt)
-            {
-                return InvoiceStatus.Overdue;
-            }
-
-            if (this.CancelledAt is not null)
-            {
-                return InvoiceStatus.Cancelled;
-            }
-
-            return InvoiceStatus.Pending;
-        }
-    }
 }
 
 public enum InvoiceStatus
 {
-    Pending,
-    Paid,
-    Cancelled,
-    Overdue
+    Pending = 0,
+    Paid = 1,
+    Cancelled = 2,
+    Overdue = 3,
+    Withdrawn = 4
 }

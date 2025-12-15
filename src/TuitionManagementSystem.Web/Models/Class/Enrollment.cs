@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using User;
 
-[Index(nameof(StudentId), nameof(CourseId), IsUnique = true)]
+[Index(nameof(StudentId), nameof(CourseId), IsUnique = false)]
 public class Enrollment
 {
     [Key]
@@ -19,4 +19,14 @@ public class Enrollment
     public Student Student { get; set; } = null!;
 
     public Course Course { get; set; } = null!;
+
+    public EnrollmentStatus Status { get; set; } = EnrollmentStatus.Active;
+
+    public enum EnrollmentStatus
+    {
+        Active = 1,
+        Cancelled = 2,
+        Withdrawn = 3,
+        Completed = 4
+    }
 }
