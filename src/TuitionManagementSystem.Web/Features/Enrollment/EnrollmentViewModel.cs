@@ -4,9 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 public class EnrollmentViewModel
 {
-    [Required]
-    public int StudentId { get; set; }
+    public int? EnrollmentId { get; set; }
 
-    [Required]
-    public int CourseId { get; set; }
+    public int? StudentId { get; set; }
+
+    public int? CourseId { get; set; }
 }
+
