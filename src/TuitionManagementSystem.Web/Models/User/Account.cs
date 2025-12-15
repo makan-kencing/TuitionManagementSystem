@@ -14,6 +14,9 @@ public class Account
     [StringLength(30)]
     public required string Username { get; set; }
 
+    [StringLength(50)]
+    public string? DisplayName { get; set; }
+
     [StringLength(300)]
     public required string HashedPassword { get; set; }
 

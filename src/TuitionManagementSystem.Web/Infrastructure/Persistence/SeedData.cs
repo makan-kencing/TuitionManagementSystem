@@ -60,7 +60,8 @@ public class SeedData
             {
                 Account = new Account
                 {
-                    Username = $"Admin Teacher {i}",
+                    Username = $"admin{i}",
+                    DisplayName = $"Admin Teacher {i}",
                     HashedPassword = this.HashedDefaultPassword,
                     Email = $"admin{i}@example.com",
                     AccessRole = AccessRoles.Administrator
@@ -70,7 +71,8 @@ public class SeedData
                 {
                     Account = new Account
                     {
-                        Username = $"Teacher {i}",
+                        Username = $"teacher{i}",
+                        DisplayName= $"Teacher {i}",
                         HashedPassword = this.HashedDefaultPassword,
                         Email = $"teacher{i}@example.com",
                         AccessRole = AccessRoles.User
@@ -83,7 +85,8 @@ public class SeedData
             {
                 Account = new Account
                 {
-                    Username = $"Student {i}",
+                    Username = $"student{i}",
+                    DisplayName = $"Student {i}",
                     HashedPassword = this.HashedDefaultPassword,
                     Email = $"student{i}@example.com",
                     AccessRole = AccessRoles.User
@@ -95,7 +98,8 @@ public class SeedData
             {
                 Account = new Account
                 {
-                    Username = $"Parent {i}",
+                    Username = $"parent{i}",
+                    DisplayName = $"Parent {i}",
                     HashedPassword = this.HashedDefaultPassword,
                     Email = $"parent{i}@example.com",
                     AccessRole = AccessRoles.User
