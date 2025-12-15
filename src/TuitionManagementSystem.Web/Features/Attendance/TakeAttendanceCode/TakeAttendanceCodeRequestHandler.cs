@@ -14,8 +14,8 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db, IHttpCont
         CancellationToken cancellationToken)
     {
         var session = await db.Sessions
-            .Include(s => s.Code)
-            .Where(s => s.Code.Code == request.Code)
+            .Include(s => s.AttendanceCode)
+            .Where(s => s.AttendanceCode.Code == request.Code)
             .OrderByDescending(s => s.CodeGeneratedAt)
             .FirstOrDefaultAsync(cancellationToken);
         if (session == null)

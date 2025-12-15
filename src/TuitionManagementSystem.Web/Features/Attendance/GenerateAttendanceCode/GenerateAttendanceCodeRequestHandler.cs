@@ -27,7 +27,7 @@ public sealed class GenerateAttendanceCodeRequestHandler(ApplicationDbContext db
             .Where(at => at.Id == LastCodeId)
             .FirstAsync(cancellationToken);
 
-        session.Code = code;
+        session.AttendanceCode = code;
         session.CodeGeneratedAt = DateTime.UtcNow;
 
         return Result<GenerateAttendanceCodeResponse>.Success(new()

@@ -12,15 +12,15 @@ public class FamilyAuthorizationHandler : AuthorizationHandler<OperationAuthoriz
         OperationAuthorizationRequirement requirement,
         Family resource)
     {
-        var accountId = context.User.GetUserId() ?? -1;
-        if (accountId == -1)  // cant check for null since compiler keep it nullable
+        var userId = context.User.GetUserId() ?? -1;
+        if (userId == -1)  // cant check for null since compiler keep it nullable
         {
             return Task.CompletedTask;
         }
 
         if (requirement == FamilyOperations.View)
         {
-            if (IsParentOf(resource, accountId) || IsChildOf(resource, accountId))
+            if (IsParentOf(resource, userId) || IsChildOf(resource, userId))
             {
                 context.Succeed(requirement);
             }
@@ -29,7 +29,7 @@ public class FamilyAuthorizationHandler : AuthorizationHandler<OperationAuthoriz
                  && requirement == FamilyOperations.EditDetails
                  && requirement == FamilyOperations.RemoveMember)
         {
-            if (IsParentOf(resource, accountId))
+            if (IsParentOf(resource, userId))
             {
                 context.Succeed(requirement);
             }
@@ -38,11 +38,11 @@ public class FamilyAuthorizationHandler : AuthorizationHandler<OperationAuthoriz
         return Task.CompletedTask;
     }
 
-    private static bool IsChildOf(Family family, int accountId) =>
-        family.Children.Any(u => u.Account.Id == accountId);
+    private static bool IsChildOf(Family family, int userId) =>
+        family.Children.Any(u => u.UserId == userId);
 
-    private static bool IsParentOf(Family family, int accountId) =>
-        family.Parents.Any(u => u.Account.Id == accountId);
+    private static bool IsParentOf(Family family, int userId) =>
+        family.Parents.Any(u => u.UserId == userId);
 }
 
 public static class FamilyOperations

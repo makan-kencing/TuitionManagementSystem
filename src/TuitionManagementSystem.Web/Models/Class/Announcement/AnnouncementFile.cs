@@ -1,16 +1,19 @@
 namespace TuitionManagementSystem.Web.Models.Class.Announcement;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
+[Index(nameof(AnnouncementId), nameof(FileId), IsUnique = true)]
 public class AnnouncementFile
 {
     [Key]
     public int Id { get; set; }
 
-    [ForeignKey(nameof(Announcement) + "Id")]
-    public required Announcement Announcement { get; set; }
+    public int AnnouncementId { get; set; }
 
-    [ForeignKey(nameof(File) + "Id")]
-    public required File File { get; set; }
+    public int FileId { get; set; }
+
+    public Announcement Announcement { get; set; } = null!;
+
+    public File File { get; set; } = null!;
 }

@@ -1,7 +1,6 @@
 namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 [Index(nameof(Name), IsUnique = true)]
@@ -16,23 +15,24 @@ public class Course
     [StringLength(255)]
     public string? Description { get; set; }
 
-    [Column(TypeName = "decimal(10,2)")]
-    [Range(0, 999.99)]
+    [Precision(10, 2)]
     public decimal Price { get; set; }
 
-    [ForeignKey(nameof(Subject) + "Id")]
-    public required Subject Subject { get; set; }
+    public int SubjectId { get; set; }
 
-    [ForeignKey(nameof(PreferredClassroom) + "Id")]
-    public required Classroom PreferredClassroom { get; set; }
+    public int PreferredClassroomId { get; set; }
 
-    public virtual Schedule? Schedule { get; set; }
+    public Subject Subject { get; set; } = null!;
 
-    public virtual ICollection<CourseTeacher> TeachersInCharge { get; set; } = [];
+    public Classroom PreferredClassroom { get; set; } = null!;
 
-    public virtual ICollection<Session> Sessions { get; set; } = [];
+    public Schedule? Schedule { get; set; }
 
-    public virtual ICollection<Enrollment> Enrollments { get; set; } = [];
+    public ICollection<CourseTeacher> TeachersInCharge { get; set; } = [];
 
-    public virtual ICollection<Announcement.Announcement> Announcements { get; set; } = [];
+    public ICollection<Session> Sessions { get; set; } = [];
+
+    public ICollection<Enrollment> Enrollments { get; set; } = [];
+
+    public ICollection<Announcement.Announcement> Announcements { get; set; } = [];
 }

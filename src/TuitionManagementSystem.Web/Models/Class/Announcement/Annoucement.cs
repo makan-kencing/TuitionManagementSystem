@@ -1,7 +1,6 @@
 namespace TuitionManagementSystem.Web.Models.Class.Announcement;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using User;
 
 public class Announcement : ISoftDeletable
@@ -15,22 +14,25 @@ public class Announcement : ISoftDeletable
     [StringLength(2000)]
     public string? Description { get; set; }
 
-    [ForeignKey(nameof(Course) + "Id")]
-    public required Course Course { get; set; }
+    public int CourseId { get; set; }
 
-    [ForeignKey(nameof(RelatedSession) + "Id")]
-    public Session? RelatedSession { get; set; }
+    public int? RelatedSessionId { get; set; }
 
-    [ForeignKey(nameof(CreatedBy) + "Id")]
-    public required Teacher CreatedBy { get; set; }
+    public int CreatedById { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public DateTime? PublishedAt { get; set; }  // for drafting purposes
+    public DateTime? PublishedAt { get; set; } // for drafting purposes
+
+    public Course Course { get; set; } = null!;
+
+    public Session? RelatedSession { get; set; }
+
+    public Teacher CreatedBy { get; set; } = null!;
+
+    public ICollection<AnnouncementFile> Attachments { get; set; } = [];
 
     public DateTime? DeletedAt { get; set; }
-
-    public virtual ICollection<AnnouncementFile> Attachments { get; set; } = [];
 }

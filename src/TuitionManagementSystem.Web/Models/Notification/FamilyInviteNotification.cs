@@ -1,9 +1,8 @@
 namespace TuitionManagementSystem.Web.Models.Notification;
 
-using System.ComponentModel.DataAnnotations.Schema;
-
 public class FamilyInviteNotification : Notification
 {
-    [ForeignKey(nameof(FamilyInvite) + "Id")]
+    public int FamilyInviteId { get; set; }
+
     public required FamilyInvite FamilyInvite { get; set; }
 }

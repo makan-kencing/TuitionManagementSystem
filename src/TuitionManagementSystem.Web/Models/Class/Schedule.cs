@@ -1,15 +1,13 @@
 namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 
 // https://stackoverflow.com/questions/1054201/icalendar-field-list-for-database-schema-based-on-icalendar-standard/1397019#1397019
 public class Schedule
 {
-    [Key]
-    public int Id { get; set; }
+    [Key] public int Id { get; set; }
 
     [StringLength(50)]
     public string? Summary { get; set; }
@@ -21,14 +19,15 @@ public class Schedule
 
     public required DateTime End { get; set; }
 
-    [ForeignKey(nameof(Course) + "Id")]
-    public required Course Course { get; set; }
+    public int CourseId { get; set; }
 
-    public virtual ICollection<ScheduleRecurrencePattern> RecurrencePatterns { get; set; } = [];
+    public Course Course { get; set; } = null!;
 
-    public virtual ICollection<DateTime> RecurrenceDates { get; set; } = [];
+    public ICollection<ScheduleRecurrencePattern> RecurrencePatterns { get; set; } = [];
 
-    public virtual ICollection<DateTime> ExceptionDates { get; set; } = [];
+    public ICollection<DateTime> RecurrenceDates { get; set; } = [];
+
+    public ICollection<DateTime> ExceptionDates { get; set; } = [];
 
     public CalendarEvent ToICalendarEvent()
     {
@@ -57,4 +56,3 @@ public static class ICalExtensions
     public static CalDateTime ToCalDateTime(this DateTime dateTime) => new(dateTime);
     public static WeekDay ToWeekDay(this DayOfWeek dayOfWeek) => new(dayOfWeek);
 }
-
