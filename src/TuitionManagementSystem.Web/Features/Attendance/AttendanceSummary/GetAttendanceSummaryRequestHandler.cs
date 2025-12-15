@@ -29,6 +29,10 @@ public sealed class GetAttendanceSummaryRequestHandler(
         //                 )
         //             }).ToList()
         //     }).FirstOrDefaultAsync(cancellationToken);
+        var studentId = await db.Students
+            .Where(s=>s.Account.Id==request.UserId)
+            .Select(s => s.Id)
+            .FirstOrDefaultAsync(cancellationToken);
 
         var courseSummary = await db.Database
             .SqlQuery<CourseQuery>
@@ -38,14 +42,14 @@ public sealed class GetAttendanceSummaryRequestHandler(
                        JOIN public."Courses" C on "Enrollments"."CourseId" = C."Id"
                        LEFT JOIN public."Sessions" S on C."Id" = S."CourseId"
                        LEFT JOIN public."Attendances" Att on S."Id" = Att."SessionId"
-              WHERE "Enrollments"."StudentId" = {request.StudentId}
+              WHERE "Enrollments"."StudentId" = {studentId}
               GROUP BY C."Id", C."Name"
               """)
             .Select(r => r.ToSummary)
             .ToListAsync(cancellationToken);
 
         var fullSummary = await db.Students
-            .Where(s => s.Id == request.StudentId)
+            .Where(s => s.Id == studentId)
             .Select(s => new GetAttendanceSummaryResponse
                 {
                     Student = new StudentInfo(s.Id, s.Account.Username), Courses = courseSummary

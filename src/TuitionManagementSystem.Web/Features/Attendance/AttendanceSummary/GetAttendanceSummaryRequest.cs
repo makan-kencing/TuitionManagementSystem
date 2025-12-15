@@ -3,5 +3,5 @@
 using Ardalis.Result;
 using MediatR;
 
-public record GetAttendanceSummaryRequest(int StudentId)
+public record GetAttendanceSummaryRequest(int UserId)
     : IRequest<Result<GetAttendanceSummaryResponse>>;
