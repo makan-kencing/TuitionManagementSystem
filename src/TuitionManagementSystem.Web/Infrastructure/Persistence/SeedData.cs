@@ -78,15 +78,25 @@ public static class SeedData
         }
 
         // CLASSROOMS
-        var classroomLocations = new[] { "Room A", "Room B", "Room C" };
+        var classroomData = new[]
+        {
+            new { Location = "Room A", MaxCapacity = 30 },
+            new { Location = "Room B", MaxCapacity = 25 },
+            new { Location = "Room C", MaxCapacity = 20 }
+        };
+
         var existingClassrooms = await db.Set<Classroom>()
-            .Where(c => classroomLocations.Contains(c.Location))
+            .Where(c => classroomData.Select(d => d.Location).Contains(c.Location))
             .Select(c => c.Location)
             .ToListAsync(cancellationToken);
 
-        var newClassrooms = classroomLocations
-            .Except(existingClassrooms)
-            .Select(l => new Classroom { Location = l })
+        var newClassrooms = classroomData
+            .Where(c => !existingClassrooms.Contains(c.Location))
+            .Select(c => new Classroom
+            {
+                Location = c.Location,
+                MaxCapacity = c.MaxCapacity
+            })
             .ToList();
 
         if (newClassrooms.Any())
