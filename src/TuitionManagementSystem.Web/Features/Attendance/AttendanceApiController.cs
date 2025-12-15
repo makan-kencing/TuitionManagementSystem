@@ -2,6 +2,7 @@
 
 namespace TuitionManagementSystem.Web.Features.Attendance;
 
+using Abstractions;
 using Ardalis.Result;
 using Ardalis.Result.AspNetCore;
 using AttendanceSummary;
@@ -10,7 +11,8 @@ using GenerateAttendanceCode;
 using MediatR;
 using TakeAttendanceCode;
 
-public class AttendanceApiController(IMediator mediator) : Controller
+
+public class AttendanceApiController(IMediator mediator) : ApiController
 {
     [HttpPost("generate")]
     public async Task<Result<GenerateAttendanceCodeResponse>> GenerateAttendanceCode(
@@ -30,9 +32,12 @@ public class AttendanceApiController(IMediator mediator) : Controller
         CancellationToken cancellationToken) =>
         await mediator.Send(new DeleteAttendanceRequest(attendanceId), cancellationToken);
 
-    [HttpGet("summary/{studentId}")]
+   /* [HttpGet("summary/{studentId}")]
     public async Task<Result<GetAttendanceSummaryResponse>> AttendanceSummary(
         [FromRoute] int studentId,
         CancellationToken cancellationToken) =>
         await mediator.Send(new GetAttendanceSummaryRequest(studentId), cancellationToken);
+        */
+
+
 }
