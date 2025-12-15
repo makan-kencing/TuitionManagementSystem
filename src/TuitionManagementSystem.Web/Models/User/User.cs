@@ -2,8 +2,10 @@ namespace TuitionManagementSystem.Web.Models.User;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using Notification;
 
+[Index(nameof(Account) + "Id", IsUnique = true)]
 public abstract class User
 {
     [Key]

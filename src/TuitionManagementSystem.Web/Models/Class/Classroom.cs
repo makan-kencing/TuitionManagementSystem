@@ -1,7 +1,9 @@
 namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
+[Index(nameof(Location), IsUnique = true)]
 public class Classroom
 {
     [Key]
