@@ -13,15 +13,7 @@ public sealed class GetAttendanceHistoryRequestHandler(ApplicationDbContext db)
         GetAttendanceHistoryRequest request,
         CancellationToken cancellationToken)
     {
-        var studentId = await db.Students
-            .Where(s => s.Account != null && s.Account.Id == request.UserId)
-            .Select(s => s.Id)
-            .FirstOrDefaultAsync(cancellationToken);
 
-        if (studentId == 0)
-        {
-            return Result.NotFound("Student not found");
-        }
 
         var courseName = await db.Courses
             .Where(c => c.Id == request.CourseId)
@@ -40,7 +32,7 @@ public sealed class GetAttendanceHistoryRequestHandler(ApplicationDbContext db)
                 SessionId = s.Id,
                 StartAt = s.StartAt,
                 EndAt = s.EndAt,
-                IsValid = s.Attendances.Any(a => a.Student.Id == studentId)
+                IsValid = s.Attendances.Any(a => a.Student.Id ==request.UserId)
             })
             .OrderBy(s => s.StartAt)
             .ToListAsync(cancellationToken);
