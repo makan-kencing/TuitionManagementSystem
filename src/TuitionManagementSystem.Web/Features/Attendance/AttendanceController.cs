@@ -7,6 +7,7 @@ namespace TuitionManagementSystem.Web.Features.Attendance;
 using Ardalis.Result;
 using AttendanceHistory;
 using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authorization;
 using Services.Auth.Extensions;
 using TakeAttendanceCode;
 
@@ -50,6 +51,13 @@ public class AttendanceController(IMediator mediator , ApplicationDbContext db) 
 
     [HttpGet]
     public IActionResult TakeAttendance()
+    {
+        return this.View();
+    }
+
+    [Authorize (Roles =  "Admin")]
+    [HttpGet]
+    public IActionResult GenerateAttendance()
     {
         return this.View();
     }
