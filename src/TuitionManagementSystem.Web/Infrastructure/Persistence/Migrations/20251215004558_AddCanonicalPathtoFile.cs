@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿#nullable disable
 
-#nullable disable
-
-namespace TuitionManagementSystem.Web.Migrations
+namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 {
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     /// <inheritdoc />
-    public partial class createDB : Migration
+    public partial class AddCanonicalPathtoFile : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
