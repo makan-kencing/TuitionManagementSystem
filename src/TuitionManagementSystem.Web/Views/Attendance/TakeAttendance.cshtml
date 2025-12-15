@@ -3,6 +3,16 @@
 }
 
 <div class="container">
+    <nav>
+        <h4>Take Attendance</h4>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a class="btn btn-primary" asp-controller="Attendance" asp-action="Summary">
+                Summary
+            </a>
+        </div>
+
+    </nav>
     <form id="take" asp-controller="AttendanceApi" asp-action="TakeAttendanceCode">
         <div class="mb-3 mt-3">
             <label for="code" class="form-label">AttendanceCode:</label>
@@ -14,6 +24,27 @@
     </form>
 </div>
 
+
+<div class="modal" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title"></h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                No Enter Code
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 @section Scripts
 {
@@ -31,11 +62,30 @@
                     contentType: false,
                     processData: false,
                     data: data,
-                    error: (xhr) => {
+                    success: function (response) {
+                        $("#myModal .modal-title").text("Attendance Success");
+                        $("#myModal .modal-body").html(`<div class="alert alert-success">Attendance recorded successfully</div>`);
+                        const modal = new bootstrap.Modal(document.getElementById("myModal"));
+                        modal.show();
                     },
-                    success: () => {
+                    error: function (xhr) {
+
+                        let message = "Attendance failed";
+
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            message = xhr.responseJSON.errors.join("<br>");
+                        }
+
+                        $("#myModal .modal-title").text("Attendance Failed");
+                        $("#myModal .modal-body").html(`<div class="alert alert-danger">${message}</div>
+            `);
+
+                        const modal = new bootstrap.Modal(document.getElementById("myModal"));
+                        modal.show();
                     }
                 });
         })
     </script>
+
+
 }
