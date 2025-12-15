@@ -62,7 +62,7 @@ public class SubjectPageController(IMediator mediator, ApplicationDbContext db) 
     {
         var subject = await mediator.Send(new GetSubjectById(id));
         if(subject == null) return NotFound();
-        var subjectEdit = new SubjectFormVm { id = subject.Id, Name = subject.Name, Description = subject.Description };
+        var subjectEdit = new SubjectFormVm { Id = subject.Id, Name = subject.Name, Description = subject.Description };
         return View("SubjectEdit", subjectEdit);
     }
 
@@ -72,12 +72,12 @@ public class SubjectPageController(IMediator mediator, ApplicationDbContext db) 
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, SubjectFormVm subject)
     {
-        if (id != subject.id) return this.BadRequest();
+        if (id != subject.Id) return this.BadRequest();
         if (!ModelState.IsValid) return this.View("SubjectEdit", subject);
 
-        var ok = await mediator.Send(new UpdateSubject(subject.id, subject.Name, subject.Description));
+        var ok = await mediator.Send(new UpdateSubject(subject.Id, subject.Name, subject.Description));
         if(!ok) return NotFound();
-        return RedirectToAction(nameof(GetSubject), new{id = subject.id});
+        return RedirectToAction(nameof(GetSubject), new{id = subject.Id});
     }
 
     // ARCHIVE (soft delete)
@@ -95,9 +95,9 @@ public class SubjectPageController(IMediator mediator, ApplicationDbContext db) 
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Restore(int id)
     {
-        var subj = await _db.Subjects.FirstOrDefaultAsync(s => s.Id == id);
-        if (subj is null) return NotFound();
-        subj.DeletedAt = null;
+        var subject = await _db.Subjects.FirstOrDefaultAsync(s => s.Id == id);
+        if (subject is null) return NotFound();
+        subject.DeletedAt = null;
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(GetSubject), new { id });
     }
