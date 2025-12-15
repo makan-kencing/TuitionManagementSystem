@@ -27,6 +27,7 @@ public class ViewEnrollmentHandler
                 StudentId = e.Student.Id,
                 CourseId = e.Course.Id,
                 CourseName = e.Course.Name,
+                ClassroomName = e.Course.PreferredClassroom.Location,
                 EnrolledAt = e.EnrolledAt,
             })
             .ToListAsync(cancellationToken);

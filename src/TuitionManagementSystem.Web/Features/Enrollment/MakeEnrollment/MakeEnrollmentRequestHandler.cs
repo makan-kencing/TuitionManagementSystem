@@ -14,32 +14,36 @@ public class MakeEnrollmentRequestHandler(ApplicationDbContext db)
         CancellationToken cancellationToken)
     {
         var student = await db.Students
-            .Where(s => s.Id == request.StudentId)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(s => s.Id == request.StudentId, cancellationToken);
 
         if (student == null)
-        {
             return Result.NotFound("Student not found");
-        }
 
         var course = await db.Courses
-            .Where(c => c.Id == request.CourseId)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Include(c => c.PreferredClassroom)
+            .FirstOrDefaultAsync(c => c.Id == request.CourseId, cancellationToken);
 
         if (course == null)
-        {
             return Result.NotFound("Course not found");
-        }
 
-        var isEnrolled = await db.Enrollments
-            .AnyAsync(e =>
-                    e.Student.Id == student.Id &&
-                    e.Course.Id == course.Id,
-                cancellationToken);
+        var isEnrolled = await db.Enrollments.AnyAsync(e =>
+            e.Student.Id == student.Id &&
+            e.Course.Id == course.Id,
+            cancellationToken);
 
         if (isEnrolled)
-        {
             return Result.Conflict("Student is already enrolled in this course");
+
+        var currentEnrollmentCount = await db.Enrollments.CountAsync(e =>
+            e.Course.Id == course.Id,
+            cancellationToken);
+
+        var maxCapacity = course.PreferredClassroom.MaxCapacity;
+
+        if (currentEnrollmentCount >= maxCapacity)
+        {
+            return Result.Conflict(
+                $"Classroom capacity reached ({currentEnrollmentCount}/{maxCapacity})");
         }
 
         var enrollment = new Enrollment
@@ -52,7 +56,7 @@ public class MakeEnrollmentRequestHandler(ApplicationDbContext db)
         await db.Enrollments.AddAsync(enrollment, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
-        return Result<MakeEnrollmentResponse>.Success(new MakeEnrollmentResponse
+        return Result.Success(new MakeEnrollmentResponse
         {
             EnrollmentId = enrollment.Id,
             StudentId = student.Id,
@@ -61,3 +65,4 @@ public class MakeEnrollmentRequestHandler(ApplicationDbContext db)
         });
     }
 }
+

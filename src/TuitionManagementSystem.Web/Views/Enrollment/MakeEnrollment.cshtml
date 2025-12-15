@@ -1,8 +1,7 @@
 @model TuitionManagementSystem.Web.Models.ViewModels.EnrollmentViewModel
+@using TuitionManagementSystem.Web.Services.Auth.Extensions
 
 <form id="enrollForm">
-    <input type="hidden" id="studentId" value="16" />
-
     @* <div class="mb-3"> *@
     @*     <label for="subjectSelect" class="form-label">Subject</label> *@
     @*     <select id="subjectSelect" class="form-select"> *@
@@ -31,7 +30,7 @@
 <script>
 $(document).ready(function() {
 
-    const studentId = parseInt($("#studentId").val());
+    const studentId = @User.GetUserId();
 
     // async function loadSubjects() {
     //     const response = await fetch("/subjects");
