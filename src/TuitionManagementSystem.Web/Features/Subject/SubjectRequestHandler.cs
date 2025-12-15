@@ -10,13 +10,14 @@ public class SubjectRequestHandler(ApplicationDbContext db) :
     IRequestHandler<CreateSubject, SubjectResponse>,
     IRequestHandler<UpdateSubject, bool>,
     IRequestHandler<ArchiveSubject, bool>,
+    IRequestHandler<RestoreSubject, bool>,
     IRequestHandler<GetSubjects, IEnumerable<SubjectResponse>>,
     IRequestHandler<GetSubjectById, SubjectResponse?>
 {
     public async Task<SubjectResponse> Handle(CreateSubject request, CancellationToken ct)
     {
         var entity = new Subject { Name = request.Name, Description = request.Description };
-        db.Subjects.Add(entity);
+        await db.Subjects.AddAsync(entity, ct);
         await db.SaveChangesAsync(ct);
         return SubjectResponse.FromEntity(entity);
     }
@@ -51,25 +52,21 @@ public class SubjectRequestHandler(ApplicationDbContext db) :
 
     public async Task<IEnumerable<SubjectResponse>> Handle(GetSubjects request, CancellationToken ct)
     {
-        // 1. Fetch from DB
         var entities = await db.Subjects
             .AsNoTracking()
-            .Where(s => s.DeletedAt == null)
+            // .Where(s => s.DeletedAt == null)
             .ToListAsync(ct);
 
-        // 2. Convert in Memory
         return entities.Select(SubjectResponse.FromEntity);
     }
 
     public async Task<SubjectResponse?> Handle(GetSubjectById request, CancellationToken ct)
     {
-        // 1. Fetch from DB
         var entity = await db.Subjects
             .AsNoTracking()
             .Where(s => s.Id == request.Id)
             .FirstOrDefaultAsync(ct);
-
-        // 2. Convert in Memory
+        
         return entity is null ? null : SubjectResponse.FromEntity(entity);
     }
 }

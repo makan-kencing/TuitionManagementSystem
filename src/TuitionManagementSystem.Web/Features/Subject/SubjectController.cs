@@ -45,11 +45,13 @@ public class SubjectController(IMediator mediator, ApplicationDbContext db) : Co
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Name == subject.Name && s.DeletedAt != null);
 
+
         if (archived != null)
         {
             return View("SubjectArchive", archived);
         }
         if (!ModelState.IsValid) return View("SubjectCreate", subject);
+
         var created = await mediator.Send(new CreateSubject(subject.Name, subject.Description));
         return RedirectToAction(nameof(GetSubject), new{id = created.Id});
     }
@@ -62,6 +64,7 @@ public class SubjectController(IMediator mediator, ApplicationDbContext db) : Co
     {
         var subject = await mediator.Send(new GetSubjectById(id));
         if(subject == null) return NotFound();
+
         var subjectEdit = new SubjectFormVm { Id = subject.Id, Name = subject.Name, Description = subject.Description };
         return View("SubjectEdit", subjectEdit);
     }
