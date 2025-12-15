@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.User;
+using Services.Auth.Constants;
 using Services.Auth.Extensions;
 
 public class HomeController(IMediator mediator) : Controller
@@ -12,6 +13,11 @@ public class HomeController(IMediator mediator) : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
+        if (User.IsInRole(nameof(AccessRoles.Administrator)))
+        {
+            return RedirectToAction("Index", "Admin");
+        }
+
         switch (this.User.GetUserType())
         {
             case nameof(Student):
@@ -24,6 +30,8 @@ public class HomeController(IMediator mediator) : Controller
                 return this.View("GuestDashboard");
         }
     }
+
+
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() =>
