@@ -8,6 +8,7 @@ using Ardalis.Result;
 using AttendanceHistory;
 using Infrastructure.Persistence;
 using Services.Auth.Extensions;
+using TakeAttendanceCode;
 
 public class AttendanceController(IMediator mediator , ApplicationDbContext db) : Controller
 {
@@ -45,6 +46,12 @@ public class AttendanceController(IMediator mediator , ApplicationDbContext db) 
         }
 
         return this.View(result.Value);
+    }
+
+    [HttpGet]
+    public IActionResult TakeAttendance()
+    {
+        return this.View();
     }
 
 

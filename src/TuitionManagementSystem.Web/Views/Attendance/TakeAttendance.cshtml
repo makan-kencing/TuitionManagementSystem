@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Take Attendance";
+}
+
+<div class="container">
+    <form id="take" asp-controller="AttendanceApi" asp-action="TakeAttendanceCode">
+        <div class="mb-3 mt-3">
+            <label for="code" class="form-label">AttendanceCode:</label>
+            <input type="text" class="form-control" id="code" placeholder="Enter Attendance Code" name="code">
+        </div>
+        <button type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+            Take Attendance
+        </button>
+    </form>
+</div>
+
+
+@section Scripts
+{
+    <script>
+        $("#take").submit((e) => {
+            e.preventDefault();
+            console.log(e);
+
+            const data = new FormData(e.target);
+
+            $.ajax(
+                e.target.action,
+                {
+                    method: e.target.method,
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    error: (xhr) => {
+                    },
+                    success: () => {
+                    }
+                });
+        })
+    </script>
+}
