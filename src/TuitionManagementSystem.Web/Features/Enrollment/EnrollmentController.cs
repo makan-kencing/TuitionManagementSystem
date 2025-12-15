@@ -22,15 +22,10 @@ public class EnrollmentController : Controller
         _mediator = mediator;
     }
 
-    [HttpGet("make")]
-    [AllowAnonymous]
-    public IActionResult MakeEnrollment()
-    {
-        return View();
-    }
+    [HttpGet]
+    public IActionResult MakeEnrollment() => this.View();
 
     [HttpPost("make")]
-    [AllowAnonymous]
     public async Task<IActionResult> MakeEnrollment(
         [FromBody] EnrollmentViewModel model,
         CancellationToken cancellationToken)
@@ -55,7 +50,6 @@ public class EnrollmentController : Controller
     }
 
     [HttpGet("view/{id}")]
-    [AllowAnonymous]
     public async Task<IActionResult> ViewEnrollment(int id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
@@ -74,7 +68,6 @@ public class EnrollmentController : Controller
 
 
     [HttpPost("cancel")]
-    [AllowAnonymous]
     public async Task<IActionResult> CancelEnrollment([FromBody] EnrollmentViewModel model, CancellationToken cancellationToken)
     {
         if (!model.EnrollmentId.HasValue)
