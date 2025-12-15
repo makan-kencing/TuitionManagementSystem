@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Models.Notification;
+using Services;
 using Services.File;
 using Services.Payment;
 
@@ -123,6 +124,8 @@ public class Startup(IConfiguration configuration)
 
         services.AddScoped<UserCookieAuthenticationEvents>();
         services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+        services.AddScoped<IInvoiceService, InvoiceService>();
+
 
         services.AddTransient<IClaimsTransformation, AccountClaimsTransformer>();
     }
