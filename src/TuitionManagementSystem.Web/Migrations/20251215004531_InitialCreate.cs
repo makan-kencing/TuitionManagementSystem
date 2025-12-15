@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
+namespace TuitionManagementSystem.Web.Migrations
 {
     /// <inheritdoc />
-    public partial class AddCanonicalPathToFile : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

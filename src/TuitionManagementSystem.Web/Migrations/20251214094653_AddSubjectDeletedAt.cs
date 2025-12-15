@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
+namespace TuitionManagementSystem.Web.Migrations
 {
     /// <inheritdoc />
-    public partial class MakeSubjectSoftDeletable : Migration
+    public partial class AddSubjectDeletedAt : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
