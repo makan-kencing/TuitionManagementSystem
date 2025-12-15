@@ -84,6 +84,14 @@ public class Startup(IConfiguration configuration)
             .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
             .AddDataAnnotationsLocalization();
 
+        services.AddDistributedMemoryCache();
+        services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromMinutes(30); // session timeout
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+        });
+
         services
             .AddSignalR();
 
@@ -147,7 +155,7 @@ public class Startup(IConfiguration configuration)
                 FileProvider = fileService.FileProvider,
                 RequestPath = fileService.MappedPath
             })
-            // .UseSession()
+            .UseSession()
             .UseAntiforgery()
             .UseResponseCompression()
             .UseResponseCaching()
