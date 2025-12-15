@@ -6,9 +6,9 @@ using AcceptInvite;
 using Ardalis.Result;
 using CheckInvite;
 using DeclineInvite;
+using GetChild;
+using GetFamily;
 using MediatR;
-using ViewChild;
-using ViewFamily;
 
 public class FamilyController(IMediator mediator) : Controller
 {
@@ -21,17 +21,22 @@ public class FamilyController(IMediator mediator) : Controller
             return this.View("Accept", new CheckInviteViewModel { Invite = invite.Value });
         }
 
-        var family = await mediator.Send(new ViewFamilyQuery());
+        var family = await mediator.Send(new GetFamilyQuery());
+        if (family.IsNotFound())
+        {
+            return this.View("NoFamilyFound");
+        }
+
         return this.View(new ViewFamilyViewModel
         {
-            Family = family.IsSuccess ? family.Value : null
+            Family = family.Value
         });
     }
 
     [HttpGet]
     public async Task<IActionResult> Child(int id)
     {
-        var result = await mediator.Send(new ViewChildQuery(id));
+        var result = await mediator.Send(new GetChildQuery(id));
         if (result.IsNotFound())
         {
             return this.NotFound();

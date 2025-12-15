@@ -9,7 +9,7 @@ using Models.Class;
 public class SubjectRequestHandler(ApplicationDbContext db) :
     IRequestHandler<CreateSubject, SubjectResponse>,
     IRequestHandler<UpdateSubject, bool>,
-    IRequestHandler<DeleteSubject, bool>,
+    IRequestHandler<ArchiveSubject, bool>,
     IRequestHandler<GetSubjects, IEnumerable<SubjectResponse>>,
     IRequestHandler<GetSubjectById, SubjectResponse?>
 {
@@ -31,7 +31,7 @@ public class SubjectRequestHandler(ApplicationDbContext db) :
         return true;
     }
 
-    public async Task<bool> Handle(DeleteSubject request, CancellationToken ct)
+    public async Task<bool> Handle(ArchiveSubject request, CancellationToken ct)
     {
         var entity = await db.Subjects.FirstOrDefaultAsync(x => x.Id == request.Id, ct);
         if (entity is null) return false;

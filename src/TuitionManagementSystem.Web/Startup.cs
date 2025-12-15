@@ -69,10 +69,16 @@ public class Startup(IConfiguration configuration)
         services
             .AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(this.connectionString)
-                    .UseSeeding((context, _)
-                        => SeedData.InitializeAsync(context).GetAwaiter().GetResult())
-                    .UseAsyncSeeding(async (context, _, cancellationToken)
-                        => await SeedData.InitializeAsync(context, cancellationToken)))
+                    .UseSeeding((context, _) =>
+                    {
+                        var seed = new SeedData(context);
+                        seed.InitializeAsync().GetAwaiter().GetResult();
+                    })
+                    .UseAsyncSeeding(async (context, _, cancellationToken) =>
+                    {
+                        var seed = new SeedData(context);
+                        await seed.InitializeAsync(cancellationToken);
+                    }))
             .AddHttpContextAccessor()
             .AddProblemDetails()
             .AddSwaggerGen()
@@ -152,8 +158,7 @@ public class Startup(IConfiguration configuration)
             .UseAuthorization()
             .UseStaticFiles(new StaticFileOptions
             {
-                FileProvider = fileService.FileProvider,
-                RequestPath = fileService.MappedPath
+                FileProvider = fileService.FileProvider, RequestPath = fileService.MappedPath
             })
             .UseSession()
             .UseAntiforgery()

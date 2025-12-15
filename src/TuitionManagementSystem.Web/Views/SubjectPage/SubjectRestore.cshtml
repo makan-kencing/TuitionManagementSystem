@@ -1,0 +1,12 @@
+@model TuitionManagementSystem.Web.Models.Class.Subject
+@{
+    ViewData["Title"] = "Subject Restore";
+}
+<h2>Subject Archived</h2>
+<p>The subject "@Model.Name" exists but is archived. Do you want to restore it?</p>
+<form asp-action="Restore" asp-route-id="@Model.Id" method="post" class="d-inline">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-warning">Restore</button>
+</form>
+<a asp-action="Index" class="btn btn-secondary">Cancel</a>
+

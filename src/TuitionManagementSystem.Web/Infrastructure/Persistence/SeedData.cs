@@ -1,179 +1,160 @@
 namespace TuitionManagementSystem.Web.Infrastructure.Persistence;
 
 using System.Globalization;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Models.Class;
 using Models.User;
 using Services.Auth.Constants;
 using Microsoft.AspNetCore.Identity;
 
-public static class SeedData
+public class SeedData
 {
-    public static async Task InitializeAsync(
-        DbContext db,
-        CancellationToken cancellationToken = default)
+    private Random random = new(1);
+
+    private readonly List<Subject> subjects;
+    private readonly List<Classroom> classrooms;
+    private readonly List<Teacher> teachers;
+    private readonly List<Student> students;
+    private readonly List<Parent> parents;
+    private readonly List<Course> courses;
+    private readonly List<Enrollment> enrollments;
+
+    private IEnumerable<User> Users => this.teachers.Cast<User>()
+        .Concat(this.students)
+        .Concat(this.parents);
+
+    private const string DefaultPassword = "123456";
+    private readonly PasswordHasher<object> passwordHasher = new();
+    private string HashedDefaultPassword => this.passwordHasher.HashPassword(null!, DefaultPassword);
+
+    private readonly DbContext db;
+
+    public SeedData(DbContext db)
     {
-        var random = new Random(12345);
-        var passwordHasher = new PasswordHasher<Account>();
-        var plainPassword = "123456";
+        this.db = db;
 
-        // // ATTENDANCE CODES
-        // if (!await db.Set<AttendanceCode>().AnyAsync(cancellationToken))
-        // {
-        //     var codes = Enumerable.Range(0, 1_000_000)
-        //         .OrderBy(_ => random.NextDouble())
-        //         .Select((v, index) => new AttendanceCode
-        //         {
-        //             Id = index + 1,
-        //             Code = v.ToString("D6", CultureInfo.InvariantCulture)
-        //         });
-        //
-        //     await db.Set<AttendanceCode>().AddRangeAsync(codes, cancellationToken);
-        //     await db.SaveChangesAsync(cancellationToken);
-        // }
+        this.subjects =
+        [
+            new Subject { Name = "Algebra" },
+            new Subject { Name = "Science" },
+            new Subject { Name = "Advanced English" }
+        ];
 
-        // STUDENTS + ACCOUNTS
-        var studentUsernames = Enumerable.Range(1, 5).Select(i => $"student{i}").ToList();
-        var existingAccounts = await db.Set<Account>()
-            .Where(a => studentUsernames.Contains(a.Username))
-            .Select(a => a.Username)
-            .ToListAsync(cancellationToken);
+        this.classrooms =
+        [
+            new Classroom { Location = "Room A", MaxCapacity = 30 },
+            new Classroom { Location = "Room B", MaxCapacity = 25 },
+            new Classroom { Location = "Room C", MaxCapacity = 20 }
+        ];
 
-        var newStudents = studentUsernames
-            .Except(existingAccounts)
-            .Select(u => new Student
+        this.courses =
+        [
+            new Course { Name = "Basic Algebra", Subject = this.subjects[0], PreferredClassroom = this.classrooms[0] },
+            new Course
+            {
+                Name = "General Science", Subject = this.subjects[1], PreferredClassroom = this.classrooms[1]
+            },
+            new Course { Name = "English Grammar", Subject = this.subjects[2], PreferredClassroom = this.classrooms[2] }
+        ];
+
+        this.teachers = Enumerable.Range(1, 3)
+            .Select(i => new Teacher
             {
                 Account = new Account
                 {
-                    Username = u,
-                    HashedPassword = passwordHasher.HashPassword(null, plainPassword),
-                    Email = $"{u}@example.com",
+                    Username = $"Admin Teacher {i}",
+                    HashedPassword = this.HashedDefaultPassword,
+                    Email = $"admin{i}@example.com",
+                    AccessRole = AccessRoles.Administrator
+                }
+            }).Concat(Enumerable.Range(1, 6)
+                .Select(i => new Teacher
+                {
+                    Account = new Account
+                    {
+                        Username = $"Teacher {i}",
+                        HashedPassword = this.HashedDefaultPassword,
+                        Email = $"teacher{i}@example.com",
+                        AccessRole = AccessRoles.User
+                    }
+                }))
+            .ToList();
+
+        this.students = Enumerable.Range(1, 20)
+            .Select(i => new Student
+            {
+                Account = new Account
+                {
+                    Username = $"Student {i}",
+                    HashedPassword = this.HashedDefaultPassword,
+                    Email = $"student{i}@example.com",
                     AccessRole = AccessRoles.User
                 }
-            })
+            }).ToList();
+
+        this.parents = Enumerable.Range(1, 8)
+            .Select(i => new Parent
+            {
+                Account = new Account
+                {
+                    Username = $"Parent {i}",
+                    HashedPassword = this.HashedDefaultPassword,
+                    Email = $"parent{i}@example.com",
+                    AccessRole = AccessRoles.User
+                }
+            }).ToList();
+
+        this.enrollments = this.students
+            .Select(s => this.courses.OrderBy(_ => this.random.Next())
+                    .Take(this.random.Next(this.courses.Count))
+                    .Select(c => new Enrollment
+                    {
+                        Student = s,
+                        Course = c,
+                        EnrolledAt = DateTime.UtcNow.AddDays(-this.random.Next(1, 30))
+                    })
+            )
+            .SelectMany(i => i)
             .ToList();
+    }
 
-        if (newStudents.Any())
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        await this.SeedAttendanceCodes(cancellationToken);
+        await this.Seed(this.subjects, cancellationToken);
+        await this.Seed(this.classrooms, cancellationToken);
+        await this.Seed(this.courses, cancellationToken);
+        await this.Seed(this.Users, cancellationToken);
+        await this.Seed(this.enrollments, cancellationToken);
+    }
+
+    private async Task Seed<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
+    {
+        this.random = new Random(1);
+
+        if (!await this.db.Set<TEntity>().AnyAsync(cancellationToken))
         {
-            await db.Set<Student>().AddRangeAsync(newStudents, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
-        }
-
-        // SUBJECTS
-        var subjectNames = new[] { "Mathematics", "Science", "English" };
-        var existingSubjects = await db.Set<Subject>()
-            .Where(s => subjectNames.Contains(s.Name))
-            .Select(s => s.Name)
-            .ToListAsync(cancellationToken);
-
-        var newSubjects = subjectNames
-            .Except(existingSubjects)
-            .Select(n => new Subject { Name = n })
-            .ToList();
-
-        if (newSubjects.Any())
-        {
-            await db.Set<Subject>().AddRangeAsync(newSubjects, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
-        }
-
-        // CLASSROOMS
-        var classroomData = new[]
-        {
-            new { Location = "Room A", MaxCapacity = 30 },
-            new { Location = "Room B", MaxCapacity = 25 },
-            new { Location = "Room C", MaxCapacity = 20 }
-        };
-
-        var existingClassrooms = await db.Set<Classroom>()
-            .Where(c => classroomData.Select(d => d.Location).Contains(c.Location))
-            .Select(c => c.Location)
-            .ToListAsync(cancellationToken);
-
-        var newClassrooms = classroomData
-            .Where(c => !existingClassrooms.Contains(c.Location))
-            .Select(c => new Classroom
-            {
-                Location = c.Location,
-                MaxCapacity = c.MaxCapacity
-            })
-            .ToList();
-
-        if (newClassrooms.Any())
-        {
-            await db.Set<Classroom>().AddRangeAsync(newClassrooms, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
-        }
-
-        // COURSES
-        var subjects = await db.Set<Subject>().ToListAsync(cancellationToken);
-        var classrooms = await db.Set<Classroom>().ToListAsync(cancellationToken);
-
-        var courseData = new[]
-        {
-            new
-            {
-                Name = "Basic Algebra",
-                Subject = subjects[0],
-                Classroom = classrooms[0],
-                Price = 300.00m
-            },
-            new
-            {
-                Name = "General Science",
-                Subject = subjects[1],
-                Classroom = classrooms[1],
-                Price = 350.00m
-            },
-            new
-            {
-                Name = "English Grammar",
-                Subject = subjects[2],
-                Classroom = classrooms[2],
-                Price = 280.00m
-            }
-        };
-
-        var existingCourses = await db.Set<Course>()
-            .Where(c => courseData.Select(d => d.Name).Contains(c.Name))
-            .Select(c => c.Name)
-            .ToListAsync(cancellationToken);
-
-        var newCourses = courseData
-            .Where(c => !existingCourses.Contains(c.Name))
-            .Select(c => new Course
-            {
-                Name = c.Name,
-                Subject = c.Subject,
-                PreferredClassroom = c.Classroom,
-                Price = c.Price
-            })
-            .ToList();
-
-        if (newCourses.Any())
-        {
-            await db.Set<Course>().AddRangeAsync(newCourses, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
-        }
-
-        // ENROLLMENTS
-        var studentsList = await db.Set<Student>().ToListAsync(cancellationToken);
-        var coursesList = await db.Set<Course>().ToListAsync(cancellationToken);
-
-        var newEnrollments = studentsList
-            .Where(s => !db.Set<Enrollment>().Any(e => e.Student.Id == s.Id))
-            .Select(s => new Enrollment
-            {
-                Student = s,
-                Course = coursesList[random.Next(coursesList.Count)],
-                EnrolledAt = DateTime.UtcNow.AddDays(-random.Next(1, 30))
-            })
-            .ToList();
-
-        if (newEnrollments.Any())
-        {
-            await db.Set<Enrollment>().AddRangeAsync(newEnrollments, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
+            await this.db.Set<TEntity>().AddRangeAsync(entities, cancellationToken);
+            await this.db.SaveChangesAsync(cancellationToken);
         }
     }
+
+    private async Task BulkSeed<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
+    {
+        this.random = new Random(1);
+
+        if (!await this.db.Set<TEntity>().AnyAsync(cancellationToken))
+        {
+            await this.db.BulkInsertAsync(entities, cancellationToken: cancellationToken);
+        }
+    }
+
+    private async Task SeedAttendanceCodes(CancellationToken cancellationToken = default) =>
+        await this.BulkSeed(Enumerable.Range(0, 1_000_000)
+            .OrderBy(_ => this.random.NextDouble())
+            .Select((v, index) => new AttendanceCode
+            {
+                Id = index + 1, Code = v.ToString("D6", CultureInfo.InvariantCulture)
+            }), cancellationToken);
 }

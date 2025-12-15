@@ -2,7 +2,9 @@ namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
+[Index(nameof(Name), IsUnique = true)]
 public class Course
 {
     [Key]
