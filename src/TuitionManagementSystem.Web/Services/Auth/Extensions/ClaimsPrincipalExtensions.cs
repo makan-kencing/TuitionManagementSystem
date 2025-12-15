@@ -66,6 +66,9 @@ public static class ClaimsPrincipalExtensions
 
     public static string? GetProfileImageUri(this ClaimsPrincipal user) =>
         user.FindFirstValue(ClaimTypes.Uri);
+
+    public static string? GetDisplayName(this ClaimsPrincipal user) =>
+        user.FindFirstValue(InternalClaimTypes.DisplayName);
 }
 
 

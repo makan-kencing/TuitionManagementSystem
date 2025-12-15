@@ -81,6 +81,7 @@
                             @if (User.GetProfileImageUri() != null)
                             {
                                 <img src="@User.GetProfileImageUri()"
+                                     alt=""
                                      class="rounded-circle"
                                      width="30"
                                      height="30"/>
@@ -89,7 +90,7 @@
                             {
                                 <i class="fa-solid fa-user"></i>
                             }
-                            <span class="ms-2">@User.GetUsername()</span>
+                            <span class="ms-2">@User.GetDisplayName()</span>
                         </a>
 
                         <ul class="dropdown-menu dropdown-menu-end">
