@@ -81,8 +81,12 @@
                                    asp-action="Index">Enrollments</a>
                             </li>
                             <li>
+                                <a class="dropdown-item" asp-controller="Attendance" asp-action="Index">Attendance</a>
+                            </li>
+                            <li>
                                 <a class="dropdown-item" asp-controller="Family" asp-action="Index">Family</a>
                             </li>
+
                             @if (User.IsInRole(nameof(AccessRoles.Administrator)))
                             {
                                 <li>
