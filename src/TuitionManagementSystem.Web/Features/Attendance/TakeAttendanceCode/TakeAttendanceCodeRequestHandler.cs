@@ -18,36 +18,45 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db, IHttpCont
             .Where(s => s.Code.Code == request.Code)
             .OrderByDescending(s => s.CodeGeneratedAt)
             .FirstOrDefaultAsync(cancellationToken);
-        var accountId = httpContextAccessor.HttpContext!.User.GetUserId();
-        var student = await db.Students
-            .Where(s => s.Account.Id == accountId)
-            .FirstOrDefaultAsync(cancellationToken);
-        var isEnroll = await db.Enrollments
-            .Where(e => e.Student.Id == student.Id)
-            .Where(e => e.Course.Id == session.Course.Id)
-            .AnyAsync(cancellationToken);
-        var existingAttendance = await db.Attendances
-            .AnyAsync(a => a.Student.Id == student.Id
-                           && a.Session.Id == session.Id,
-                cancellationToken);
         if (session == null)
         {
-            return Result.NotFound("Attendance code not found");
+            return Result.NotFound("Session not found");
         }
 
-        if (!this.CheckWithinTheTime(session))
+        var userId = httpContextAccessor.HttpContext!.User.GetUserId();
+
+        var student = await db.Students
+            .Where(s => s.Id == userId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (student == null)
         {
-            return Result.Invalid();
+            return Result.NotFound("Student not found");
         }
+
+        var isEnroll = await db.Enrollments
+            .Where(e => e.Student.Id == student.Id)
+            .Where(e => e.Course.Id == session.CourseId)
+            .AnyAsync(cancellationToken);
 
         if (isEnroll)
         {
             return Result.Invalid();
         }
 
+        var existingAttendance = await db.Attendances
+            .AnyAsync(a => a.Student.Id == student.Id
+                           && a.Session.Id == session.Id,
+                cancellationToken);
+
         if (!existingAttendance)
         {
             return Result.Conflict("Attendance is already taken");
+        }
+
+        if (!this.CheckWithinTheTime(session))
+        {
+            return Result.Invalid();
         }
 
 
