@@ -24,6 +24,10 @@ public class AttendanceController(IMediator mediator) : Controller
             return this.NotFound();
         }
 
-        return this.View(result.Value);
+        return this.View("AttendanceSummary",result.Value);
     }
+
+
 }
+
+
