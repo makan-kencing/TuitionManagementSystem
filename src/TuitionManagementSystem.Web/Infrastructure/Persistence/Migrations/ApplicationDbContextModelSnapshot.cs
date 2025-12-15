@@ -217,6 +217,9 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("MaxCapacity")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.ToTable("Classrooms");
