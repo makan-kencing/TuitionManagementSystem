@@ -6,18 +6,16 @@ using File = System.IO.File;
 
 public class PhysicalFileService : IFileService
 {
-    public PathString MappedPath { get; } = "/uploads";
+    public string MappedPath { get; } = "/uploads";
 
-    public PathString PhysicalPath { get; }
+    public string PhysicalPath { get; }
 
     public IFileProvider FileProvider { get; }
 
     public PhysicalFileService(IWebHostEnvironment env)
     {
-        var physicalPath = Path.Combine(env.ContentRootPath, "assets", "uploads");
-        this.PhysicalPath = new PathString("/" + physicalPath.Replace("\\", "/"));
-
-        this.FileProvider = new PhysicalFileProvider(physicalPath);
+        this.PhysicalPath = Path.Combine(env.ContentRootPath, "assets", "uploads");
+        this.FileProvider = new PhysicalFileProvider(this.PhysicalPath);
     }
 
     public async Task<SavedFile> UploadFileAsync(IFormFile formFile)
@@ -39,7 +37,7 @@ public class PhysicalFileService : IFileService
             canonicalPath);
     }
 
-    public Task DeleteFileAsync(PathString canonicalPath)
+    public Task DeleteFileAsync(string canonicalPath)
     {
         File.Delete(canonicalPath);
         return Task.CompletedTask;
