@@ -17,50 +17,80 @@ else
                 <th>Course</th>
                 <th>Classroom</th>
                 <th>Enrolled At</th>
+                <th>Days Since</th>
+                <th>Status</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
         @foreach (var enrollment in Model)
         {
+            var daysSinceEnrollment = (DateTime.UtcNow - enrollment.EnrolledAt).Days;
+            var isActive = enrollment.Status == TuitionManagementSystem.Web.Models.Class.Enrollment.EnrollmentStatus.Active;
+            var showCancelButton = daysSinceEnrollment <= 14 && isActive;
+            var showWithdrawButton = daysSinceEnrollment > 14 && isActive;
+
             <tr data-enrollment-id="@enrollment.EnrollmentId">
                 <td>@enrollment.EnrollmentId</td>
                 <td>@enrollment.CourseName</td>
                 <td>@enrollment.ClassroomName</td>
                 <td>@enrollment.EnrolledAt.ToString("dd MMM yyyy")</td>
+                <td>@daysSinceEnrollment days</td>
+                <td>@enrollment.Status</td>
                 <td>
-                    <button class="btn btn-danger btn-sm cancelEnrollmentBtn">
-                        Cancel
-                    </button>
+                    @if (showCancelButton)
+                    {
+                        <button class="btn btn-warning btn-sm markEnrollmentBtn" data-action="Cancelled">
+                            Cancel
+                        </button>
+                    }
+                    else if (showWithdrawButton)
+                    {
+                        <button class="btn btn-danger btn-sm markEnrollmentBtn" data-action="Withdrawn">
+                            Withdraw
+                        </button>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No action</span>
+                    }
                 </td>
             </tr>
         }
         </tbody>
     </table>
 }
-    <script>
-$(document).on("click", ".cancelEnrollmentBtn", async function() {
+
+<script>
+$(document).on("click", ".markEnrollmentBtn", async function() {
     const row = $(this).closest("tr");
     const enrollmentId = row.data("enrollment-id");
+    const action = $(this).data("action");
+
+    const actionText = action.toLowerCase();
+    const actionTitle = action === "Cancelled" ? "Cancel" : "Withdraw";
 
     const confirmed = await Swal.fire({
-        title: "Are you sure?",
-        text: "This will cancel the enrollment.",
+        title: `Are you sure?`,
+        text: `This will ${actionText} the enrollment. ${action === "Withdrawn" ? "Note: Withdrawal is only allowed after 2 weeks of enrollment." : ""}`,
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#d33",
+        confirmButtonColor: action === "Cancelled" ? "#f39c12" : "#d33",
         cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, cancel it!"
+        confirmButtonText: `Yes, ${actionText} it!`
     });
 
     if (confirmed.isConfirmed) {
         try {
-            const response = await fetch("/enrollment/cancel", {
+            const response = await fetch("/enrollment/mark", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ enrollmentId })
+                body: JSON.stringify({
+                    enrollmentId: enrollmentId,
+                    status: action
+                })
             });
 
             const data = await response.json();
@@ -68,17 +98,16 @@ $(document).on("click", ".cancelEnrollmentBtn", async function() {
             if (response.ok) {
                 Swal.fire({
                     icon: "success",
-                    title: "Cancelled",
+                    title: `${actionTitle}ed`,
                     text: data.message
+                }).then(() => {
+                    location.reload();
                 });
-
-                // remove row from table
-                row.remove();
             } else {
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: data.message || data.errors.join(", ")
+                    text: data.message || (data.errors ? data.errors.join(", ") : "Unknown error")
                 });
             }
         } catch (err) {
@@ -89,5 +118,5 @@ $(document).on("click", ".cancelEnrollmentBtn", async function() {
             });
         }
     }
-        });
+});
 </script>

@@ -9,6 +9,7 @@ using TuitionManagementSystem.Web.Features.Enrollment.CancelEnrollment;
 namespace TuitionManagementSystem.Web.Features.Enrollment;
 
 using Ardalis.Result.AspNetCore;
+using MarkEnrollment;
 using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
@@ -33,6 +34,7 @@ public class EnrollmentController : Controller
         if (!model.StudentId.HasValue || !model.CourseId.HasValue)
             return BadRequest(new { message = "Student and Course are required." });
 
+        // Send request to handler
         var result = await _mediator.Send(
             new MakeEnrollmentRequest(
                 model.StudentId.Value,
@@ -42,10 +44,19 @@ public class EnrollmentController : Controller
         if (!result.IsSuccess)
             return BadRequest(new { errors = result.Errors });
 
+        // Return structured response
+        var response = new EnrollmentViewModel
+        {
+            EnrollmentId = result.Value.EnrollmentId,
+            StudentId = result.Value.StudentId,
+            CourseId = result.Value.CourseId,
+            EnrolledAt = result.Value.EnrolledAt
+        };
+
         return Ok(new
         {
             message = "Enrollment created successfully",
-            enrollmentId = result.Value.EnrollmentId
+            enrollment = response
         });
     }
 
@@ -67,18 +78,31 @@ public class EnrollmentController : Controller
     }
 
 
-    [HttpPost("cancel")]
-    public async Task<IActionResult> CancelEnrollment([FromBody] EnrollmentViewModel model, CancellationToken cancellationToken)
+    [HttpPost("mark")]
+    public async Task<IActionResult> MarkEnrollment(
+        [FromBody] EnrollmentViewModel model,
+        CancellationToken cancellationToken)
     {
         if (!model.EnrollmentId.HasValue)
             return BadRequest(new { error = "EnrollmentId is required" });
 
-        var result = await _mediator.Send(new CancelEnrollmentRequest(model.EnrollmentId.Value), cancellationToken);
+        if (!model.Status.HasValue)
+            return BadRequest(new { error = "Status is required (Cancelled or Withdrawn)" });
+
+        var result = await _mediator.Send(
+            new MarkEnrollmentRequest
+            {
+                EnrollmentId = model.EnrollmentId.Value,
+                Status = model.Status.Value
+            },
+            cancellationToken);
 
         if (!result.IsSuccess)
             return BadRequest(new { errors = result.Errors });
 
-        return Ok(new { message = "Enrollment cancelled successfully" });
+        return Ok(new {
+            message = $"Enrollment {model.Status.Value.ToString().ToLower()} successfully"
+        });
     }
 }
 

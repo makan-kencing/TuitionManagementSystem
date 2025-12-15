@@ -5,64 +5,90 @@ using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Models.Class;
+using TuitionManagementSystem.Web.Features.Invoice.CreateInvoice;
 
-public class MakeEnrollmentRequestHandler(ApplicationDbContext db)
+public class MakeEnrollmentRequestHandler
     : IRequestHandler<MakeEnrollmentRequest, Result<MakeEnrollmentResponse>>
 {
+    private readonly ApplicationDbContext _db;
+    private readonly IMediator _mediator;
+
+    public MakeEnrollmentRequestHandler(
+        ApplicationDbContext db,
+        IMediator mediator)
+    {
+        _db = db;
+        _mediator = mediator;
+    }
+
     public async Task<Result<MakeEnrollmentResponse>> Handle(
         MakeEnrollmentRequest request,
         CancellationToken cancellationToken)
     {
-        var student = await db.Students
+
+        var student = await _db.Students
             .FirstOrDefaultAsync(s => s.Id == request.StudentId, cancellationToken);
 
         if (student == null)
             return Result.NotFound("Student not found");
 
-        var course = await db.Courses
+        var course = await _db.Courses
             .Include(c => c.PreferredClassroom)
             .FirstOrDefaultAsync(c => c.Id == request.CourseId, cancellationToken);
 
         if (course == null)
             return Result.NotFound("Course not found");
 
-        var isEnrolled = await db.Enrollments.AnyAsync(e =>
-            e.Student.Id == student.Id &&
-            e.Course.Id == course.Id,
+        var alreadyEnrolled = await _db.Enrollments.AnyAsync(e =>
+            e.Student.Id == request.StudentId &&
+            e.Course.Id == request.CourseId &&
+            e.Status == Enrollment.EnrollmentStatus.Active,
             cancellationToken);
 
-        if (isEnrolled)
-            return Result.Conflict("Student is already enrolled in this course");
+        if (alreadyEnrolled)
+            return Result.Conflict("Student is already actively enrolled in this course");
 
-        var currentEnrollmentCount = await db.Enrollments.CountAsync(e =>
-            e.Course.Id == course.Id,
+        var activeEnrollmentCount = await _db.Enrollments.CountAsync(e =>
+            e.Course.Id == request.CourseId &&
+            e.Status == Enrollment.EnrollmentStatus.Active,
             cancellationToken);
 
         var maxCapacity = course.PreferredClassroom.MaxCapacity;
 
-        if (currentEnrollmentCount >= maxCapacity)
+        if (activeEnrollmentCount >= maxCapacity)
         {
             return Result.Conflict(
-                $"Classroom capacity reached ({currentEnrollmentCount}/{maxCapacity})");
+                $"Classroom capacity reached ({activeEnrollmentCount}/{maxCapacity})");
         }
 
         var enrollment = new Enrollment
         {
-            Student = student,
-            Course = course,
+            Student = student!,
+            Course = course!,
+            Status = Enrollment.EnrollmentStatus.Active,
             EnrolledAt = DateTime.UtcNow
         };
 
-        await db.Enrollments.AddAsync(enrollment, cancellationToken);
-        await db.SaveChangesAsync(cancellationToken);
+        _db.Enrollments.Add(enrollment);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var invoiceResult = await _mediator.Send(
+            new CreateInvoiceRequest
+            {
+                StudentId = request.StudentId,
+                EnrollmentId = enrollment.Id
+            },
+            cancellationToken);
+
+        if (!invoiceResult.IsSuccess)
+            return Result.Error("Enrollment created but failed to generate invoice");
 
         return Result.Success(new MakeEnrollmentResponse
         {
             EnrollmentId = enrollment.Id,
-            StudentId = student.Id,
-            CourseId = course.Id,
+            StudentId = request.StudentId,
+            CourseId = request.CourseId,
             EnrolledAt = enrollment.EnrolledAt
         });
     }
 }
-

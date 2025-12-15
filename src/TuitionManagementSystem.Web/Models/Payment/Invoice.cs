@@ -2,6 +2,7 @@ namespace TuitionManagementSystem.Web.Models.Payment;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Class;
 using User;
 
 public class Invoice
@@ -16,6 +17,9 @@ public class Invoice
 
     [ForeignKey(nameof(Student) + "Id")]
     public required Student Student { get; set; }
+
+    [ForeignKey(nameof(Enrollment) + "Id")]
+    public required Enrollment Enrollment { get; set; }
 
     [ForeignKey(nameof(Payment) + "Id")]
     public Payment? Payment { get; set; }
