@@ -50,12 +50,9 @@ public class SeedData
 
         this.courses =
         [
-            new Course { Name = "Basic Algebra", Subject = this.subjects[0], PreferredClassroom = this.classrooms[0] },
-            new Course
-            {
-                Name = "General Science", Subject = this.subjects[1], PreferredClassroom = this.classrooms[1]
-            },
-            new Course { Name = "English Grammar", Subject = this.subjects[2], PreferredClassroom = this.classrooms[2] }
+            new Course { Name = "Basic Algebra", Subject = this.subjects[0], PreferredClassroom = this.classrooms[0], Price = 100.00m },
+            new Course { Name = "General Science", Subject = this.subjects[1], PreferredClassroom = this.classrooms[1], Price = 120.00m },
+            new Course { Name = "English Grammar", Subject = this.subjects[2], PreferredClassroom = this.classrooms[2], Price = 110.00m }
         ];
 
         this.teachers = Enumerable.Range(1, 3)
