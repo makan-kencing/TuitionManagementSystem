@@ -1,39 +1,29 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using TuitionManagementSystem.Web.Features.Attendance.AttendanceSummary;
 
 namespace TuitionManagementSystem.Web.Features.Attendance;
 
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
-using DeleteAttendance;
-using GenerateAttendanceCode;
-using MediatR;
-using TakeAttendanceCode;
+using Services.Auth.Extensions;
 
 public class AttendanceController(IMediator mediator) : Controller
 {
+    public async Task<IActionResult> Index(
+        CancellationToken cancellationToken)
+    {
+        var userId = this.User.GetUserId() ?? -1;
+        if (userId == -1)
+        {
+            return this.Unauthorized();
+        }
 
-    [HttpPost("generate")]
-    [TranslateResultToActionResult]
-    public async Task<Result<GenerateAttendanceCodeResponse>> GenerateAttendanceCode(
-        [FromForm] int sessionId,
-        CancellationToken cancellationToken) => await mediator.Send(
-        new GenerateAttendanceCodeRequest(
-            sessionId),
-        cancellationToken);
+        var result = await mediator.Send(new GetAttendanceSummaryRequest(userId!), cancellationToken);
+        if (result.IsNotFound())
+        {
+            return this.NotFound();
+        }
 
-    [HttpPost("take")]
-    [TranslateResultToActionResult]
-    public async Task<Result<TakeAttendanceCodeResponse>>TakeAttendanceCode(
-        [FromForm] string code,
-        CancellationToken cancellationToken) => await mediator.Send(
-        new TakeAttendanceCodeRequest(
-            code),
-        cancellationToken);
-
-    [HttpDelete("delete/{attendanceId}")]
-    [TranslateResultToActionResult]
-    public async Task<Result<DeleteAttendanceResponse>> DeleteAttendance(
-        [FromRoute] int attendanceId,
-        CancellationToken cancellationToken) => await mediator.Send(
-            new DeleteAttendanceRequest(attendanceId),cancellationToken);
+        return this.View(result.Value);
+    }
 }

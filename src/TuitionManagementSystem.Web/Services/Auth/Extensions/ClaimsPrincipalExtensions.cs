@@ -11,6 +11,21 @@ public static class ClaimsPrincipalExtensions
 
     public static int? GetUserId(this ClaimsPrincipal user)
     {
+        var value = user.FindFirstValue(InternalClaimTypes.UserId);
+        try
+        {
+            return string.IsNullOrEmpty(value)
+                ? null
+                : int.Parse(value, CultureInfo.InvariantCulture);
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+    }
+
+    public static int? GetAccountId(this ClaimsPrincipal user)
+    {
         var value = user.FindFirstValue(ClaimTypes.NameIdentifier);
         try
         {
@@ -48,6 +63,9 @@ public static class ClaimsPrincipalExtensions
 
     public static string? GetUserType(this ClaimsPrincipal user) =>
         user.FindFirstValue(InternalClaimTypes.UserType);
+
+    public static string? GetProfileImageUri(this ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.Uri);
 }
 
 
