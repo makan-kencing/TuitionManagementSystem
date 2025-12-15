@@ -14,9 +14,10 @@ public class PhysicalFileService : IFileService
 
     public PhysicalFileService(IWebHostEnvironment env)
     {
-        this.PhysicalPath = Path.Combine(env.ContentRootPath, "assets", "uploads");
+        var physicalPath = Path.Combine(env.ContentRootPath, "assets", "uploads");
+        this.PhysicalPath = new PathString("/" + physicalPath.Replace("\\", "/"));
 
-        this.FileProvider = new PhysicalFileProvider(this.PhysicalPath);
+        this.FileProvider = new PhysicalFileProvider(physicalPath);
     }
 
     public async Task<SavedFile> UploadFileAsync(IFormFile formFile)
