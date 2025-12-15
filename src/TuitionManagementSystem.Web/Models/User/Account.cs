@@ -17,7 +17,7 @@ public class Account
     [StringLength(300)]
     public required string HashedPassword { get; set; }
 
-    public required AccessRoles AccessRole { get; set; } = AccessRoles.User;
+    public AccessRoles AccessRole { get; set; } = AccessRoles.User;
 
     [MaxLength(254)]
     public required string? Email { get; set; }
