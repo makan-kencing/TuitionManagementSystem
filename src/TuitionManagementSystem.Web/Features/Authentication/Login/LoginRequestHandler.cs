@@ -103,7 +103,8 @@ public sealed class LoginRequestHandler(
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, session.Account.Id.ToString(CultureInfo.InvariantCulture)),
-            new(ClaimTypes.Thumbprint, session.SessionId.ToString())
+            new(ClaimTypes.Thumbprint, session.SessionId.ToString()),
+            new(ClaimTypes.Role, session.Account.AccessRole.ToString())
         };
         return new(
             new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)
