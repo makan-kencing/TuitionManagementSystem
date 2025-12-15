@@ -35,21 +35,41 @@ public class SubjectRequestHandler(ApplicationDbContext db) :
     {
         var entity = await db.Subjects.FirstOrDefaultAsync(x => x.Id == request.Id, ct);
         if (entity is null) return false;
-        db.Subjects.Remove(entity);
+        entity.DeletedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(ct);
+        return true;
+    }
+
+    public async Task<bool> Handle(RestoreSubject request, CancellationToken ct)
+    {
+        var entity = await db.Subjects.FirstOrDefaultAsync(x => x.Id == request.Id, ct);
+        if (entity is null) return false;
+        entity.DeletedAt = null;
         await db.SaveChangesAsync(ct);
         return true;
     }
 
     public async Task<IEnumerable<SubjectResponse>> Handle(GetSubjects request, CancellationToken ct)
-        => await db.Subjects
+    {
+        // 1. Fetch from DB
+        var entities = await db.Subjects
             .AsNoTracking()
-            .Select(s => SubjectResponse.FromEntity(s))
+            .Where(s => s.DeletedAt == null)
             .ToListAsync(ct);
 
+        // 2. Convert in Memory
+        return entities.Select(SubjectResponse.FromEntity);
+    }
+
     public async Task<SubjectResponse?> Handle(GetSubjectById request, CancellationToken ct)
-        => await db.Subjects
+    {
+        // 1. Fetch from DB
+        var entity = await db.Subjects
             .AsNoTracking()
             .Where(s => s.Id == request.Id)
-            .Select(s => SubjectResponse.FromEntity(s))
             .FirstOrDefaultAsync(ct);
+
+        // 2. Convert in Memory
+        return entity is null ? null : SubjectResponse.FromEntity(entity);
+    }
 }
