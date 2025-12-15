@@ -1,19 +1,22 @@
 namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using User;
 
+[Index(nameof(SessionId), nameof(StudentId), IsUnique = true)]
 public class Attendance
 {
     [Key]
     public int Id { get; set; }
 
-    [ForeignKey(nameof(Session) + "Id")]
-    public required Session Session { get; set; }
+    public int SessionId { get; set; }
 
-    [ForeignKey(nameof(Student) + "Id")]
-    public required Student Student { get; set; }
+    public int StudentId { get; set; }
 
     public DateTime TakenOn { get; set; } = DateTime.UtcNow;
+
+    public Session Session { get; set; } = null!;
+
+    public Student Student { get; set; } = null!;
 }

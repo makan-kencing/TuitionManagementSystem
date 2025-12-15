@@ -1,7 +1,6 @@
 namespace TuitionManagementSystem.Web.Models;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 public class File
 {
@@ -16,11 +15,11 @@ public class File
 
     public required Uri Uri { get; set; }
 
-    [StringLength(255)]
-    public string? CanonicalPath { get; set; }
-
-    [ForeignKey(nameof(CreatedBy) + "Id")]
-    public User.User? CreatedBy { get; set; }
+    [StringLength(255)] public string? CanonicalPath { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public int? CreatedById { get; set; }
+
+    public User.User? CreatedBy { get; set; }
 }

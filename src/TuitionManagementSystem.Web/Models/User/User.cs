@@ -1,23 +1,24 @@
 namespace TuitionManagementSystem.Web.Models.User;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Notification;
 
-[Index(nameof(Account) + "Id", IsUnique = true)]
+[Index(nameof(AccountId), IsUnique = true)]
 public abstract class User
 {
     [Key]
     public int Id { get; set; }
 
-    [ForeignKey(nameof(Family) + "Id")]
+    public int AccountId { get; set; }
+
+    public int? FamilyId { get; set; }
+
+    public Account Account { get; set; } = null!;
+
     public Family? Family { get; set; }
 
-    [ForeignKey(nameof(Account) + "Id")]
-    public required Account Account { get; set; }
+    public ICollection<File> Files { get; set; } = [];
 
-    public virtual ICollection<File> Files { get; set; } = [];
-
-    public virtual ICollection<Notification> Notifications { get; set; } = [];
+    public ICollection<Notification> Notifications { get; set; } = [];
 }

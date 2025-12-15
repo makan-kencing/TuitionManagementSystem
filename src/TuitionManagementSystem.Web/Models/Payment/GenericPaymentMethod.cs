@@ -1,8 +1,11 @@
 namespace TuitionManagementSystem.Web.Models.Payment;
 
+using System.ComponentModel.DataAnnotations;
+
 public class GenericPaymentMethod : PaymentMethod
 {
-    public required string Name { get; set; }
+    [StringLength(50)]
+    public required string Generic { get; set; }
 
-    public override string GetSummaryText() => this.Name;
+    public override string GetSummaryText() => this.Generic;
 }

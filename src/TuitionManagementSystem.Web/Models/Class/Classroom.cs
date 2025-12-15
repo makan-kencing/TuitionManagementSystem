@@ -14,7 +14,7 @@ public class Classroom
 
     public required int MaxCapacity { get; set; }
 
-    public virtual ICollection<Session> Sessions { get; set; } = [];
+    public ICollection<Session> Sessions { get; set; } = [];
 
-    public virtual ICollection<Schedule> Schedules { get; set; } = [];
+    public ICollection<Schedule> Schedules { get; set; } = [];
 }

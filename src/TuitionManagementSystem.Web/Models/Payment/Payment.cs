@@ -1,19 +1,19 @@
 namespace TuitionManagementSystem.Web.Models.Payment;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 public class Payment
 {
     [Key]
     public int Id { get; set; }
 
-    [ForeignKey(nameof(Method) + "Id")]
-    public required PaymentMethod Method { get; set; }
+    public int MethodId { get; set; }
 
     public required decimal Amount { get; set; }
 
     public DateTime PaidAt { get; set; } = DateTime.UtcNow;
 
-    public virtual ICollection<Invoice> Invoices { get; set; } = [];
+    public PaymentMethod Method { get; set; } = null!;
+
+    public ICollection<Invoice> Invoices { get; set; } = [];
 }

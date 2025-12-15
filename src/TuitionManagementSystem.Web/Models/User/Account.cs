@@ -1,8 +1,8 @@
 namespace TuitionManagementSystem.Web.Models.User;
 
 using System.ComponentModel.DataAnnotations;
-using Services.Auth.Constants;
 using Microsoft.EntityFrameworkCore;
+using Services.Auth.Constants;
 
 [Index(nameof(Username), IsUnique = true)]
 [Index(nameof(Email), IsUnique = true)]
@@ -17,13 +17,15 @@ public class Account
     [StringLength(50)]
     public string? DisplayName { get; set; }
 
+    [MaxLength(254)]
+    public required string? Email { get; set; }
+
     [StringLength(300)]
     public required string HashedPassword { get; set; }
 
     public AccessRoles AccessRole { get; set; } = AccessRoles.User;
 
-    [MaxLength(254)]
-    public required string? Email { get; set; }
+    public int? ProfileImageId { get; set; }
 
     public File? ProfileImage { get; set; }
 
@@ -31,7 +33,7 @@ public class Account
 
     public DateTime? DeletedAt { get; set; }
 
-    public virtual User? User { get; set; }
+    public User? User { get; set; }
 
-    public virtual ICollection<AccountSession> Sessions { get; set; } = [];
+    public ICollection<AccountSession> Sessions { get; set; } = [];
 }

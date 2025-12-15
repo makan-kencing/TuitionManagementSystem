@@ -35,6 +35,11 @@ public class AccountClaimsTransformer(ApplicationDbContext db) : IClaimsTransfor
             new(ClaimTypes.Role, account.AccessRole.ToString())
         };
 
+        if (account.DisplayName is not null)
+        {
+            claims.Add(new Claim(InternalClaimTypes.DisplayName, account.DisplayName));
+        }
+
         if (account.User is not null)
         {
             claims.AddRange([

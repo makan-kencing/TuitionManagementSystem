@@ -8,10 +8,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"] - TuitionManagementSystem</title>
 
+    <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
-          crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+          integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"/>
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/TuitionManagementSystem.Web.styles.css" asp-append-version="true"/>
@@ -81,6 +84,7 @@
                             @if (User.GetProfileImageUri() != null)
                             {
                                 <img src="@User.GetProfileImageUri()"
+                                     alt=""
                                      class="rounded-circle"
                                      width="30"
                                      height="30"/>
@@ -89,7 +93,7 @@
                             {
                                 <i class="fa-solid fa-user"></i>
                             }
-                            <span class="ms-2">@User.GetUsername()</span>
+                            <span class="ms-2">@User.GetDisplayName()</span>
                         </a>
 
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -153,8 +157,7 @@
 </header>
 
 <!-- MAIN LAYOUT -->
-<div class="app-layout @(User.Identity!.IsAuthenticated ? "" : "sidebar-collapsed")"
-     id="appLayout">
+<div class="app-layout sidebar-collapsed" id="appLayout">
 
     <!-- SIDEBAR (always exists) -->
     <aside class="sidebar p-3">
@@ -246,9 +249,11 @@
     </div>
 </footer>
 
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/htmx/dist/htmx.min.js"></script>
+<script src="~/lib/signalr/dist/browser/signalr.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

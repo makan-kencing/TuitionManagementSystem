@@ -1,7 +1,6 @@
 namespace TuitionManagementSystem.Web.Models.User;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +16,7 @@ public class AccountSession
 
     public DateTime LastLogin { get; set; } = DateTime.UtcNow;
 
-    [ForeignKey(nameof(Account) + "Id")]
-    public required Account Account { get; set; }
+    public int AccountId { get; set; }
+
+    public Account Account { get; set; } = null!;
 }

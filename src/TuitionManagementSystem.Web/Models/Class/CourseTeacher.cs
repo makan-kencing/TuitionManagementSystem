@@ -1,17 +1,19 @@
 namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using User;
 
+[Index(nameof(CourseId), nameof(TeacherId), IsUnique = true)]
 public class CourseTeacher
 {
-    [Key]
-    public int Id { get; set; }
+    [Key] public int Id { get; set; }
 
-    [ForeignKey(nameof(Course) + "Id")]
-    public required Course Course { get; set; }
+    public int CourseId { get; set; }
 
-    [ForeignKey(nameof(Teacher) + "Id")]
-    public required Teacher Teacher { get; set; }
+    public int TeacherId { get; set; }
+
+    public Course Course { get; set; } = null!;
+
+    public Teacher Teacher { get; set; } = null!;
 }

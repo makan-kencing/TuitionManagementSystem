@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TuitionManagementSystem.Web.Infrastructure.Persistence;
@@ -12,9 +13,11 @@ using TuitionManagementSystem.Web.Infrastructure.Persistence;
 namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251215150924_AddExplicitForeignKeyColumn")]
+    partial class AddExplicitForeignKeyColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -308,9 +311,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime>("EnrolledAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("integer");
@@ -637,9 +637,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("DueAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("EnrollmentId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("InvoicedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -655,8 +652,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EnrollmentId");
 
                     b.HasIndex("PaymentId");
 
@@ -1220,12 +1215,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Payment.Invoice", b =>
                 {
-                    b.HasOne("TuitionManagementSystem.Web.Models.Class.Enrollment", "Enrollment")
-                        .WithMany()
-                        .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TuitionManagementSystem.Web.Models.Payment.Payment", "Payment")
                         .WithMany("Invoices")
                         .HasForeignKey("PaymentId");
@@ -1235,8 +1224,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Enrollment");
 
                     b.Navigation("Payment");
 

@@ -19,13 +19,14 @@ public class ClassroomController(IMediator mediator) : Controller
     }
 
     [HttpGet("create")]
-    public IActionResult Create() => View("ClassroomCreate");
+    public IActionResult Create() => View("ClassroomCreate", new ClassroomFormVM());
 
     [HttpPost("create")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ClassroomFormVM vm)
     {
         if (!ModelState.IsValid) return View("ClassroomCreate", vm);
+
         var created = await mediator.Send(new CreateClassroom(vm.Location, vm.MaxCapacity));
         return RedirectToAction(nameof(Details), new { id = created.Id });
     }
@@ -35,6 +36,7 @@ public class ClassroomController(IMediator mediator) : Controller
     {
         var item = await mediator.Send(new GetClassroomById(id));
         if (item is null) return NotFound();
+
         var vm = new ClassroomFormVM { Id = item.Id, Location = item.Location, MaxCapacity = item.MaxCapacity };
         return View("ClassroomEdit", vm);
     }
@@ -45,6 +47,7 @@ public class ClassroomController(IMediator mediator) : Controller
     {
         if (id != vm.Id) return BadRequest();
         if (!ModelState.IsValid) return View("ClassroomEdit", vm);
+        
         var ok = await mediator.Send(new UpdateClassroom(vm.Id, vm.Location, vm.MaxCapacity));
         if (!ok) return NotFound();
         return RedirectToAction(nameof(Details), new { id = vm.Id });

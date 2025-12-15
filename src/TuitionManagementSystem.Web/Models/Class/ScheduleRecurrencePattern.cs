@@ -1,7 +1,6 @@
 namespace TuitionManagementSystem.Web.Models.Class;
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Ical.Net;
 using Ical.Net.DataTypes;
 
@@ -38,8 +37,9 @@ public class ScheduleRecurrencePattern
 
     public ICollection<int> BySetPosition { get; set; } = [];
 
-    [ForeignKey(nameof(Schedule) + "Id")]
-    public required Schedule Schedule { get; set; }
+    public int ScheduleId { get; set; }
+
+    public Schedule Schedule { get; set; } = null!;
 
     public RecurrencePattern ToIRecurrencePattern() =>
         new()
