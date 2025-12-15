@@ -3,18 +3,21 @@ using System;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TuitionManagementSystem.Web.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
+namespace TuitionManagementSystem.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251209092504_createDB")]
+    partial class createDB
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,7 +55,7 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .HasMaxLength(13)
                         .HasColumnType("character varying(13)");
 
-                    b.Property<DateTime?>("PublishedAt")
+                    b.Property<DateTime>("PublishedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("RelatedSessionId")
@@ -216,9 +219,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<int>("MaxCapacity")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -463,9 +463,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Description")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
@@ -476,9 +473,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Subjects");
                 });
@@ -491,10 +485,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CanonicalPath")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -505,6 +495,9 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<bool>("IsLocal")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("MimeType")
                         .IsRequired()
@@ -522,40 +515,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.ToTable("Files");
                 });
 
-            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.FamilyInvite", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("FamilyId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("RequestedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("RequesterId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FamilyId");
-
-                    b.HasIndex("RequesterId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("FamilyInvites");
-                });
-
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -569,11 +528,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime?>("DeliveredAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("character varying(34)");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -594,10 +548,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
-
-                    b.HasDiscriminator().HasValue("Notification");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Payment.Invoice", b =>
@@ -769,14 +719,9 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Families");
+                    b.ToTable("Family");
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.User.User", b =>
@@ -800,7 +745,7 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.HasIndex("AccountId")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("User");
 
                     b.HasDiscriminator().HasValue("User");
 
@@ -822,18 +767,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.HasBaseType("TuitionManagementSystem.Web.Models.Class.Announcement.Announcement");
 
                     b.HasDiscriminator().HasValue("Material");
-                });
-
-            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.FamilyInviteNotification", b =>
-                {
-                    b.HasBaseType("TuitionManagementSystem.Web.Models.Notification.Notification");
-
-                    b.Property<int>("FamilyInviteId")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("FamilyInviteId");
-
-                    b.HasDiscriminator().HasValue("FamilyInviteNotification");
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Payment.BankPaymentMethod", b =>
@@ -882,7 +815,7 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("FamilyId");
 
-                    b.ToTable("Users", t =>
+                    b.ToTable("User", t =>
                         {
                             t.Property("FamilyId")
                                 .HasColumnName("Parent_FamilyId");
@@ -900,23 +833,12 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("FamilyId");
 
-                    b.ToTable("Users", t =>
-                        {
-                            t.Property("FamilyId")
-                                .HasColumnName("Student_FamilyId");
-                        });
-
                     b.HasDiscriminator().HasValue("Student");
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.User.Teacher", b =>
                 {
                     b.HasBaseType("TuitionManagementSystem.Web.Models.User.User");
-
-                    b.Property<int?>("FamilyId")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("FamilyId");
 
                     b.HasDiscriminator().HasValue("Teacher");
                 });
@@ -1006,7 +928,7 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Class.Attendance", b =>
                 {
                     b.HasOne("TuitionManagementSystem.Web.Models.Class.Session", "Session")
-                        .WithMany("Attendances")
+                        .WithMany()
                         .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1139,33 +1061,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.Navigation("CreatedBy");
                 });
 
-            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.FamilyInvite", b =>
-                {
-                    b.HasOne("TuitionManagementSystem.Web.Models.User.Family", "Family")
-                        .WithMany()
-                        .HasForeignKey("FamilyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TuitionManagementSystem.Web.Models.User.Parent", "Requester")
-                        .WithMany()
-                        .HasForeignKey("RequesterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TuitionManagementSystem.Web.Models.User.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Family");
-
-                    b.Navigation("Requester");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.Notification", b =>
                 {
                     b.HasOne("TuitionManagementSystem.Web.Models.User.User", "User")
@@ -1236,17 +1131,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Notification.FamilyInviteNotification", b =>
-                {
-                    b.HasOne("TuitionManagementSystem.Web.Models.Notification.FamilyInvite", "FamilyInvite")
-                        .WithMany()
-                        .HasForeignKey("FamilyInviteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FamilyInvite");
-                });
-
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.User.Parent", b =>
                 {
                     b.HasOne("TuitionManagementSystem.Web.Models.User.Family", "Family")
@@ -1260,15 +1144,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("TuitionManagementSystem.Web.Models.User.Family", "Family")
                         .WithMany("Children")
-                        .HasForeignKey("FamilyId");
-
-                    b.Navigation("Family");
-                });
-
-            modelBuilder.Entity("TuitionManagementSystem.Web.Models.User.Teacher", b =>
-                {
-                    b.HasOne("TuitionManagementSystem.Web.Models.User.Family", "Family")
-                        .WithMany()
                         .HasForeignKey("FamilyId");
 
                     b.Navigation("Family");
@@ -1307,11 +1182,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Class.Schedule", b =>
                 {
                     b.Navigation("RecurrencePatterns");
-                });
-
-            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Class.Session", b =>
-                {
-                    b.Navigation("Attendances");
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Class.Subject", b =>

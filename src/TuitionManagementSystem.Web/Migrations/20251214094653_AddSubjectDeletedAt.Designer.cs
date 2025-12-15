@@ -3,18 +3,21 @@ using System;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TuitionManagementSystem.Web.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
+namespace TuitionManagementSystem.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251214094653_AddSubjectDeletedAt")]
+    partial class AddSubjectDeletedAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -216,9 +219,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<int>("MaxCapacity")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -491,10 +491,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CanonicalPath")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -505,6 +501,9 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<bool>("IsLocal")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("MimeType")
                         .IsRequired()
@@ -1006,7 +1005,7 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Class.Attendance", b =>
                 {
                     b.HasOne("TuitionManagementSystem.Web.Models.Class.Session", "Session")
-                        .WithMany("Attendances")
+                        .WithMany()
                         .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1307,11 +1306,6 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Class.Schedule", b =>
                 {
                     b.Navigation("RecurrencePatterns");
-                });
-
-            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Class.Session", b =>
-                {
-                    b.Navigation("Attendances");
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Class.Subject", b =>
