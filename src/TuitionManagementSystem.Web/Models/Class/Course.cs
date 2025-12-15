@@ -14,6 +14,10 @@ public class Course
     [StringLength(255)]
     public string? Description { get; set; }
 
+    [Column(TypeName = "decimal(10,2)")]
+    [Range(0, 999.99)]
+    public decimal Price { get; set; }
+
     [ForeignKey(nameof(Subject) + "Id")]
     public required Subject Subject { get; set; }
 

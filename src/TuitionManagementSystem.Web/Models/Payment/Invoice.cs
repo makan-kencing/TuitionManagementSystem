@@ -24,5 +24,15 @@ public class Invoice
 
     public DateTime? DueAt { get; set; }
 
-    public bool IsPaid() => this.Payment != null;
+    public InvoiceStatus Status { get; set; } = InvoiceStatus.Pending;
+
+    public bool IsPaid() => Status == InvoiceStatus.Paid;
+}
+
+public enum InvoiceStatus
+{
+    Pending = 0,
+    Paid = 1,
+    Cancelled = 2,
+    Withdrawn = 3
 }

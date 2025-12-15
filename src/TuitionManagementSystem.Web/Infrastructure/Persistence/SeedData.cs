@@ -111,9 +111,27 @@ public static class SeedData
 
         var courseData = new[]
         {
-            new { Name = "Basic Algebra", Subject = subjects[0], Classroom = classrooms[0] },
-            new { Name = "General Science", Subject = subjects[1], Classroom = classrooms[1] },
-            new { Name = "English Grammar", Subject = subjects[2], Classroom = classrooms[2] }
+            new
+            {
+                Name = "Basic Algebra",
+                Subject = subjects[0],
+                Classroom = classrooms[0],
+                Price = 300.00m
+            },
+            new
+            {
+                Name = "General Science",
+                Subject = subjects[1],
+                Classroom = classrooms[1],
+                Price = 350.00m
+            },
+            new
+            {
+                Name = "English Grammar",
+                Subject = subjects[2],
+                Classroom = classrooms[2],
+                Price = 280.00m
+            }
         };
 
         var existingCourses = await db.Set<Course>()
@@ -127,7 +145,8 @@ public static class SeedData
             {
                 Name = c.Name,
                 Subject = c.Subject,
-                PreferredClassroom = c.Classroom
+                PreferredClassroom = c.Classroom,
+                Price = c.Price
             })
             .ToList();
 
