@@ -1,0 +1,100 @@
+@model TuitionManagementSystem.Web.Models.ViewModels.EnrollmentViewModel
+
+<form id="enrollForm">
+    <input type="hidden" id="studentId" value="16" />
+
+    @* <div class="mb-3"> *@
+    @*     <label for="subjectSelect" class="form-label">Subject</label> *@
+    @*     <select id="subjectSelect" class="form-select"> *@
+    @*         <option value="">-- Select Subject --</option> *@
+    @*     </select> *@
+    @* </div> *@
+
+    <div class="mb-3">
+        <label for="courseSelect" class="form-label">Course</label>
+        <select id="courseSelect" class="form-select">
+            <option value="">-- Select Course --</option>
+            <option value="1">Basic Algebra</option>
+            <option value="2">General Science</option>
+            <option value="3">English Grammar</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Enroll</button>
+</form>
+
+<div id="enrollmentsContainer"></div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+$(document).ready(function() {
+
+    const studentId = parseInt($("#studentId").val());
+
+    // async function loadSubjects() {
+    //     const response = await fetch("/subjects");
+    //     const subjects = await response.json();
+    //     const $subjectSelect = $("#subjectSelect");
+    //     subjects.forEach(s => {
+    //         $subjectSelect.append(`<option value="${s.id}">${s.name}</option>`);
+    //     });
+    // }
+
+    // async function loadCourses(subjectId) {
+    //     if (!subjectId) {
+    //         $("#courseSelect").html('<option value="">-- Select Course --</option>');
+    //         return;
+    //     }
+    //
+    //     const response = await fetch(`/courses?subjectId=${subjectId}`);
+    //     const courses = await response.json();
+    //
+    //     const $courseSelect = $("#courseSelect");
+    //     $courseSelect.empty().append('<option value="">-- Select Course --</option>');
+    //     courses.forEach(c => {
+    //         $courseSelect.append(`<option value="${c.id}">(${c.id}) ${c.courseName}</option>`);
+    //     });
+    // }
+    //
+    // $("#subjectSelect").change(function() {
+    //     const subjectId = $(this).val();
+    //     loadCourses(subjectId);
+    // });
+
+    function loadEnrollments() {
+        $("#enrollmentsContainer").load("/enrollment/view/" + studentId);
+    }
+
+    // loadSubjects();
+    loadEnrollments();
+
+    $("#enrollForm").submit(async function(e) {
+        e.preventDefault();
+
+        const courseId = parseInt($("#courseSelect").val());
+
+        if (!courseId) {
+            Swal.fire({ icon: "error", title: "Error", text: "Please select a course." });
+            return;
+        }
+
+        const response = await fetch("/enrollment/make", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ studentId, courseId })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            Swal.fire({ icon: "success", title: "Success", text: data.message })
+                 .then(() => loadEnrollments());
+        } else {
+            Swal.fire({ icon: "error", title: "Error", text: data.message || data.errors.join("\n") });
+        }
+    });
+
+});
+</script>
