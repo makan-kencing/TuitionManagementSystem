@@ -9,7 +9,7 @@ using AttendanceHistory;
 using Infrastructure.Persistence;
 using Services.Auth.Extensions;
 
-public class AttendanceController(IMediator mediator) : Controller
+public class AttendanceController(IMediator mediator , ApplicationDbContext db) : Controller
 {
     public async Task<IActionResult> Summary(
         CancellationToken cancellationToken)

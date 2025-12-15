@@ -1,0 +1,61 @@
+﻿@model TuitionManagementSystem.Web.Features.Attendance.AttendanceHistory.GetAttendanceHistoryResponse
+
+@{
+    ViewData["Title"] = "Attendance History";
+}
+
+<div class="container mt-4">
+
+    <h4 class="mb-4 text-center">
+        Attendance History for
+        <span class="text-primary">@Model.Course</span>
+    </h4>
+
+    @if (!Model.Sessions.Any())
+    {
+        <div class="alert alert-warning text-center">
+            No attendance records found.
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover align-middle text-center">
+            <thead class="table-light">
+            <tr>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            @foreach (var session in Model.Sessions)
+            {
+                <tr>
+                    <td>
+                        @session.StartAt.ToString("dd MMM yyyy, hh:mm tt")
+                    </td>
+                    <td>
+                        @session.EndAt.ToString("dd MMM yyyy, hh:mm tt")
+                    </td>
+                    <td>
+                        @if (session.IsValid)
+                        {
+                            <span class="badge bg-success px-3 py-2">
+                                Attended
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger px-3 py-2">
+                                Absent
+                            </span>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+
+</div>
