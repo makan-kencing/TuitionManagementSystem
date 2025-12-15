@@ -1,80 +1,90 @@
-namespace TuitionManagementSystem.Web.Features.Enrollment.MarkEnrollment
+namespace TuitionManagementSystem.Web.Features.Enrollment.MarkEnrollment;
+
+using Ardalis.Result;
+using Infrastructure.Persistence;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Models.Class;
+using Models.Payment;
+using TuitionManagementSystem.Web.Services;
+
+public class MarkEnrollmentRequestHandler : IRequestHandler<MarkEnrollmentRequest, Result>
 {
-    using Ardalis.Result;
-    using Infrastructure.Persistence;
-    using MediatR;
-    using Microsoft.EntityFrameworkCore;
-    using Models.Class;
-    using Models.Payment;
+    private readonly ApplicationDbContext _db;
+    private readonly IInvoiceService _invoiceService;
 
-    public class MarkEnrollmentRequestHandler : IRequestHandler<MarkEnrollmentRequest, Result>
+    public MarkEnrollmentRequestHandler(
+        ApplicationDbContext db,
+        IInvoiceService invoiceService)
     {
-        private readonly ApplicationDbContext _db;
+        _db = db;
+        _invoiceService = invoiceService; // Fixed: Changed IInvoiceService to _invoiceService
+    }
 
-        public MarkEnrollmentRequestHandler(ApplicationDbContext db)
+    public async Task<Result> Handle(
+        MarkEnrollmentRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (request.Status != Enrollment.EnrollmentStatus.Cancelled &&
+            request.Status != Enrollment.EnrollmentStatus.Withdrawn)
         {
-            _db = db;
+            return Result.Error("Status must be either Cancelled or Withdrawn");
         }
 
-        public async Task<Result> Handle(
-            MarkEnrollmentRequest request,
-            CancellationToken cancellationToken)
+        var enrollment = await _db.Enrollments
+            .Include(e => e.Student)
+            .FirstOrDefaultAsync(e => e.Id == request.EnrollmentId, cancellationToken);
+
+        if (enrollment == null)
+            return Result.NotFound("Enrollment not found");
+
+        if (enrollment.Status == Enrollment.EnrollmentStatus.Cancelled)
+            return Result.Conflict("Enrollment is already cancelled");
+
+        if (enrollment.Status == Enrollment.EnrollmentStatus.Withdrawn)
+            return Result.Conflict("Enrollment is already withdrawn");
+
+        if (enrollment.Status == Enrollment.EnrollmentStatus.Completed)
+            return Result.Error("Cannot modify a completed enrollment");
+
+        var invoice = await _db.Invoices
+            .FirstOrDefaultAsync(i => i.EnrollmentId == request.EnrollmentId,
+                cancellationToken);
+
+        using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+        try
         {
-            if (request.Status != Enrollment.EnrollmentStatus.Cancelled &&
-                request.Status != Enrollment.EnrollmentStatus.Withdrawn)
+            enrollment.Status = request.Status;
+
+            if (invoice != null)
             {
-                return Result.Error("Status must be either Cancelled or Withdrawn");
-            }
+                var invoiceStatus = request.Status == Enrollment.EnrollmentStatus.Cancelled
+                    ? InvoiceStatus.Cancelled
+                    : InvoiceStatus.Withdrawn;
 
-            var enrollment = await _db.Enrollments
-                .Include(e => e.Student)
-                .FirstOrDefaultAsync(e => e.Id == request.EnrollmentId, cancellationToken);
-
-            if (enrollment == null)
-                return Result.NotFound("Enrollment not found");
-
-            if (enrollment.Status == Enrollment.EnrollmentStatus.Cancelled)
-                return Result.Conflict("Enrollment is already cancelled");
-
-            if (enrollment.Status == Enrollment.EnrollmentStatus.Withdrawn)
-                return Result.Conflict("Enrollment is already withdrawn");
-
-            if (enrollment.Status == Enrollment.EnrollmentStatus.Completed)
-                return Result.Error("Cannot modify a completed enrollment");
-
-            var invoice = await _db.Invoices
-                .FirstOrDefaultAsync(i =>
-                    i.Enrollment.Id == request.EnrollmentId &&
-                    i.Status != InvoiceStatus.Cancelled &&
-                    i.Status != InvoiceStatus.Withdrawn,
+                // Fixed: Changed _invoiceStatusService to _invoiceService
+                var invoiceResult = await _invoiceService.UpdateInvoiceStatusAsync(
+                    invoice.Id,
+                    invoiceStatus,
                     cancellationToken);
 
-            using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
-
-            try
-            {
-                enrollment.Status = request.Status;
-
-                if (invoice != null)
+                if (!invoiceResult.IsSuccess)
                 {
-                    invoice.Status = request.Status switch
-                    {
-                        Enrollment.EnrollmentStatus.Cancelled => InvoiceStatus.Cancelled,
-                        Enrollment.EnrollmentStatus.Withdrawn => InvoiceStatus.Withdrawn,
-                        _ => invoice.Status
-                    };
+                    await transaction.RollbackAsync(cancellationToken);
+                    return Result.Error($"Failed to update invoice: {string.Join(", ", invoiceResult.Errors)}");
                 }
-
-                await _db.SaveChangesAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
-
-                return Result.Success();
             }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                return Result.Error($"Failed to update enrollment: {ex.Message}");
-            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return Result.Error($"Failed to update enrollment: {ex.Message}");
         }
     }
 }

@@ -4,7 +4,6 @@ using MediatR;
 using TuitionManagementSystem.Web.Features.Enrollment.MakeEnrollment;
 using TuitionManagementSystem.Web.Models.ViewModels;
 using TuitionManagementSystem.Web.Features.Enrollment.ViewEnrollment;
-using TuitionManagementSystem.Web.Features.Enrollment.CancelEnrollment;
 
 namespace TuitionManagementSystem.Web.Features.Enrollment;
 

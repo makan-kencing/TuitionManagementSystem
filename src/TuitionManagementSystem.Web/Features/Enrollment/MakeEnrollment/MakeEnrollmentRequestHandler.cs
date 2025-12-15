@@ -25,7 +25,6 @@ public class MakeEnrollmentRequestHandler
         MakeEnrollmentRequest request,
         CancellationToken cancellationToken)
     {
-
         var student = await _db.Students
             .FirstOrDefaultAsync(s => s.Id == request.StudentId, cancellationToken);
 
@@ -39,18 +38,18 @@ public class MakeEnrollmentRequestHandler
         if (course == null)
             return Result.NotFound("Course not found");
 
-        var alreadyEnrolled = await _db.Enrollments.AnyAsync(e =>
-            e.Student.Id == request.StudentId &&
-            e.Course.Id == request.CourseId &&
-            e.Status == Enrollment.EnrollmentStatus.Active,
+        var alreadyActiveEnrolled = await _db.Enrollments.AnyAsync(e =>
+                e.Student.Id == request.StudentId &&
+                e.Course.Id == request.CourseId &&
+                e.Status == Enrollment.EnrollmentStatus.Active,
             cancellationToken);
 
-        if (alreadyEnrolled)
+        if (alreadyActiveEnrolled)
             return Result.Conflict("Student is already actively enrolled in this course");
 
         var activeEnrollmentCount = await _db.Enrollments.CountAsync(e =>
-            e.Course.Id == request.CourseId &&
-            e.Status == Enrollment.EnrollmentStatus.Active,
+                e.Course.Id == request.CourseId &&
+                e.Status == Enrollment.EnrollmentStatus.Active,
             cancellationToken);
 
         var maxCapacity = course.PreferredClassroom.MaxCapacity;
@@ -73,11 +72,7 @@ public class MakeEnrollmentRequestHandler
         await _db.SaveChangesAsync(cancellationToken);
 
         var invoiceResult = await _mediator.Send(
-            new CreateInvoiceRequest
-            {
-                StudentId = request.StudentId,
-                EnrollmentId = enrollment.Id
-            },
+            new CreateInvoiceRequest { StudentId = request.StudentId, EnrollmentId = enrollment.Id },
             cancellationToken);
 
         if (!invoiceResult.IsSuccess)
