@@ -8,7 +8,7 @@ public class Session
     [Key]
     public int Id { get; set; }
 
-    [ForeignKey(nameof(Course) + "Id")]
+    public  int CourseId { get; set; }
     public required Course Course { get; set; }
 
     [ForeignKey(nameof(Classroom) + "Id")]
