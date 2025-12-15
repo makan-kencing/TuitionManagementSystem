@@ -4,41 +4,77 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="d-flex justify-content-center align-items-center vh-100">
-    <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px;">
-        <h2 class="card-title text-center mb-4">Login</h2>
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+    <div class="card shadow-lg border-0 rounded-4" style="max-width: 420px; width: 100%;">
 
-        <form asp-controller="Authentication"
-              asp-action="Login"
-              asp-route-returnUrl="@Context.Request.Query["ReturnUrl"]">
+        <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+            <h3 class="mb-0">Welcome Back</h3>
+            <small>Sign in to your account</small>
+        </div>
 
-            <div class="mb-3">
-                <label asp-for="Username" class="form-label"></label>
-                <input asp-for="Username" class="form-control" placeholder="Enter your username" required autofocus/>
-                <span asp-validation-for="Username" class="form-text text-danger"></span>
-            </div>
+        <div class="card-body p-4">
+            <form asp-controller="Authentication"
+                  asp-action="Login"
+                  asp-route-returnUrl="@Context.Request.Query["ReturnUrl"]">
 
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" placeholder="Enter your password" required/>
-                <span asp-validation-for="Password" class="form-text text-danger"></span>
-            </div>
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label fw-semibold"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fa-solid fa-user text-muted"></i>
+                        </span>
+                        <input asp-for="Username"
+                               class="form-control"
+                               placeholder="Enter your username"
+                               required
+                               autofocus />
+                    </div>
+                    <span asp-validation-for="Username"
+                          class="small text-danger"></span>
+                </div>
 
-            <div class="form-check mb-3">
-                <input asp-for="RememberMe" class="form-check-input"/>
-                <label asp-for="RememberMe" class="form-check-label">Remember me</label>
-            </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label fw-semibold"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fa-solid fa-lock text-muted"></i>
+                        </span>
+                        <input asp-for="Password"
+                               class="form-control"
+                               placeholder="Enter your password"
+                               required />
+                    </div>
+                    <span asp-validation-for="Password"
+                          class="small text-danger"></span>
+                </div>
 
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input asp-for="RememberMe" class="form-check-input"/>
+                        <label asp-for="RememberMe"
+                               class="form-check-label">
+                            Remember me
+                        </label>
+                    </div>
 
-            <div class="text-center mt-3 text-danger">
-                @Html.ValidationMessage("Invalid")
-            </div>
+                    <a asp-action="ForgotPassword"
+                       class="small text-decoration-none">
+                        Forgot password?
+                    </a>
+                </div>
 
-        </form>
+                <button type="submit"
+                        class="btn btn-primary w-100 py-2 fw-semibold">
+                    Login
+                </button>
 
-        <div class="text-center mt-3">
-            <a href="/Authentication/ForgotPassword">Forgot password?</a>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger text-center mt-3 py-2">
+                        @Html.ValidationMessage("Invalid")
+                    </div>
+                }
+            </form>
         </div>
     </div>
 </div>
