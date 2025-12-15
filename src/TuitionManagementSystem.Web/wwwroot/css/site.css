@@ -29,3 +29,26 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  min-height: calc(100vh - 56px);
+  background-color: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar-collapsed .sidebar {
+  margin-left: -240px;
+}
+
+.app-layout {
+  display: flex;
+}
+
+.app-content {
+  flex-grow: 1;
+  padding: 1rem;
+  transition: margin-left 0.3s ease;
+}
