@@ -1,0 +1,12 @@
+@model TuitionManagementSystem.Web.Features.Classroom.ClassroomFormVM
+@{
+    ViewData["Title"] = "Edit Classroom";
+}
+<h2>Edit Classroom</h2>
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    @await Html.PartialAsync("_ClassroomForm", Model)
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>

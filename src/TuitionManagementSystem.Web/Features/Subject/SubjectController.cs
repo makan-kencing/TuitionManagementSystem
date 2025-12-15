@@ -10,7 +10,7 @@ using TuitionManagementSystem.Web.ViewModels.Subject;
 
 
 [Route("subjects")]
-public class SubjectPageController(IMediator mediator, ApplicationDbContext db) : Controller
+public class SubjectController(IMediator mediator, ApplicationDbContext db) : Controller
 {
     private readonly ApplicationDbContext _db = db;
     // GET ALL SUBJECTS

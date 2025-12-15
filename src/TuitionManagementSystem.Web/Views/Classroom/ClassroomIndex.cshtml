@@ -1,0 +1,32 @@
+@model IEnumerable<TuitionManagementSystem.Web.Features.Classroom.ClassroomResponse>
+@{
+    ViewData["Title"] = "Classrooms";
+}
+<h2>Classrooms</h2>
+<p><a asp-action="Create" class="btn btn-primary">Create New</a></p>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Location</th>
+        <th>Max Capacity</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var c in Model)
+    {
+        <tr>
+            <td>@c.Location</td>
+            <td>@c.MaxCapacity</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@c.Id">Details</a> |
+                <a asp-action="Edit" asp-route-id="@c.Id">Edit</a> |
+                <form asp-action="Delete" asp-route-id="@c.Id" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-link text-danger p-0">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

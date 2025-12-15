@@ -1,0 +1,11 @@
+@model TuitionManagementSystem.Web.Features.Classroom.ClassroomFormVM
+<div class="mb-3">
+    <label asp-for="Location" class="form-label"></label>
+    <input asp-for="Location" class="form-control" />
+    <span asp-validation-for="Location" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="MaxCapacity" class="form-label"></label>
+    <input asp-for="MaxCapacity" class="form-control" type="number" min="1" />
+    <span asp-validation-for="MaxCapacity" class="text-danger"></span>
+</div>
