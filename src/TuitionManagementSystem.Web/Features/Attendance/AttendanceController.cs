@@ -9,7 +9,7 @@ using Services.Auth.Extensions;
 
 public class AttendanceController(IMediator mediator) : Controller
 {
-    public async Task<IActionResult> Index(
+    public async Task<IActionResult> Summary(
         CancellationToken cancellationToken)
     {
         var userId = this.User.GetUserId() ?? -1;
@@ -24,8 +24,10 @@ public class AttendanceController(IMediator mediator) : Controller
             return this.NotFound();
         }
 
-        return this.View("AttendanceSummary",result.Value);
+        return this.View(result.Value);
     }
+
+
 
 
 }
