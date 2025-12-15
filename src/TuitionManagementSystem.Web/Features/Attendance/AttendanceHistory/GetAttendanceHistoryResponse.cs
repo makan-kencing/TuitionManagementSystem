@@ -3,6 +3,7 @@
 public class GetAttendanceHistoryResponse
 {
     public List<SessionAttendanceItem> Sessions { get; set; } = [];
+    public string Course { get; set; }
 }
 
 public class SessionAttendanceItem
