@@ -10,8 +10,11 @@ namespace TuitionManagementSystem.Web.Services
 
     public interface IInvoiceService
     {
-        Task<Result<Invoice>> UpdateInvoiceStatusAsync(int invoiceId, InvoiceStatus newStatus, CancellationToken cancellationToken);
+        Task<Result<Invoice>> UpdateInvoiceStatusAsync(int invoiceId, InvoiceStatus newStatus,
+            CancellationToken cancellationToken);
+
         Task CheckAndCreateOverdueInvoicesAsync(IMediator mediator, CancellationToken cancellationToken);
+        Task GenerateMonthlyInvoicesAsync(IMediator mediator, CancellationToken cancellationToken);
     }
 
     public class InvoiceService : IInvoiceService
@@ -45,7 +48,8 @@ namespace TuitionManagementSystem.Web.Services
             var validationResult = ValidateStatusTransition(currentStatus, newStatus);
             if (!validationResult.IsValid)
             {
-                _logger.LogWarning("Invalid status transition for invoice {InvoiceId}: {CurrentStatus} -> {NewStatus}. Error: {Error}",
+                _logger.LogWarning(
+                    "Invalid status transition for invoice {InvoiceId}: {CurrentStatus} -> {NewStatus}. Error: {Error}",
                     invoiceId, currentStatus, newStatus, validationResult.ErrorMessage);
                 return Result.Error(validationResult.ErrorMessage);
             }
@@ -60,7 +64,8 @@ namespace TuitionManagementSystem.Web.Services
                     break;
 
                 case InvoiceStatus.Paid:
-                    _logger.LogWarning("Attempted to mark invoice {InvoiceId} as paid through UpdateInvoiceStatus", invoiceId);
+                    _logger.LogWarning("Attempted to mark invoice {InvoiceId} as paid through UpdateInvoiceStatus",
+                        invoiceId);
                     return Result.Error("Use payment endpoint to mark invoice as paid");
 
                 case InvoiceStatus.Overdue:
@@ -89,10 +94,10 @@ namespace TuitionManagementSystem.Web.Services
             var overduePendingInvoices = await _db.Invoices
                 .Include(i => i.Payment)
                 .Where(i => i.Status == InvoiceStatus.Pending &&
-                           i.DueAt.HasValue &&
-                           i.DueAt.Value < now &&
-                           !i.PaymentId.HasValue &&
-                           !i.CancelledAt.HasValue)
+                            i.DueAt.HasValue &&
+                            i.DueAt.Value < now &&
+                            !i.PaymentId.HasValue &&
+                            !i.CancelledAt.HasValue)
                 .ToListAsync(cancellationToken);
 
             _logger.LogInformation("Found {Count} pending invoices that are overdue", overduePendingInvoices.Count);
@@ -107,34 +112,34 @@ namespace TuitionManagementSystem.Web.Services
                 {
                     var existingOverdueInvoice = await _db.Invoices
                         .FirstOrDefaultAsync(i =>
-                            i.EnrollmentId == invoice.EnrollmentId &&
-                            i.InvoicedAt.Date == invoice.InvoicedAt.Date &&
-                            i.DueAt == invoice.DueAt &&
-                            i.Status == InvoiceStatus.Overdue &&
-                            i.CancelledAt == null,
+                                i.EnrollmentId == invoice.EnrollmentId &&
+                                i.InvoicedAt.Date == invoice.InvoicedAt.Date &&
+                                i.DueAt == invoice.DueAt &&
+                                i.Status == InvoiceStatus.Overdue &&
+                                i.CancelledAt == null,
                             cancellationToken);
 
                     if (existingOverdueInvoice != null)
                     {
-                        _logger.LogDebug("Overdue invoice already exists for invoice {InvoiceId} (billing period: {InvoicedAt} to {DueAt}). Skipping.",
+                        _logger.LogDebug(
+                            "Overdue invoice already exists for invoice {InvoiceId} (billing period: {InvoicedAt} to {DueAt}). Skipping.",
                             invoice.Id, invoice.InvoicedAt.Date, invoice.DueAt);
                         skippedCount++;
                         continue;
                     }
 
-                    _logger.LogInformation("Creating overdue invoice from original invoice {InvoiceId} (Amount: {Amount}, Due: {DueAt})",
+                    _logger.LogInformation(
+                        "Creating overdue invoice from original invoice {InvoiceId} (Amount: {Amount}, Due: {DueAt})",
                         invoice.Id, invoice.Amount, invoice.DueAt);
 
                     var result = await mediator.Send(
-                        new CreateInvoiceRequest
-                        {
-                            OverdueFromInvoiceId = invoice.Id
-                        },
+                        new CreateInvoiceRequest { OverdueFromInvoiceId = invoice.Id },
                         cancellationToken);
 
                     if (result.IsSuccess)
                     {
-                        _logger.LogInformation("Successfully created overdue invoice {NewInvoiceId} from original invoice {OriginalInvoiceId}",
+                        _logger.LogInformation(
+                            "Successfully created overdue invoice {NewInvoiceId} from original invoice {OriginalInvoiceId}",
                             result.Value.Id, invoice.Id);
                         createdCount++;
                     }
@@ -147,12 +152,98 @@ namespace TuitionManagementSystem.Web.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing overdue invoice creation for invoice {InvoiceId}", invoice.Id);
+                    _logger.LogError(ex, "Error processing overdue invoice creation for invoice {InvoiceId}",
+                        invoice.Id);
                     errorCount++;
                 }
             }
 
-            _logger.LogInformation("Overdue invoice check completed. Created: {Created}, Skipped: {Skipped}, Errors: {Errors}",
+            _logger.LogInformation(
+                "Overdue invoice check completed. Created: {Created}, Skipped: {Skipped}, Errors: {Errors}",
+                createdCount, skippedCount, errorCount);
+        }
+
+        public async Task GenerateMonthlyInvoicesAsync(
+            IMediator mediator,
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Starting monthly invoice generation check");
+
+            var now = DateTime.UtcNow;
+
+            var activeEnrollments = await _db.Enrollments
+                .Include(e => e.Student)
+                .Include(e => e.Course)
+                .Where(e => e.Status == Models.Class.Enrollment.EnrollmentStatus.Active)
+                .ToListAsync(cancellationToken);
+
+            _logger.LogInformation("Found {Count} active enrollments", activeEnrollments.Count);
+
+            int createdCount = 0;
+            int skippedCount = 0;
+            int errorCount = 0;
+
+            foreach (var enrollment in activeEnrollments)
+            {
+                try
+                {
+                    var latestInvoice = await _db.Invoices
+                        .Where(i => i.EnrollmentId == enrollment.Id &&
+                                    i.CancelledAt == null)
+                        .OrderByDescending(i => i.InvoicedAt)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    if (latestInvoice != null)
+                    {
+                        var daysSinceLastInvoice = (now - latestInvoice.InvoicedAt).TotalDays;
+
+                        if (daysSinceLastInvoice < 30)
+                        {
+                            _logger.LogDebug(
+                                "Enrollment {EnrollmentId}: Last invoice from {InvoiceDate} ({Days} days ago), needs {RemainingDays} more days",
+                                enrollment.Id, latestInvoice.InvoicedAt, Math.Floor(daysSinceLastInvoice),
+                                Math.Ceiling(30 - daysSinceLastInvoice));
+                            skippedCount++;
+                            continue;
+                        }
+                    }
+                    else if ((now - enrollment.EnrolledAt).TotalDays < 30)
+                    {
+                        _logger.LogDebug(
+                            "Enrollment {EnrollmentId}: New enrollment from {EnrolledAt}, needs first invoice",
+                            enrollment.Id, enrollment.EnrolledAt);
+                    }
+
+                    _logger.LogInformation(
+                        "Creating invoice for enrollment {EnrollmentId} (Student: {StudentId}, Course: {CourseName})",
+                        enrollment.Id, enrollment.Student.Id, enrollment.Course.Name);
+
+                    var result = await mediator.Send(
+                        new CreateInvoiceRequest { StudentId = enrollment.Student.Id, EnrollmentId = enrollment.Id },
+                        cancellationToken);
+
+                    if (result.IsSuccess)
+                    {
+                        _logger.LogInformation("Successfully created invoice {InvoiceId} for enrollment {EnrollmentId}",
+                            result.Value.Id, enrollment.Id);
+                        createdCount++;
+                    }
+                    else
+                    {
+                        _logger.LogError("Failed to create invoice for enrollment {EnrollmentId}. Errors: {Errors}",
+                            enrollment.Id, string.Join(", ", result.Errors));
+                        errorCount++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error generating invoice for enrollment {EnrollmentId}", enrollment.Id);
+                    errorCount++;
+                }
+            }
+
+            _logger.LogInformation(
+                "Monthly invoice generation completed. Created: {Created}, Skipped: {Skipped}, Errors: {Errors}",
                 createdCount, skippedCount, errorCount);
         }
 
