@@ -10,6 +10,7 @@ using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Services.Auth.Extensions;
 using TakeAttendanceCode;
+using TeacherDailySessionList;
 
 public class AttendanceController(IMediator mediator , ApplicationDbContext db) : Controller
 {
@@ -57,9 +58,22 @@ public class AttendanceController(IMediator mediator , ApplicationDbContext db) 
 
     [Authorize (Roles =  "Admin")]
     [HttpGet]
-    public IActionResult GenerateAttendance()
+    public async Task<IActionResult> GenerateAttendance( CancellationToken cancellationToken)
     {
-        return this.View();
+        var userId = this.User.GetUserId() ?? -1;
+        if (userId == -1)
+        {
+            return this.Unauthorized();
+        }
+
+        var result =await mediator.Send(new GetTeacherDailySessionListRequest(userId!), cancellationToken);
+        if (result.IsNotFound())
+        {
+            return this.NotFound();
+        }
+
+        return this.View(result.Value);
+
     }
 
 
