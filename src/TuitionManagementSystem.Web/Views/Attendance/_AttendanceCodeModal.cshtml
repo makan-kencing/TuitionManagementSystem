@@ -1,12 +1,11 @@
 @model TuitionManagementSystem.Web.Features.Attendance.AttendanceCodeViewModel
-@using System.Web
 
 @{
     var returnUrl = Url.Action(
-        protocol: Context.Request.Protocol,
+        protocol: Context.Request.Scheme,
         controller: "Attendance",
         action: "TakeAttendance",
-        values: new { code = Model.Code });
+        values: new { code = Model.Code }) ?? "/";
 }
 
 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -18,9 +17,9 @@
 
         <div class="modal-body">
             <div class="text-center">
-                <img
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@HttpUtility.HtmlEncode(returnUrl)"
-                    alt="QR Code"/>
+                <!-- https://stackoverflow.com/questions/602642/server-urlencode-vs-httputility-urlencode -->
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@Uri.EscapeDataString(returnUrl)"
+                     alt="QR Code"/>
 
                 <p class="mt-3">Code: @Model.Code</p>
             </div>
