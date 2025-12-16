@@ -230,7 +230,10 @@ public sealed class AuthenticationController(
     public async Task<IActionResult> RegisterStudent(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
-            return View("Register");
+        {
+            ViewData["ShowForm"] = "student";
+            return View("Register", model); // keep user input
+        }
 
         var result = await mediator.Send(new RegisterStudentRequest
         {
@@ -239,15 +242,26 @@ public sealed class AuthenticationController(
             Password = model.Password
         });
 
-        var response = result.Value!; // get RegisterStudentResponse
+        var response = result.Value!;
 
-        // Use TempData to pass message to Razor page for SweetAlert
+        // Registration failed (username/email exists, validation error, etc.)
+        if (!response.IsSuccess)
+        {
+            ViewData["ShowForm"] = "student";
+            TempData["RegisterMessage"] = response.Message; // <-- set error message
+            TempData["RegisterStatus"] = "error";           // <-- mark as error
+            return View("Register", model); // keep user input
+        }
+
+        // Registration succeeded
         TempData["RegisterMessage"] = response.Message;
-        TempData["RegisterStatus"] = response.IsSuccess ? "success" : "error";
+        TempData["RegisterStatus"] = "success";
 
-        // Keep user on the same page to show SweetAlert message
-        return View("Register");
+        // Redirect to login page
+        return RedirectToAction("Login", "Authentication");
     }
+
+
 
 
     // --------------------
@@ -259,7 +273,10 @@ public sealed class AuthenticationController(
     public async Task<IActionResult> RegisterParent(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
-            return View("Register");
+        {
+            ViewData["ShowForm"] = "parent";
+            return View("Register", model); // keep user input
+        }
 
         var result = await mediator.Send(new RegisterParentRequest
         {
@@ -269,10 +286,22 @@ public sealed class AuthenticationController(
         });
 
         var response = result.Value!;
-        TempData["RegisterMessage"] = response.Message;
-        TempData["RegisterStatus"] = response.IsSuccess ? "success" : "error";
 
-        // Keep user on the same page to show SweetAlert message
-        return View("Register");
+        // Registration failed (username/email exists, validation error, etc.)
+        if (!response.IsSuccess)
+        {
+            ViewData["ShowForm"] = "parent";
+            TempData["RegisterMessage"] = response.Message; // show error
+            TempData["RegisterStatus"] = "error";
+            return View("Register", model); // keep user input
+        }
+
+        // Registration succeeded
+        TempData["RegisterMessage"] = response.Message;
+        TempData["RegisterStatus"] = "success";
+
+        // Redirect to login page to show SweetAlert
+        return RedirectToAction("Login", "Authentication");
     }
+
 }
