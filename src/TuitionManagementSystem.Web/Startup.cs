@@ -126,7 +126,6 @@ public class Startup(IConfiguration configuration)
                 options.LogoutPath = "/logout";
             });
 
-        services.AddSingleton<IInvoiceService, InvoiceService>();
         services.AddSingleton<IEmailService, SmtpEmailService>();
         services.AddSingleton<IPaymentService, StripePaymentService>();
         services.AddSingleton<IFileService, PhysicalFileService>();
@@ -134,6 +133,7 @@ public class Startup(IConfiguration configuration)
 
         services.AddScoped<UserCookieAuthenticationEvents>();
         services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+        services.AddScoped<IInvoiceService, InvoiceService>();
 
         services.AddTransient<IClaimsTransformation, AccountClaimsTransformer>();
     }
