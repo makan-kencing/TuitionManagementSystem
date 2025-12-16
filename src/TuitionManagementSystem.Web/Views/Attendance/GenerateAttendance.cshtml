@@ -21,15 +21,22 @@
                   <div class="collapse" id="sessions1">
                       @foreach (var session in Model.Sessions)
                       {
-                          <div class="list-group mt-3">
-                              <div class="list-group-item d-flex justify-content-between">
-                                  <h6>Session Time : @session.StartAt to @session.EndAt</h6>
-                                  <div class="btn-group btn-group-sm">
-                                      <button type="submit" class="takeCode"  data-id="@session.SessionId" data-bs-toggle="modal" data-bs-target="#myModal">Code</button>
-                                      <button type="submit"  class="takeQrCode"  data-id="@session.SessionId" data-bs-toggle="modal" data-bs-target="#myQrModal">QR</button>
+                          if (session.Course == course.Course)
+                          {
+                              <div class="list-group mt-3">
+                                  <div class="list-group-item d-flex justify-content-between">
+                                      <h6>Session Time : @session.StartAt to @session.EndAt</h6>
+                                      <div class="btn-group btn-group-sm">
+                                          <button type="submit" class="takeCode" data-id="@session.SessionId"
+                                                  data-bs-toggle="modal" data-bs-target="#myModal">Code
+                                          </button>
+                                          <button type="submit" class="takeQrCode" data-id="@session.SessionId"
+                                                  data-bs-toggle="modal" data-bs-target="#myQrModal">QR
+                                          </button>
+                                      </div>
                                   </div>
                               </div>
-                          </div>
+                          }
                       }
                   </div>
               </div>
