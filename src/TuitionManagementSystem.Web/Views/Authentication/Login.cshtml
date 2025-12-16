@@ -74,6 +74,18 @@
                         @Html.ValidationMessage("Invalid")
                     </div>
                 }
+
+                <hr class="my-4"/>
+
+                <div class="text-center">
+                    <span class="text-muted small">Don’t have an account?</span>
+                    <br/>
+                    <a asp-controller="Authentication"
+                       asp-action="Register"
+                       class="btn btn-outline-primary mt-2 w-100">
+                        Create an account
+                    </a>
+                </div>
             </form>
         </div>
     </div>
