@@ -38,7 +38,7 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db, IHttpCont
 
         if (!withinTime)
         {
-            Result.Forbidden("Cannot take attendance outside of class time.");
+            return Result.Forbidden("Cannot take attendance outside of class time.");
         }
 
         var existingAttendance = await db.Attendances
