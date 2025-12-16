@@ -1,103 +1,218 @@
 @model TuitionManagementSystem.Web.Models.ViewModels.EnrollmentViewModel
 @using TuitionManagementSystem.Web.Services.Auth.Extensions
 
+
 @{
     Layout = "_Layout";
 }
 
-<form id="enrollForm">
-    @* <div class="mb-3"> *@
-    @*     <label for="subjectSelect" class="form-label">Subject</label> *@
-    @*     <select id="subjectSelect" class="form-select"> *@
-    @*         <option value="">-- Select Subject --</option> *@
-    @*     </select> *@
-    @* </div> *@
+@section Styles {
+    <style>
+        .subject-card {
+            cursor: pointer;
+            border-radius: 1rem;
+            min-height: 180px;
+            background: linear-gradient(135deg, #6a11cb, #2575fc, #6a11cb, #6a11cb);
+            background-size: 300% 300%;
+            transition: transform .25s ease, box-shadow .15s ease;
+            box-shadow: 0 .25rem .5rem rgba(0,0,0,.1);
+            color: #fff;
+        }
+        .subject-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 1rem 2rem rgba(0,0,0,.18);
+            animation: gradientMove 3s ease infinite;
+        }
+        .subject-card h5,
+        .subject-card p {
+            transition: color .25s ease;
+        }
+        .subject-card:hover h5,
+        .subject-card:hover p {
+            color: #fff;
+        }
+        @@keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        #enrollModal .modal-dialog {
+            max-width: 1100px;
+            width: 100%;
+        }
+        #enrollModal .modal-content {
+            height: 80vh;
+        }
+        #enrollModal .modal-body {
+            overflow-y: auto;
+        }
+        #enrollModal .modal-header {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 10;
+        }
+        .subject-card {
+            cursor: pointer;
+            border-radius: 1rem;
+            min-height: 180px;
+            transition:
+                transform .25s ease,
+                box-shadow .25s ease,
+                background-color .25s ease;
+        }
+        .subject-card .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    </style>
+}
 
-    <div class="mb-3">
-        <label for="courseSelect" class="form-label">Course</label>
-        <select id="courseSelect" class="form-select">
-            <option value="">-- Select Course --</option>
-            <option value="1">Basic Algebra</option>
-            <option value="2">General Science</option>
-            <option value="3">English Grammar</option>
-        </select>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Enrollments</h2>
+        <button class="btn btn-primary" id="newEnrollmentBtn">
+            <i class="bi bi-plus-circle"></i>&nbsp; New Enrollment
+        </button>
     </div>
+    <hr/>
+    <div id="enrollmentsContainer"></div>
+</div>
 
-    <button type="submit" class="btn btn-primary">Enroll</button>
-</form>
+<div class="modal fade" id="enrollModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex align-items-center gap-2">
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm d-none"
+                        id="backToSubjectsBtn">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
 
-<div id="enrollmentsContainer"></div>
+                <h2 class="modal-title mb-0" id="enrollModalTitle">
+                    Our Subjects
+                </h2>
 
+                <button type="button"
+                        class="btn-close ms-auto"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body enroll-modal-body">
+                <div id="subjectStep" class="row g-4 justify-content-center"></div>
+                <div id="courseStep" class="row g-3 d-none"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
-<script>
-    $(document).ready(function() {
+    <script>
+        $(function () {
+            const studentId = @User.GetUserId();
 
-        const studentId = @User.GetUserId();
-
-        // async function loadSubjects() {
-        //     const response = await fetch("/subjects");
-        //     const subjects = await response.json();
-        //     const $subjectSelect = $("#subjectSelect");
-        //     subjects.forEach(s => {
-        //         $subjectSelect.append(`<option value="${s.id}">${s.name}</option>`);
-        //     });
-        // }
-
-        // async function loadCourses(subjectId) {
-        //     if (!subjectId) {
-        //         $("#courseSelect").html('<option value="">-- Select Course --</option>');
-        //         return;
-        //     }
-        //
-        //     const response = await fetch(`/courses?subjectId=${subjectId}`);
-        //     const courses = await response.json();
-        //
-        //     const $courseSelect = $("#courseSelect");
-        //     $courseSelect.empty().append('<option value="">-- Select Course --</option>');
-        //     courses.forEach(c => {
-        //         $courseSelect.append(`<option value="${c.id}">(${c.id}) ${c.courseName}</option>`);
-        //     });
-        // }
-        //
-        // $("#subjectSelect").change(function() {
-        //     const subjectId = $(this).val();
-        //     loadCourses(subjectId);
-        // });
-
-        function loadEnrollments() {
-            $("#enrollmentsContainer").load("/enrollment/view/" + studentId);
-        }
-
-        // loadSubjects();
-        loadEnrollments();
-
-        $("#enrollForm").submit(async function(e) {
-            e.preventDefault();
-
-            const courseId = parseInt($("#courseSelect").val());
-
-            if (!courseId) {
-                Swal.fire({ icon: "error", title: "Error", text: "Please select a course." });
-                return;
+            function loadEnrollments() {
+                $("#enrollmentsContainer").load("/enrollment/view/" + studentId);
             }
 
-            const response = await fetch("/enrollment/make", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ studentId, courseId })
+            loadEnrollments();
+
+            $("#newEnrollmentBtn").click(async function () {
+                const res = await fetch("/subjects/api");
+                const subjects = await res.json();
+
+                $("#backToSubjectsBtn").addClass("d-none");
+                $("#enrollModalTitle").text("Our Subjects");
+
+                let html = "";
+                subjects.forEach(s => {
+                    html += `
+                            <div class="col-md-10">
+                                <div class="card subject-card h-100"
+                                     data-id="${s.id}"
+                                     data-name="${s.name}">
+                                    <div class="card-body">
+                                        <h5 class="text-center text-white h4">${s.name}</h5>
+                                        <p class="text-muted">${s.description ?? ""}</p>
+                                    </div>
+                                </div>
+                            </div>`;
+                });
+
+                $("#subjectStep").html(html).removeClass("d-none");
+                $("#courseStep").addClass("d-none").empty();
+                $("#enrollModal").modal("show");
             });
 
-            const data = await response.json();
+            $("#backToSubjectsBtn").on("click", function () {
+                $("#courseStep").addClass("d-none").empty();
+                $("#subjectStep").removeClass("d-none");
 
-            if (response.ok) {
-                Swal.fire({ icon: "success", title: "Success", text: data.message })
-                     .then(() => loadEnrollments());
-            } else {
-                Swal.fire({ icon: "error", title: "Error", text: data.message || data.errors.join("\n") });
-            }
+                $("#enrollModalTitle").text("Our Subjects");
+                $(this).addClass("d-none");
+            });
+
+            $(document).on("click", ".subject-card", async function () {
+                const subjectId = $(this).data("id");
+                const subjectName = $(this).data("name");
+
+                $("#enrollModalTitle").text(`Courses Available for ${subjectName}`);
+                $("#backToSubjectsBtn").removeClass("d-none");
+
+                const res = await fetch(`/courses/api?subjectId=${subjectId}`);
+                const courses = await res.json();
+
+                let html = "";
+                courses.forEach(c => {
+                    html += `
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5>${c.name}</h5>
+                                        <p>${c.description ?? ""}</p>
+
+                                        <div class="fw-bold text-primary mb-3">
+                                            RM ${c.price}
+                                        </div>
+
+                                        <button class="btn btn-success enrollCourseBtn"
+                                                data-course-id="${c.id}">
+                                            Enroll
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>`;
+                });
+
+                $("#subjectStep").addClass("d-none");
+                $("#courseStep").html(html).removeClass("d-none");
+            });
+
+            $(document).on("click", ".enrollCourseBtn", async function () {
+                const courseId = $(this).data("course-id");
+
+
+                const res = await fetch("/enrollment/make", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({studentId, courseId})
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    Swal.fire("Success", data.message, "success")
+                        .then(() => location.reload());
+                } else {
+                    const errorMessage =
+                        data?.errors?.length
+                            ? data.errors.join("\n")
+                            : data?.message || "Failed";
+
+                    Swal.fire("Enrollment Failed", errorMessage, "error");
+                }
+            });
         });
-
-    });
-</script>
+    </script>
 }

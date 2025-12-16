@@ -1,52 +1,76 @@
 @model IEnumerable<TuitionManagementSystem.Web.Features.Enrollment.ViewEnrollment.ViewEnrollmentResponse>
+@using TuitionManagementSystem.Web.Models.Class
 
-<h2>Enrollments</h2>
-
-@if (!Model.Any())
-{
-    <div class="alert alert-warning">
-        @ViewBag.Message
-    </div>
+@{
+    var ordered = Model
+        .OrderByDescending(e => e.Status == Enrollment.EnrollmentStatus.Active)
+        .ThenByDescending(e => e.EnrolledAt)
+        .ToList();
 }
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Enrollment ID</th>
-                <th>Course</th>
-                <th>Classroom</th>
-                <th>Enrolled At</th>
-                <th>Days Since</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var enrollment in Model)
-        {
-            var daysSinceEnrollment = (DateTime.UtcNow - enrollment.EnrolledAt).Days;
-            var isActive = enrollment.Status == TuitionManagementSystem.Web.Models.Class.Enrollment.EnrollmentStatus.Active;
-            var showCancelButton = daysSinceEnrollment <= 14 && isActive;
-            var showWithdrawButton = daysSinceEnrollment > 14 && isActive;
 
-            <tr data-enrollment-id="@enrollment.EnrollmentId">
-                <td>@enrollment.EnrollmentId</td>
-                <td>@enrollment.CourseName</td>
-                <td>@enrollment.ClassroomName</td>
-                <td>@enrollment.EnrolledAt.ToString("dd MMM yyyy")</td>
-                <td>@daysSinceEnrollment days</td>
-                <td>@enrollment.Status</td>
-                <td>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">My Enrollments</h5>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="toggleInactive">
+        <label class="form-check-label">Show inactive</label>
+    </div>
+</div>
+
+<div class="row g-3" id="enrollmentCards">
+@foreach (var e in ordered)
+{
+    var daysSinceEnrollment = (DateTime.UtcNow - e.EnrolledAt).Days;
+    var isActive = e.Status == Enrollment.EnrollmentStatus.Active;
+
+    var showCancelButton = isActive && daysSinceEnrollment <= 14;
+    var showWithdrawButton = isActive && daysSinceEnrollment > 14;
+
+    var isInactive = !isActive;
+    var cardClass = e.Status switch
+    {
+        Enrollment.EnrollmentStatus.Active => "border-success",
+        Enrollment.EnrollmentStatus.Cancelled => "border-secondary opacity-50 inactive-card",
+        Enrollment.EnrollmentStatus.Withdrawn => "border-danger opacity-50 inactive-card",
+        _ => ""
+    };
+
+    <div class="col-md-6 enrollment-item @(isInactive ? "d-none" : "")">
+        <div class="card h-100 @cardClass">
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">@e.CourseName</h5>
+                    <span class="badge bg-@(isActive ? "success" : "secondary")">
+                        @e.Status
+                    </span>
+                </div>
+
+                <p class="mb-1 text-muted">
+                    Classroom: <strong>@e.ClassroomName</strong>
+                </p>
+
+                <p class="mb-1">
+                    Enrolled: @e.EnrolledAt.ToString("dd MMM yyyy")
+                </p>
+
+                <p class="mb-3">
+                    Days since: <strong>@daysSinceEnrollment</strong>
+                </p>
+
+                <div class="d-flex gap-2">
                     @if (showCancelButton)
                     {
-                        <button class="btn btn-warning btn-sm markEnrollmentBtn" data-action="Cancelled">
+                        <button class="btn btn-outline-warning btn-sm markEnrollmentBtn"
+                                data-enrollment-id="@e.EnrollmentId"
+                                data-action="Cancelled">
                             Cancel
                         </button>
                     }
                     else if (showWithdrawButton)
                     {
-                        <button class="btn btn-danger btn-sm markEnrollmentBtn" data-action="Withdrawn">
+                        <button class="btn btn-outline-danger btn-sm markEnrollmentBtn"
+                                data-enrollment-id="@e.EnrollmentId"
+                                data-action="Withdrawn">
                             Withdraw
                         </button>
                     }
@@ -54,69 +78,90 @@ else
                     {
                         <span class="text-muted">No action</span>
                     }
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
 }
+</div>
 
 <script>
-$(document).on("click", ".markEnrollmentBtn", async function() {
-    const row = $(this).closest("tr");
-    const enrollmentId = row.data("enrollment-id");
-    const action = $(this).data("action");
-
-    const actionText = action.toLowerCase();
-    const actionTitle = action === "Cancelled" ? "Cancel" : "Withdraw";
-
-    const confirmed = await Swal.fire({
-        title: `Are you sure?`,
-        text: `This will ${actionText} the enrollment. ${action === "Withdrawn" ? "Note: Withdrawal is only allowed after 2 weeks of enrollment." : ""}`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: action === "Cancelled" ? "#f39c12" : "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: `Yes, ${actionText} it!`
+    $("#toggleInactive").on("change", function () {
+        $(".inactive-card").closest(".enrollment-item")
+            .toggleClass("d-none", !this.checked);
     });
 
-    if (confirmed.isConfirmed) {
-        try {
-            const response = await fetch("/enrollment/mark", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    enrollmentId: enrollmentId,
-                    status: action
-                })
-            });
+    $(document).on("click", ".markEnrollmentBtn", async function () {
+        const id = $(this).data("enrollment-id");
+        const action = $(this).data("action");
 
-            const data = await response.json();
+        const actionText = action === "Cancelled" ? "cancel" : "withdraw";
+        const actionTitle = action === "Cancelled" ? "Cancel" : "Withdraw";
 
-            if (response.ok) {
-                Swal.fire({
-                    icon: "success",
-                    title: `${actionTitle}ed`,
-                    text: data.message
-                }).then(() => {
-                    location.reload();
-                });
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: data.message || (data.errors ? data.errors.join(", ") : "Unknown error")
-                });
-            }
-        } catch (err) {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "Something went wrong"
-            });
+        const confirmed = await Swal.fire({
+            title: "Are you sure?",
+            text: `This will ${actionText} the enrollment.` +
+                (action === "Withdrawn"
+                    ? " Note: Withdrawal is only allowed after 2 weeks of enrollment."
+                    : ""),
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: action === "Cancelled" ? "#f39c12" : "#d33",
+            confirmButtonText: `Yes, ${actionText} it`
+        });
+
+        if (!confirmed.isConfirmed) return;
+
+        const res = await fetch("/enrollment/mark", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ enrollmentId: id, status: action })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            Swal.fire("Success", data.message, "success")
+                .then(() => location.reload());
+        } else {
+            const msg = data?.message || data?.errors?.join(", ") || "Failed";
+            Swal.fire("Error", msg, "error");
         }
-    }
-});
+    });
+
+    $(document).on("click", ".markEnrollmentBtn", async function () {
+        const id = $(this).data("enrollment-id");
+        const action = $(this).data("action");
+
+
+        const confirmed = await Swal.fire({
+            title: "Are you sure?",
+            text: `The enrollment will be ${action.toLowerCase()}`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes"
+        });
+
+
+        if (!confirmed.isConfirmed) return;
+
+
+        const res = await fetch("/enrollment/mark", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({enrollmentId: id, status: action})
+        });
+
+
+        const data = await res.json();
+
+
+        if (res.ok) {
+            Swal.fire("Success", data.message, "success")
+                .then(() => location.reload());
+        } else {
+            Swal.fire("Error", data.message || "Failed", "error");
+        }
+    });
 </script>
