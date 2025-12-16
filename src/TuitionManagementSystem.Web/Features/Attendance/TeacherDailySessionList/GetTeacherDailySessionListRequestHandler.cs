@@ -35,7 +35,7 @@ public sealed class GetTeacherDailySessionListRequestHandler(ApplicationDbContex
             .Where(s => s.StartAt >= startDate && s.StartAt < endDate)
             .Select(s => new SessionDaily
             {
-                SessionId = s.Id, StartAt = s.StartAt, EndAt = s.EndAt
+                SessionId = s.Id, StartAt = s.StartAt, EndAt = s.EndAt,Course = s.Course.Name
             })
             .OrderBy(s => s.StartAt)
             .ToListAsync(cancellationToken);
