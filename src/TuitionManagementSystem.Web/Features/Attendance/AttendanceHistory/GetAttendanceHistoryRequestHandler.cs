@@ -1,7 +1,6 @@
 ﻿namespace TuitionManagementSystem.Web.Features.Attendance.AttendanceHistory;
 
 using Ardalis.Result;
-using AutoMapper;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -13,36 +12,28 @@ public sealed class GetAttendanceHistoryRequestHandler(ApplicationDbContext db)
         GetAttendanceHistoryRequest request,
         CancellationToken cancellationToken)
     {
-
-
-        var courseName = await db.Courses
+        var response = await db.Courses
             .Where(c => c.Id == request.CourseId)
-            .Select(c => c.Name)
+            .Select(c => new GetAttendanceHistoryResponse
+            {
+                CourseName = c.Name,
+                Sessions = c.Sessions.Select(s => new SessionAttendanceItem
+                    {
+                        SessionId = s.Id,
+                        StartAt = s.StartAt,
+                        EndAt = s.EndAt,
+                        IsValid = s.Attendances.Any(a => a.Student.Id == request.UserId)
+                    })
+                    .OrderBy(s => s.StartAt)
+                    .ToList()
+            })
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (courseName == null)
+        if (response is null)
         {
-            return Result.NotFound("Course not found");
+            Result.NotFound("Course not found");
         }
 
-        var list = await db.Sessions
-            .Where(s => s.Course.Id == request.CourseId)
-            .Select(s => new SessionAttendanceItem
-            {
-                SessionId = s.Id,
-                StartAt = s.StartAt,
-                EndAt = s.EndAt,
-                IsValid = s.Attendances.Any(a => a.Student.Id ==request.UserId)
-            })
-            .OrderBy(s => s.StartAt)
-            .ToListAsync(cancellationToken);
-
-        return Result.Success(new GetAttendanceHistoryResponse
-        {
-            Course = courseName,
-            Sessions = list
-        });
+        return Result.Success(response!);
     }
-
-
 }

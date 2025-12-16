@@ -3,6 +3,8 @@
 using Ardalis.Result;
 using AttendanceHistory;
 using AttendanceSummary;
+using GenerateAttendanceCode;
+using GetAttendanceCode;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -53,8 +55,9 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
 
     // public IActionResult GenerateAttendance() => this.View();
 
-    [Authorize(Policy =  "TeacherOnly")]
-    public async Task<IActionResult> GenerateAttendance( CancellationToken cancellationToken)
+    [HttpGet]
+    [Authorize(Policy = "TeacherOnly")]
+    public async Task<IActionResult> GenerateAttendance(CancellationToken cancellationToken)
     {
         var userId = this.User.GetUserId() ?? -1;
         if (userId == -1)
@@ -62,13 +65,39 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
             return this.Unauthorized();
         }
 
-        var result =await mediator.Send(new GetTeacherDailySessionListRequest(userId!), cancellationToken);
+        var result = await mediator.Send(new GetTeacherDailySessionListRequest(userId!), cancellationToken);
         if (result.IsNotFound())
         {
             return this.NotFound();
         }
 
         return this.View(result.Value);
+    }
 
+    [HttpPost]
+    [Authorize(Policy = "TeacherOnly")]
+    public async Task<IActionResult> Generate(int id, CancellationToken cancellationToken)
+    {
+        var code = await mediator.Send(new GetAttendanceCodeQuery(id), cancellationToken);
+
+        if (code.IsSuccess)
+        {
+            return this.PartialView("_AttendanceCodeModal", new AttendanceCodeViewModel
+            {
+                SessionId = id,
+                Code = code.Value.Code
+            });
+        }
+
+        var generatedCode = await mediator.Send(
+            new GenerateAttendanceCodeRequest(id),
+            cancellationToken);
+
+        return this.PartialView("_AttendanceCodeModal",
+            new AttendanceCodeViewModel
+            {
+                SessionId = id,
+                Code = generatedCode.Value.Code
+            });
     }
 }

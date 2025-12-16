@@ -2,7 +2,7 @@
 
 public class GenerateAttendanceCodeResponse
 {
-    public string Code { get; set; } = default!;
+    public required string Code { get; set; }
 }
 
 

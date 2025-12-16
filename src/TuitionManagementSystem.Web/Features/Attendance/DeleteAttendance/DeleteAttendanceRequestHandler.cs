@@ -5,11 +5,10 @@ using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-public sealed class DeleteAttendanceRequestHandler(ApplicationDbContext db
-    , IHttpContextAccessor httpContextAccessor) :
-    IRequestHandler<DeleteAttendanceRequest, Result<DeleteAttendanceResponse>>
+public sealed class DeleteAttendanceRequestHandler(ApplicationDbContext db) :
+    IRequestHandler<DeleteAttendanceRequest, Result>
 {
-    public async Task<Result<DeleteAttendanceResponse>> Handle(
+    public async Task<Result> Handle(
         DeleteAttendanceRequest request, CancellationToken cancellationToken)
     {
         var checkAttendance = await db.Attendances
@@ -24,7 +23,7 @@ public sealed class DeleteAttendanceRequestHandler(ApplicationDbContext db
         db.Attendances.Remove(checkAttendance);
         await db.SaveChangesAsync(cancellationToken);
 
-        return Result<DeleteAttendanceResponse>.Success(new DeleteAttendanceResponse());
+        return Result.Success();
 
     }
 }

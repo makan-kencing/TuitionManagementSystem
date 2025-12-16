@@ -1,7 +1,6 @@
 ﻿namespace TuitionManagementSystem.Web.Features.Attendance.GenerateAttendanceCode;
 
 using Ardalis.Result;
-using System;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -27,8 +26,8 @@ public sealed class GenerateAttendanceCodeRequestHandler(ApplicationDbContext db
             .Where(at => at.Id == LastCodeId)
             .FirstAsync(cancellationToken);
 
-        session.AttendanceCode = code;
-        session.CodeGeneratedAt = DateTime.UtcNow;
+        code.Session = session;
+
         await db.SaveChangesAsync(cancellationToken);
 
         return Result<GenerateAttendanceCodeResponse>.Success(new()

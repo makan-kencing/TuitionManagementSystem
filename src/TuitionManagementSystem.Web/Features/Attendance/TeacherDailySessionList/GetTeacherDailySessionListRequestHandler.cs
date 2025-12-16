@@ -11,41 +11,30 @@ public sealed class GetTeacherDailySessionListRequestHandler(ApplicationDbContex
     public async Task<Result<GetTeacherDailySessionListResponse>> Handle(GetTeacherDailySessionListRequest request,
         CancellationToken cancellationToken)
     {
+        var hour0 = DateTime.UtcNow.Date.Subtract(
+            TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur").BaseUtcOffset);
+        var hour24 = hour0.AddDays(1);
+
         var courses = await db.CourseTeachers
             .Where(ct => ct.TeacherId == request.UserId)
             .Select(ct => ct.Course)
-            .ToListAsync(cancellationToken);
-
-        if (courses.Count == 0)
-        {
-            return Result.NotFound("Course not found");
-        }
-
-        var courseNames = courses.Select(c => new CourseDaily
-        {
-            Course = c.Name
-        }).ToList();
-
-        var startDate = DateTime.UtcNow.Date.Subtract(TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur").BaseUtcOffset);
-        var endDate = startDate.AddDays(1);
-
-
-        var sessions = await db.Sessions
-            .Where(s => courses.Contains(s.Course))
-            .Where(s => s.StartAt >= startDate && s.StartAt < endDate)
-            .Select(s => new SessionDaily
+            .Select(c => new CourseDaily
             {
-                SessionId = s.Id, StartAt = s.StartAt, EndAt = s.EndAt,Course = s.Course.Name
+                Name = c.Name,
+                Sessions = c.Sessions
+                    .Where(s => s.StartAt >= hour0 && s.StartAt < hour24)
+                    .Select(s => new SessionDaily
+                    {
+                        Id = s.Id,
+                        StartAt = s.StartAt,
+                        EndAt = s.EndAt,
+                        Code = s.AttendanceCode != null
+                            ? s.AttendanceCode.Code
+                            : null
+                    }).ToList()
             })
-            .OrderBy(s => s.StartAt)
             .ToListAsync(cancellationToken);
 
-
-
-        return Result.Success(new GetTeacherDailySessionListResponse
-        {
-            Sessions = sessions,
-            Courses =courseNames
-        });
+        return Result.Success(new GetTeacherDailySessionListResponse { Courses = courses });
     }
 }

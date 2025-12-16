@@ -9,6 +9,7 @@ using AttendanceSummary;
 using DeleteAttendance;
 using GenerateAttendanceCode;
 using MediatR;
+using Services.Auth.Extensions;
 using TakeAttendanceCode;
 
 
@@ -24,10 +25,10 @@ public class AttendanceApiController(IMediator mediator) : ApiController
     public async Task<Result<TakeAttendanceCodeResponse>> TakeAttendanceCode(
         [FromForm] string code,
         CancellationToken cancellationToken) =>
-        await mediator.Send(new TakeAttendanceCodeRequest(code), cancellationToken);
+        await mediator.Send(new TakeAttendanceCodeRequest(this.User.GetUserId() ?? -1, code), cancellationToken);
 
     [HttpDelete("delete/{attendanceId}")]
-    public async Task<Result<DeleteAttendanceResponse>> DeleteAttendance(
+    public async Task<Result> DeleteAttendance(
         [FromRoute] int attendanceId,
         CancellationToken cancellationToken) =>
         await mediator.Send(new DeleteAttendanceRequest(attendanceId), cancellationToken);
