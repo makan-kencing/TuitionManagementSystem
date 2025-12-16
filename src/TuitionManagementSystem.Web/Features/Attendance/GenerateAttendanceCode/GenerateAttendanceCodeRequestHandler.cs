@@ -1,7 +1,6 @@
 ﻿namespace TuitionManagementSystem.Web.Features.Attendance.GenerateAttendanceCode;
 
 using Ardalis.Result;
-using System;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -22,13 +21,21 @@ public sealed class GenerateAttendanceCodeRequestHandler(ApplicationDbContext db
             return Result.NotFound("Session not found.");
         }
 
+        var withinTime = DateTime.UtcNow >= session.StartAt && DateTime.UtcNow <= session.EndAt;
+
+        if (!withinTime)
+        {
+            return Result.Forbidden("Cannot generate attendance outside of class time.");
+        }
+
         LastCodeId = (LastCodeId % 1_000_000) + 1;
         var code = await db.AttendanceCodes
             .Where(at => at.Id == LastCodeId)
             .FirstAsync(cancellationToken);
 
-        session.AttendanceCode = code;
-        session.CodeGeneratedAt = DateTime.UtcNow;
+        code.Session = session;
+
+        await db.SaveChangesAsync(cancellationToken);
 
         return Result<GenerateAttendanceCodeResponse>.Success(new()
         {

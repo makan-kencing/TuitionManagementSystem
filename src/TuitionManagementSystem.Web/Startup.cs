@@ -106,6 +106,7 @@ public class Startup(IConfiguration configuration)
             .AddSignalR();
 
         services.AddHostedService<OverdueInvoiceService>();
+        services.AddHostedService<MonthlyInvoiceService>();
 
         services
             .AddAuthorization(options =>

@@ -5,7 +5,6 @@ using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Models.Class;
-using Services.Auth.Extensions;
 
 public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db, IHttpContextAccessor httpContextAccessor)
     : IRequestHandler<TakeAttendanceCodeRequest, Result<TakeAttendanceCodeResponse>>
@@ -13,64 +12,49 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db, IHttpCont
     public async Task<Result<TakeAttendanceCodeResponse>> Handle(TakeAttendanceCodeRequest request,
         CancellationToken cancellationToken)
     {
-        var session = await db.Sessions
-            .Include(s => s.AttendanceCode)
-            .Where(s => s.AttendanceCode.Code == request.Code)
-            .OrderByDescending(s => s.CodeGeneratedAt)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (session == null)
-        {
-            return Result.NotFound("Session not found");
-        }
-
-        var userId = httpContextAccessor.HttpContext!.User.GetUserId();
-
-        var student = await db.Students
-            .Where(s => s.Id == userId)
+        var attendanceCode = await db.AttendanceCodes
+            .Include(at => at.Session)
+            .Where(at => at.Code == request.Code)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (student == null)
+        if (attendanceCode?.Session is null)
         {
-            return Result.NotFound("Student not found");
+            return Result.NotFound("Code not found.");
         }
 
-        var isEnroll = await db.Enrollments
-            .Where(e => e.Student.Id == student.Id)
+        var session = attendanceCode.Session;
+
+        var isEnrolled = await db.Enrollments
+            .Where(e => e.Student.Id == request.UserId)
             .Where(e => e.Course.Id == session.CourseId)
             .AnyAsync(cancellationToken);
 
-        if (isEnroll)
+        if (!isEnrolled)
         {
-            return Result.Invalid();
+            return Result.Forbidden("Cannot take attendance for class not enrolled.");
+        }
+
+        var withinTime = DateTime.UtcNow >= session.StartAt && DateTime.UtcNow <= session.EndAt;
+
+        if (!withinTime)
+        {
+            return Result.Forbidden("Cannot take attendance outside of class time.");
         }
 
         var existingAttendance = await db.Attendances
-            .AnyAsync(a => a.Student.Id == student.Id
-                           && a.Session.Id == session.Id,
-                cancellationToken);
+            .Where(a => a.Student.Id == request.UserId)
+            .Where(a => a.Session.Id == session.Id)
+            .AnyAsync(cancellationToken);
 
-        if (!existingAttendance)
+        if (existingAttendance)
         {
             return Result.Conflict("Attendance is already taken");
         }
 
-        if (!this.CheckWithinTheTime(session))
-        {
-            return Result.Invalid();
-        }
-
-
-        var attendance = new Attendance { Session = session, Student = student, TakenOn = DateTime.UtcNow };
-
+        var attendance = new Attendance { Session = session, StudentId = request.UserId, TakenOn = DateTime.UtcNow };
         await db.Attendances.AddAsync(attendance, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
-        return Result<TakeAttendanceCodeResponse>.Success(new TakeAttendanceCodeResponse { SessionId = session.Id });
-    }
-
-    private bool CheckWithinTheTime(Session session)
-    {
-        var currentTime = DateTime.Now;
-        return currentTime >= session.StartAt && currentTime <= session.EndAt;
+        return Result<TakeAttendanceCodeResponse>.Success(new TakeAttendanceCodeResponse { SessionId = attendanceCode.Id });
     }
 }

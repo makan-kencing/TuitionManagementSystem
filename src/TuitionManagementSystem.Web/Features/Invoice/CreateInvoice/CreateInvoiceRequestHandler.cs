@@ -52,11 +52,11 @@ namespace TuitionManagementSystem.Web.Features.Invoice.CreateInvoice
 
             var existingOverdueInvoice = await db.Invoices
                 .FirstOrDefaultAsync(i =>
-                    i.EnrollmentId == originalInvoice.EnrollmentId &&
-                    i.InvoicedAt.Date == originalInvoice.InvoicedAt.Date &&
-                    i.DueAt == originalInvoice.DueAt &&
-                    i.Status == InvoiceStatus.Overdue &&
-                    i.CancelledAt == null,
+                        i.EnrollmentId == originalInvoice.EnrollmentId &&
+                        i.InvoicedAt.Date == originalInvoice.InvoicedAt.Date &&
+                        i.DueAt == originalInvoice.DueAt &&
+                        i.Status == InvoiceStatus.Overdue &&
+                        i.CancelledAt == null,
                     cancellationToken);
 
             if (existingOverdueInvoice != null)
@@ -119,14 +119,20 @@ namespace TuitionManagementSystem.Web.Features.Invoice.CreateInvoice
             if (enrollment.Course == null)
                 return Result.NotFound("Course not found");
 
-            var existingInvoice = await db.Invoices
-                .FirstOrDefaultAsync(i =>
-                    i.EnrollmentId == enrollmentId &&
-                    i.CancelledAt == null,
-                    cancellationToken);
+            var latestActiveInvoice = await db.Invoices
+                .Where(i => i.EnrollmentId == enrollmentId &&
+                            i.CancelledAt == null)
+                .OrderByDescending(i => i.InvoicedAt)
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (existingInvoice != null)
-                return Result.Conflict("An active invoice already exists for this enrollment");
+            if (latestActiveInvoice != null)
+            {
+                if (latestActiveInvoice.Status == InvoiceStatus.Pending)
+                {
+                    return Result.Conflict(
+                        $"Cannot create new invoice while invoice #{latestActiveInvoice.Id} is pending");
+                }
+            }
 
             var invoice = new Invoice
             {

@@ -1,0 +1,36 @@
+@model TuitionManagementSystem.Web.Features.Attendance.AttendanceCodeViewModel
+
+@{
+    var returnUrl = Url.Action(
+        protocol: Context.Request.Scheme,
+        controller: "Attendance",
+        action: "TakeAttendance",
+        values: new { code = Model.Code }) ?? "/";
+}
+
+<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title"></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+            <div class="text-center">
+                <!-- https://stackoverflow.com/questions/602642/server-urlencode-vs-httputility-urlencode -->
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@Uri.EscapeDataString(returnUrl)"
+                     alt="QR Code"/>
+
+                <p class="mt-3">Code: @Model.Code</p>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
+<span id="code-button@(Model.SessionId)" hx-swap-oob="true">
+    @Model.Code
+</span>

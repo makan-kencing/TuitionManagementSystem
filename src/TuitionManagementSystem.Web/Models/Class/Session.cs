@@ -16,10 +16,6 @@ public class Session
 
     public required DateTime EndAt { get; set; }
 
-    public int? AttendanceCodeId { get; set; }
-
-    public DateTime? CodeGeneratedAt { get; set; }
-
     public Classroom Classroom { get; set; } = null!;
 
     public Course Course { get; set; } = null!;

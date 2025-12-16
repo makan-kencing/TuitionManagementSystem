@@ -14,4 +14,8 @@ public class AttendanceCode
     [StringLength(6)]
     [RegularExpression(@"^\d{6}$")]
     public required string Code { get; set; }
+
+    public int? SessionId { get; set; }
+
+    public Session? Session { get; set; }
 }

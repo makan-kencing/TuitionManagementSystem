@@ -2,88 +2,73 @@
 
 @{
     ViewData["Title"] = "Generate Attendance";
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
 }
-
 
 <div>
     <h3>Attendance Management </h3>
 </div>
-  <div class="container mt-4">
-      @foreach (var course in Model.Courses)
-      {
-          <div class="list-group">
-              <div class="list-group-item ">
-                  <h5>@course.Course</h5>
-                  <button class="btn btn-primary btn-sm" data-bs-toggle="collapse"
-                          data-bs-target="#sessions1" aria-expanded="false" aria-controls="sessions1">
-                      Toggle Sessions
-                  </button>
-                  <div class="collapse" id="sessions1">
-                      @foreach (var session in Model.Sessions)
-                      {
-                          <div class="list-group mt-3">
-                              <div class="list-group-item d-flex justify-content-between">
-                                  <h6>Session Time : @session.StartAt to @session.EndAt</h6>
-                                  <div class="btn-group btn-group-sm">
-                                      <button type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">Code</button>
-                                      <button type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myQrModal">QR</button>
-                                  </div>
-                              </div>
-                          </div>
-                      }
-                  </div>
-              </div>
-          </div>
-      }
-  </div>
 
-  <div class="modal" id="myModal">
-      <div class="modal-dialog">
-          <div class="modal-content">
+<div class="container mt-4">
+    @foreach (var (i, course) in Model.Courses.Index())
+    {
+        <div class="list-group">
+            <div class="list-group-item ">
+                <h5>@course.Name</h5>
 
-              <div class="modal-header">
-                  <h4 class="modal-title"></h4>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-              </div>
+                <button class="btn btn-primary btn-sm"
 
-              <div class="modal-body">
-                  No Enter Code
-              </div>
+                        data-bs-toggle="collapse"
+                        data-bs-target="#sessions@(i)" aria-expanded="false" aria-controls="sessions@(i)">
+                    Toggle Sessions
+                </button>
 
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-              </div>
+                <div class="collapse" id="sessions@(i)">
+                    @if (course.Sessions.Count == 0)
+                    {
+                        <div class="list-group mt-3">
+                            No Sessions Found
+                        </div>
+                    }
+                    @foreach (var session in course.Sessions)
+                    {
+                        <div class="list-group mt-3">
+                            <div class="list-group-item d-flex justify-content-between">
+                                <h6>Session Time : @TimeZoneInfo.ConvertTimeFromUtc(session.StartAt, timezone)
+                                    to @TimeZoneInfo.ConvertTimeFromUtc(session.EndAt, timezone)</h6>
 
-          </div>
-      </div>
-  </div>
+                                <div class="btn-group btn-group-sm">
+                                    <button
+                                        hx-post
+                                        hx-controller="Attendance"
+                                        hx-action="Generate"
+                                        hx-route-id="@session.Id"
+                                        hx-target="#code-modal"
+                                        type="submit"
+                                        class=""
+                                        data-bs-toggle="modal" data-bs-target="#code-modal">
+                                        <span id="code-button@(session.Id)">
+                                            @(session.Code ?? "Generate")
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
-  <div class="modal" id="myQrModal">
-      <div class="modal-dialog">
-          <div class="modal-content">
+<div id="code-modal" class="modal"
+     aria-hidden="false"
+     tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content"></div>
+    </div>
+</div>
 
-              <div class="modal-header">
-                  <h4 class="modal-title"></h4>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-              </div>
-
-              <div class="modal-body">
-                  No Enter Code
-              </div>
-
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-              </div>
-
-          </div>
-      </div>
-  </div>
-
-  @section Scripts
-  {
-
-
-  }
 
 
 

@@ -33,7 +33,6 @@ public class EnrollmentController : Controller
         if (!model.StudentId.HasValue || !model.CourseId.HasValue)
             return BadRequest(new { message = "Student and Course are required." });
 
-        // Send request to handler
         var result = await _mediator.Send(
             new MakeEnrollmentRequest(
                 model.StudentId.Value,
@@ -43,7 +42,6 @@ public class EnrollmentController : Controller
         if (!result.IsSuccess)
             return BadRequest(new { errors = result.Errors });
 
-        // Return structured response
         var response = new EnrollmentViewModel
         {
             EnrollmentId = result.Value.EnrollmentId,

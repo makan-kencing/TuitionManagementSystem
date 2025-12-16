@@ -30,7 +30,6 @@ public sealed class GetAttendanceSummaryRequestHandler(
         //             }).ToList()
         //     }).FirstOrDefaultAsync(cancellationToken);
 
-
         var courseSummary = await db.Database
             .SqlQuery<CourseQuery>
             ($"""

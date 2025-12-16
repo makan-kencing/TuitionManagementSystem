@@ -2,23 +2,25 @@
 
 public class GetTeacherDailySessionListResponse
 {
-    public List<SessionDaily>  Sessions { get; set; } = [];
-    public List<CourseDaily>  Courses { get; set; } = [];
-
-
+    public ICollection<CourseDaily>  Courses { get; set; } = [];
 }
 
 public class CourseDaily
 {
-     public string Course { get; set; }
+     public required string Name { get; set; }
+
+     public ICollection<SessionDaily> Sessions { get; set; } = [];
 }
 
 public class SessionDaily
 {
+    public int Id { get; set; }
 
-    public int SessionId { get; set; }
-    public DateTime StartAt { get; set; }
-    public DateTime EndAt { get; set; }
+    public required DateTime StartAt { get; set; }
+
+    public required DateTime EndAt { get; set; }
+
+    public string? Code { get; set; }
 }
 
 

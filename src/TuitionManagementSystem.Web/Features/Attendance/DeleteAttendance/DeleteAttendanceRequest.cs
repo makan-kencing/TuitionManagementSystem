@@ -3,6 +3,5 @@
 using Ardalis.Result;
 using MediatR;
 
-public record DeleteAttendanceRequest(int AttendanceId)
-    : IRequest<Result<DeleteAttendanceResponse>>;
+public record DeleteAttendanceRequest(int AttendanceId) : IRequest<Result>;
 
