@@ -29,6 +29,7 @@ public sealed class GenerateAttendanceCodeRequestHandler(ApplicationDbContext db
 
         session.AttendanceCode = code;
         session.CodeGeneratedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
 
         return Result<GenerateAttendanceCodeResponse>.Success(new()
         {
