@@ -1,0 +1,112 @@
+﻿@model TuitionManagementSystem.Web.Features.Attendance.TeacherDailySessionList.GetTeacherDailySessionListResponse
+
+@{
+    ViewData["Title"] = "Generate Attendance";
+}
+
+
+<div>
+    <h3>Attendance Management </h3>
+</div>
+
+  @* <div class="container mt-4"> *@
+  @*       <!-- Course List --> *@
+  @*       <div class="list-group"> *@
+  @*           <!-- Course 1 --> *@
+  @*           <div class="list-group-item"> *@
+  @*               <h5>Course 1</h5> *@
+  @*               <button class="btn btn-primary btn-sm" data-bs-toggle="collapse" *@
+  @*                       data-bs-target="#sessions1" aria-expanded="false" aria-controls="sessions1"> *@
+  @*                   Toggle Sessions *@
+  @*               </button> *@
+  @*               <div class="collapse" id="sessions1"> *@
+  @*                   <div class="list-group mt-3"> *@
+  @*                       <div class="list-group-item d-flex justify-content-between"> *@
+  @*                           <h6>Session 1</h6> *@
+  @*                           <button class="btn btn-info btn-sm">Button</button> *@
+  @*                       </div> *@
+  @*                       <div class="list-group-item d-flex justify-content-between"> *@
+  @*                           <h6>Session 2</h6> *@
+  @*                           <button class="btn btn-info btn-sm">Button</button> *@
+  @*                       </div> *@
+  @*                       <div class="list-group-item d-flex justify-content-between"> *@
+  @*                           <h6>Session 3</h6> *@
+  @*                           <button class="btn btn-info btn-sm">Button</button> *@
+  @*                       </div> *@
+  @*                   </div> *@
+  @*               </div> *@
+  @*           </div> *@
+  @* *@
+  @*           <!-- Course 2 --> *@
+  @*           <div class="list-group-item"> *@
+  @*               <h5>Course 2</h5> *@
+  @*               <button class="btn btn-primary btn-sm" data-toggle="collapse" data-target="#sessions2" aria-expanded="false" aria-controls="sessions2"> *@
+  @*                   Toggle Sessions *@
+  @*               </button> *@
+  @*               <div class="collapse" id="sessions2"> *@
+  @*                   <div class="list-group mt-3"> *@
+  @*                       <div class="list-group-item d-flex justify-content-between"> *@
+  @*                           <h6>Session 1</h6> *@
+  @*                           <button class="btn btn-info btn-sm">Button</button> *@
+  @*                       </div> *@
+  @*                       <div class="list-group-item d-flex justify-content-between"> *@
+  @*                           <h6>Session 2</h6> *@
+  @*                           <button class="btn btn-info btn-sm">Button</button> *@
+  @*                       </div> *@
+  @*                   </div> *@
+  @*               </div> *@
+  @*           </div> *@
+  @* *@
+  @*           <!-- Course 3 --> *@
+  @*           <div class="list-group-item"> *@
+  @*               <h5>Course 3</h5> *@
+  @*               <button class="btn btn-primary btn-sm" data-toggle="collapse" data-target="#sessions3" *@
+  @*                       aria-expanded="false" aria-controls="sessions3"> *@
+  @*                   Toggle Sessions *@
+  @*               </button> *@
+  @*               <div class="collapse" id="sessions3"> *@
+  @*                   <div class="list-group mt-3"> *@
+  @*                       <div class="list-group-item d-flex justify-content-between"> *@
+  @*                           <h6>Session 1</h6> *@
+  @*                           <button class="btn btn-info btn-sm">Button</button> *@
+  @*                       </div> *@
+  @*                       <div class="list-group-item d-flex justify-content-between"> *@
+  @*                           <h6>Session 2</h6> *@
+  @*                           <button class="btn btn-info btn-sm">Button</button> *@
+  @*                       </div> *@
+  @*                   </div> *@
+  @*               </div> *@
+  @*           </div> *@
+  @*       </div> *@
+  @*   </div> *@
+  <div class="container mt-4">
+      @foreach (var course in Model.Courses)
+      {
+          <div class="list-group">
+              <div class="list-group-item ">
+                  <h5>@course.Course</h5>
+                  <button class="btn btn-primary btn-sm" data-bs-toggle="collapse"
+                          data-bs-target="#sessions1" aria-expanded="false" aria-controls="sessions1">
+                      Toggle Sessions
+                  </button>
+                  <div class="collapse" id="sessions1">
+                      @foreach (var session in Model.Sessions)
+                      {
+                          <div class="list-group mt-3">
+                              <div class="list-group-item d-flex justify-content-between">
+                                  <h6>Session Time : @session.StartAt to @session.EndAt</h6>
+                                  <div class="btn-group btn-group-sm">
+                                      <button type="button" class="btn btn-primary  btn-sm">Code</button>
+                                      <button type="button" class="btn btn-primary  btn-sm">QR</button>
+                                  </div>
+                              </div>
+                          </div>
+                      }
+                  </div>
+              </div>
+          </div>
+      }
+  </div>
+
+
+
