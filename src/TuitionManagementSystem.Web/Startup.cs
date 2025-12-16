@@ -21,7 +21,8 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Models.Notification;
-using Services;
+using Models.User;
+using Services.Auth.Constants;
 using Services.File;
 using Services.Payment;
 using Services.Background;
@@ -105,12 +106,15 @@ public class Startup(IConfiguration configuration)
 
         services.AddHostedService<OverdueInvoiceService>();
 
-
         services
             .AddAuthorization(options =>
+            {
                 options.FallbackPolicy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .Build())
+                    .Build();
+                options.AddPolicy("TeacherOnly", policy =>
+                    policy.RequireClaim(InternalClaimTypes.UserType, nameof(Teacher)));
+            })
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
             {
@@ -128,8 +132,6 @@ public class Startup(IConfiguration configuration)
 
         services.AddScoped<UserCookieAuthenticationEvents>();
         services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
-        services.AddScoped<IInvoiceService, InvoiceService>();
-
 
         services.AddTransient<IClaimsTransformation, AccountClaimsTransformer>();
     }
