@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Generate Attendance";
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
 }
 
 <div>
@@ -33,7 +34,8 @@
                     {
                         <div class="list-group mt-3">
                             <div class="list-group-item d-flex justify-content-between">
-                                <h6>Session Time : @session.StartAt to @session.EndAt</h6>
+                                <h6>Session Time : @TimeZoneInfo.ConvertTimeFromUtc(session.StartAt, timezone)
+                                    to @TimeZoneInfo.ConvertTimeFromUtc(session.EndAt, timezone)</h6>
 
                                 <div class="btn-group btn-group-sm">
                                     <button
