@@ -25,8 +25,8 @@
                               <div class="list-group-item d-flex justify-content-between">
                                   <h6>Session Time : @session.StartAt to @session.EndAt</h6>
                                   <div class="btn-group btn-group-sm">
-                                      <button type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">Code</button>
-                                      <button type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myQrModal">QR</button>
+                                      <button type="submit" class="takeCode"  data-id="@session.SessionId" data-bs-toggle="modal" data-bs-target="#myModal">Code</button>
+                                      <button type="submit"  class="takeQrCode"  data-id="@session.SessionId" data-bs-toggle="modal" data-bs-target="#myQrModal">QR</button>
                                   </div>
                               </div>
                           </div>
@@ -81,7 +81,69 @@
 
   @section Scripts
   {
+      <script>
+          document.querySelectorAll(".takeCode").forEach(btn => {
+              btn.addEventListener("click", function () {
+                  let sessionId = this.dataset.id;
+                  $.ajax({
+                      url:"/api/attendanceapi/generate",
+                      type:"Post",
+                      data:{sessionId: sessionId},
+                      success:function(data) {
+                          $("#myModal .modal-title").text("Attendance Generate Success");
+                          $("#myModal .modal-body").html(data);
+                          const modal = new bootstrap.Modal(document.getElementById("myModal"));
+                          modal.show();
+                      },
+                      error: function(xhr) {
+                          let message = "Attendance Generate failed";
 
+                          if (xhr.responseJSON && xhr.responseJSON.errors) {
+                              message = xhr.responseJSON.errors.join("<br>");
+                          }
+
+                          $("#myModal .modal-title").text("Attendance Generate Failed");
+                          $("#myModal .modal-body").html(`<div class="alert alert-danger">${message}</div>`);
+                          const modal = new bootstrap.Modal(document.getElementById("myModal"));
+                          modal.show();
+                      }
+                  })
+              });
+
+          });
+      </script>
+
+      <script>
+          document.querySelectorAll(".takeQrCode").forEach(btn => {
+              btn.addEventListener("click", function () {
+                  let sessionId = this.dataset.id;
+                  $.ajax({
+                      url:"/api/attendanceapi/generate",
+                      type:"Post",
+                      data:{sessionId: sessionId},
+                      success:function(data) {
+                          let qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent("@Url.Action(protocol:Context.Request.Scheme,controller:"Attendance",action:"TakeAttendance",values:new {})");
+                          $("#myModal .modal-title").text("Attendance QR Code");
+                          $("#myModal .modal-body").html(` <div class="text-center"> <img src="${qrUrl}" alt="QR Code" /> <p class="mt-3">Code: ${data.code}</p> </div> `);
+                          const modal = new bootstrap.Modal(document.getElementById("myQrModal"));
+                          modal.show();
+                      },
+                      error: function(xhr) {
+                          let message = "Attendance Generate failed";
+
+                          if (xhr.responseJSON && xhr.responseJSON.errors) {
+                              message = xhr.responseJSON.errors.join("<br>");
+                          }
+
+                          $("#myModal .modal-title").text("Attendance Generate Failed");
+                          $("#myModal .modal-body").html(`<div class="alert alert-danger">${message}</div>`);
+                          const modal = new bootstrap.Modal(document.getElementById("myQrModal"));
+                          modal.show();
+                      }
+                  })
+              })
+          })
+      </script>
 
   }
 
