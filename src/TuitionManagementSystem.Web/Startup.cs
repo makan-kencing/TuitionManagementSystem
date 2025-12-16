@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Models.Notification;
 using Models.User;
+using Services;
 using Services.Auth.Constants;
 using Services.File;
 using Services.Payment;
@@ -125,6 +126,7 @@ public class Startup(IConfiguration configuration)
                 options.LogoutPath = "/logout";
             });
 
+        services.AddSingleton<IInvoiceService, InvoiceService>();
         services.AddSingleton<IEmailService, SmtpEmailService>();
         services.AddSingleton<IPaymentService, StripePaymentService>();
         services.AddSingleton<IFileService, PhysicalFileService>();
