@@ -21,6 +21,13 @@ public sealed class GenerateAttendanceCodeRequestHandler(ApplicationDbContext db
             return Result.NotFound("Session not found.");
         }
 
+        var withinTime = DateTime.UtcNow >= session.StartAt && DateTime.UtcNow <= session.EndAt;
+
+        if (!withinTime)
+        {
+            return Result.Forbidden("Cannot generate attendance outside of class time.");
+        }
+
         LastCodeId = (LastCodeId % 1_000_000) + 1;
         var code = await db.AttendanceCodes
             .Where(at => at.Id == LastCodeId)
