@@ -19,8 +19,8 @@ public class SeedData
     private readonly List<Parent> parents;
     private readonly List<Course> courses;
     private readonly List<Enrollment> enrollments;
-    private readonly List<Session> sessions = [];
-    private readonly List<Attendance> attendances = [];
+    private readonly List<Session> sessions;
+    private readonly List<Attendance> attendances;
 
     private IEnumerable<User> Users => this.teachers.Cast<User>()
         .Concat(this.students)
@@ -121,71 +121,36 @@ public class SeedData
             .SelectMany(i => i)
             .ToList();
 
-    }
-
-    private async Task SeedSessions(CancellationToken cancellationToken)
-    {
-        if (await this.db.Set<Session>().AnyAsync(cancellationToken))
-            return;
-
-        foreach (var course in this.courses)
-        {
-            for (int i = 0; i < 5; i++)
-            {
-                var start = DateTime.UtcNow
-                    .Date
-                    .AddDays(-14 + i * 2)
-                    .AddHours(9);
-
-                this.sessions.Add(new Session
+        this.sessions = this.courses
+            .Select(c => Enumerable.Range(1, 5)
+                .Select(i =>
                 {
-                    Course = course,
-                    Classroom = course.PreferredClassroom,
-                    StartAt = start,
-                    EndAt = start.AddHours(2)
-                });
-            }
-        }
+                    var start = DateTime.UtcNow.Date
+                        .AddDays(-14 + (i * 2))
+                        .AddHours(9);
 
-        await this.db.Set<Session>().AddRangeAsync(this.sessions, cancellationToken);
-        await this.db.SaveChangesAsync(cancellationToken);
-    }
+                    return new Session
+                    {
+                        Course = c,
+                        Classroom = c.PreferredClassroom,
+                        StartAt = start,
+                        EndAt = start.AddHours(2)
+                    };
+                }))
+            .SelectMany(i => i)
+            .ToList();
 
-    private async Task SeedAttendances(CancellationToken cancellationToken)
-    {
-        if (await this.db.Set<Attendance>().AnyAsync(cancellationToken))
-            return;
-
-        // 用 Id，不用 reference
-        var sessionsByCourseId = this.sessions
-            .GroupBy(s => s.Course.Id)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        foreach (var enrollment in this.enrollments)
-        {
-            // 找这个学生 enroll 的 course 的 sessions
-            if (!sessionsByCourseId.TryGetValue(enrollment.Course.Id, out var courseSessions))
-                continue;
-
-            foreach (var session in courseSessions)
-            {
-                // 如果你要「每个 account 都有 attendance」
-                // 就不要 random
-                this.attendances.Add(new Attendance
+        this.attendances = this.enrollments
+            .Select(e => e.Course.Sessions
+                .Select(s => new Attendance
                 {
-                    Student = enrollment.Student,
-                    Session = session,
-                    TakenOn = session.StartAt.AddMinutes(this.random.Next(0, 10))
-                });
-            }
-        }
-
-        await this.db.Set<Attendance>().AddRangeAsync(this.attendances, cancellationToken);
-        await this.db.SaveChangesAsync(cancellationToken);
+                    Student = e.Student,
+                    Session = s,
+                    TakenOn = s.StartAt.AddMinutes(this.random.Next(0, 10))
+                }))
+            .SelectMany(i => i)
+            .ToList();
     }
-
-
-
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
@@ -195,10 +160,8 @@ public class SeedData
         await this.Seed(this.courses, cancellationToken);
         await this.Seed(this.Users, cancellationToken);
         await this.Seed(this.enrollments, cancellationToken);
-
-        await this.SeedSessions(cancellationToken);
-        await this.SeedAttendances(cancellationToken);
-
+        await this.Seed(this.sessions, cancellationToken);
+        await this.BulkSeed(this.attendances, cancellationToken);
     }
 
     private async Task Seed<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
