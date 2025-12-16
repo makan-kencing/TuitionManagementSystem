@@ -18,7 +18,7 @@ public class MarkEnrollmentRequestHandler : IRequestHandler<MarkEnrollmentReques
         IInvoiceService invoiceService)
     {
         _db = db;
-        _invoiceService = invoiceService; // Fixed: Changed IInvoiceService to _invoiceService
+        _invoiceService = invoiceService;
     }
 
     public async Task<Result> Handle(
@@ -63,7 +63,6 @@ public class MarkEnrollmentRequestHandler : IRequestHandler<MarkEnrollmentReques
                     ? InvoiceStatus.Cancelled
                     : InvoiceStatus.Withdrawn;
 
-                // Fixed: Changed _invoiceStatusService to _invoiceService
                 var invoiceResult = await _invoiceService.UpdateInvoiceStatusAsync(
                     invoice.Id,
                     invoiceStatus,
