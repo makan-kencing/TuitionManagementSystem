@@ -69,6 +69,9 @@ public static class ClaimsPrincipalExtensions
 
     public static string? GetDisplayName(this ClaimsPrincipal user) =>
         user.FindFirstValue(InternalClaimTypes.DisplayName);
+
+    public static string? GetUserEmail(this ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.Email);
 }
 
 
