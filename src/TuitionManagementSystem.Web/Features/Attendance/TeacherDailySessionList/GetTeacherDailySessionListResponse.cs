@@ -15,7 +15,7 @@ public class CourseDaily
 
 public class SessionDaily
 {
-
+    public string Course { get; set; }
     public int SessionId { get; set; }
     public DateTime StartAt { get; set; }
     public DateTime EndAt { get; set; }
