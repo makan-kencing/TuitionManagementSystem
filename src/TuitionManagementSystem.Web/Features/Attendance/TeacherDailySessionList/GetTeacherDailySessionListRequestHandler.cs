@@ -26,11 +26,13 @@ public sealed class GetTeacherDailySessionListRequestHandler(ApplicationDbContex
             Course = c.Name
         }).ToList();
 
-        var currentDate = DateTime.Now;
+        var startDate = DateTime.UtcNow.Date.Subtract(TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur").BaseUtcOffset);
+        var endDate = startDate.AddDays(1);
+
 
         var sessions = await db.Sessions
             .Where(s => courses.Contains(s.Course))
-            .Where(s => s.StartAt == currentDate)
+            .Where(s => s.StartAt >= startDate && s.StartAt < endDate)
             .Select(s => new SessionDaily
             {
                 SessionId = s.Id, StartAt = s.StartAt, EndAt = s.EndAt
