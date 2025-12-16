@@ -109,5 +109,19 @@ public class CourseController(IMediator mediator) : Controller
             .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Location });
     }
 
+    [HttpGet("api")]
+    public async Task<IActionResult> GetCoursesBySubject(int subjectId)
+    {
+        var courses = await mediator.Send(new GetCourses());
+        return Ok(courses
+            .Where(c => c.SubjectId == subjectId)
+            .Select(c => new {
+                c.Id,
+                c.Name,
+                c.Description,
+                c.Price
+            }));
+    }
+
 }
 

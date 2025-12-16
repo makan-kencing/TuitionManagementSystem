@@ -105,5 +105,15 @@ public class SubjectController(IMediator mediator, ApplicationDbContext db) : Co
         return RedirectToAction(nameof(GetSubject), new { id });
     }
 
+    [HttpGet("api")]
+    public async Task<IActionResult> GetSubjectsApi()
+    {
+        var subjects = await mediator.Send(new GetSubjects());
+        return Ok(subjects.Select(s => new {
+            s.Id,
+            s.Name,
+            s.Description
+        }));
+    }
 
 }
