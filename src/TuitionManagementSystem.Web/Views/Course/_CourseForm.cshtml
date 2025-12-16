@@ -1,0 +1,26 @@
+@model TuitionManagementSystem.Web.ViewModels.Course.CourseFormVm
+<div class="mb-3">
+    <label asp-for="Name" class="form-label"></label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Description" class="form-label"></label>
+    <textarea asp-for="Description" class="form-control"></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Price" class="form-label"></label>
+    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" />
+    <span asp-validation-for="Price" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="SubjectId" class="form-label">SubjectName</label>
+    <select asp-for="SubjectId" class="form-select" asp-items="ViewBag.Subjects"></select>
+    <span asp-validation-for="SubjectId" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="PreferredClassroomId" class="form-label">Classroom Location</label>
+    <select asp-for="PreferredClassroomId" class="form-select" asp-items="ViewBag.Classrooms"></select>
+    <span asp-validation-for="PreferredClassroomId" class="text-danger"></span>
+</div>
