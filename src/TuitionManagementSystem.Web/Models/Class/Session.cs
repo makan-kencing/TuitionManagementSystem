@@ -3,7 +3,6 @@ namespace TuitionManagementSystem.Web.Models.Class;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
-[Index(nameof(CourseId), nameof(ClassroomId), IsUnique = true)]
 public class Session
 {
     [Key]
