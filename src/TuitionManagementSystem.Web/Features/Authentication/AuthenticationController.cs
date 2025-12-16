@@ -13,8 +13,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Models.User;
+using Registration;
 using Security;
+using Services.Auth.Constants;
 using Services.Email;
 
 [Route("/[action]")]
@@ -215,5 +218,61 @@ public sealed class AuthenticationController(
         HttpContext.Session.Remove("ForgotPasswordOtpExpiry");
 
         return RedirectToAction("Login", "Authentication");
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult Register() => this.View();
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegisterStudent(RegisterViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View("Register");
+
+        var result = await mediator.Send(new RegisterStudentRequest
+        {
+            Username = model.Username,
+            Email = model.Email,
+            Password = model.Password
+        });
+
+        var response = result.Value!; // get RegisterStudentResponse
+
+        // Use TempData to pass message to Razor page for SweetAlert
+        TempData["RegisterMessage"] = response.Message;
+        TempData["RegisterStatus"] = response.IsSuccess ? "success" : "error";
+
+        // Keep user on the same page to show SweetAlert message
+        return View("Register");
+    }
+
+
+    // --------------------
+    // Register Parent
+    // --------------------
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegisterParent(RegisterViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View("Register");
+
+        var result = await mediator.Send(new RegisterParentRequest
+        {
+            Username = model.Username,
+            Email = model.Email,
+            Password = model.Password
+        });
+
+        var response = result.Value!;
+        TempData["RegisterMessage"] = response.Message;
+        TempData["RegisterStatus"] = response.IsSuccess ? "success" : "error";
+
+        // Keep user on the same page to show SweetAlert message
+        return View("Register");
     }
 }
