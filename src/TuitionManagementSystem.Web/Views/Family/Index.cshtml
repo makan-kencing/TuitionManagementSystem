@@ -32,6 +32,22 @@
                         <h5>@member.User.AccountDisplayName @(member.User.Id == User.GetUserId() ? "(You)" : "")</h5>
                         <small>@member.User.Type</small>
                     </div>
+
+                    <div class="ms-auto d-flex">
+                        @if (member.User.Id != User.GetUserId())
+                        {
+                            <button hx-get
+                                    hx-controller="Family"
+                                    hx-action="GetRemoveMember"
+                                    hx-route-id="@member.User.Id"
+                                    hx-target="#modal"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modal"
+                                    class="btn" title="Remove Member">
+                                <i class="fa-solid fa-delete-left"></i>
+                            </button>
+                        }
+                    </div>
                 </div>
             }
         </div>
