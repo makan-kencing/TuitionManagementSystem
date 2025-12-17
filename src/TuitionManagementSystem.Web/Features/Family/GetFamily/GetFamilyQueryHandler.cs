@@ -4,37 +4,40 @@ using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Services.Auth.Extensions;
 
-public class GetFamilyQueryHandler(
-    ApplicationDbContext db,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<GetFamilyQuery, Result<GetFamilyResponse>>
+public class GetFamilyQueryHandler(ApplicationDbContext db)
+    : IRequestHandler<GetFamilyQuery, Result<GetFamilyResponse>>
 {
     public async Task<Result<GetFamilyResponse>> Handle(GetFamilyQuery request, CancellationToken cancellationToken)
     {
-        var accountId = httpContextAccessor.HttpContext?.User.GetUserId();
-
-        if (accountId is null)
-        {
-            return Result.Unauthorized();
-        }
-
-        var user = await db.Users
-            .Include(u => u.Family)
-            .ThenInclude(f => f.Children)
-            .Where(u => u.Id == accountId)
+        var response = await db.Users
+            .Where(u => u.Id == request.UserId)
+            .Select(u => u.Family!.Family)
+            .Select(f => new GetFamilyResponse
+            {
+                Name = f.Name,
+                Members = f.Members.Select(fm => new FamilyMember
+                {
+                    User = new FamilyUser
+                    {
+                        Id = fm.User.Id,
+                        AccountUsername = fm.User.Account.Username,
+                        AccountDisplayName = fm.User.Account.DisplayName,
+                        AccountProfileImageUri = fm.User.Account.ProfileImage != null
+                            ? fm.User.Account.ProfileImage.Uri
+                            : null,
+                        Type = fm.User.GetType().Name
+                    },
+                    JoinedOn = fm.JoinedOn
+                }).ToList()
+            })
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (user is null)
-        {
-            return Result.Unauthorized();
-        }
-
-        if (user.Family is null)
+        if (response is null)
         {
             return Result.NotFound();
         }
 
-        return Result.Success();
+        return Result.Success(response);
     }
 }

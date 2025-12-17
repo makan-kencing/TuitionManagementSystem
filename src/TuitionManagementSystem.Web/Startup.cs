@@ -1,7 +1,6 @@
 namespace TuitionManagementSystem.Web;
 
 using System.Configuration;
-using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Options;
@@ -10,7 +9,6 @@ using Services.Email;
 using Services.View;
 using Features.Authentication.Login;
 using Features.Family;
-using Features.Family.CheckInvite;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -20,7 +18,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
-using Models.Notification;
 using Models.User;
 using Services;
 using Services.Auth.Constants;
@@ -67,7 +64,6 @@ public class Startup(IConfiguration configuration)
             .AddAutoMapper(cfg =>
             {
                 cfg.CreateMap<LoginViewModel, LoginRequest>();
-                cfg.CreateMap<CheckInviteResponse, FamilyInvite>();
             });
 
         services

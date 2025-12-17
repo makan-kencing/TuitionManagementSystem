@@ -12,11 +12,7 @@ public class FamilyAuthorizationHandler : AuthorizationHandler<OperationAuthoriz
         OperationAuthorizationRequirement requirement,
         Family resource)
     {
-        var userId = context.User.GetUserId() ?? -1;
-        if (userId == -1)  // cant check for null since compiler keep it nullable
-        {
-            return Task.CompletedTask;
-        }
+        var userId = context.User.GetUserId();
 
         if (requirement == FamilyOperations.View)
         {
@@ -47,10 +43,9 @@ public class FamilyAuthorizationHandler : AuthorizationHandler<OperationAuthoriz
 
 public static class FamilyOperations
 {
-    public static readonly OperationAuthorizationRequirement View = new(){ Name = nameof(View) };
+    public static readonly OperationAuthorizationRequirement View = new() { Name = nameof(View) };
     public static readonly OperationAuthorizationRequirement ViewChild = new() { Name = nameof(ViewChild) };
     public static readonly OperationAuthorizationRequirement Invite = new() { Name = nameof(Invite) };
     public static readonly OperationAuthorizationRequirement RemoveMember = new() { Name = nameof(RemoveMember) };
     public static readonly OperationAuthorizationRequirement EditDetails = new() { Name = nameof(EditDetails) };
-
 }

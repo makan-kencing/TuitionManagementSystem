@@ -6,22 +6,27 @@ using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Models.Notification;
-using Services.Auth.Extensions;
 
-public class CheckInviteQueryHandler(
-    ApplicationDbContext db,
-    IHttpContextAccessor httpContextAccessor,
-    IMapper mapper) : IRequestHandler<CheckInviteQuery, Result<CheckInviteResponse>>
+public class CheckInviteQueryHandler(ApplicationDbContext db, IMapper mapper)
+    : IRequestHandler<CheckInviteQuery, Result<CheckInviteResponse>>
 {
     public async Task<Result<CheckInviteResponse>> Handle(
         CheckInviteQuery query,
         CancellationToken cancellationToken)
     {
         var invite = await db.FamilyInvites
-            .Include(i => i.Family)
-            .Include(i => i.Requester)
             .Where(i => i.Status == InviteStatus.Pending)
-            .Where(i => i.User.Account.Id == httpContextAccessor.HttpContext!.User.GetUserId())
+            .Where(i => i.User.Account.Id == query.UserId)
+            .Select(fi => new CheckInviteResponse
+            {
+                Family = new Family { Name = fi.Family.Name },
+                Requester = new InviteParent
+                {
+                    AccountUsername = fi.Requester.Account.Username,
+                    AccountDisplayName = fi.Requester.Account.DisplayName
+                },
+                RequestedAt = fi.RequestedAt
+            })
             .FirstOrDefaultAsync(cancellationToken);
 
         if (invite == null)
@@ -29,6 +34,6 @@ public class CheckInviteQueryHandler(
             return Result.NotFound();
         }
 
-        return Result.Success(mapper.Map<CheckInviteResponse>(invite));
+        return Result.Success(invite);
     }
 }

@@ -1,4 +1,6 @@
-namespace TuitionManagementSystem.Web.Features.Family.CheckInvite;
+namespace TuitionManagementSystem.Web.Features.Family;
+
+using CheckInvite;
 
 public class CheckInviteViewModel
 {

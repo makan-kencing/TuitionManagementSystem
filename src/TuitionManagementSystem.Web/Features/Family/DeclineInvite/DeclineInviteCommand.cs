@@ -3,4 +3,4 @@ namespace TuitionManagementSystem.Web.Features.Family.DeclineInvite;
 using Ardalis.Result;
 using MediatR;
 
-public class DeclineInviteCommand : IRequest<Result>;
+public record DeclineInviteCommand(int UserId) : IRequest<Result>;

@@ -1,9 +1,9 @@
 namespace TuitionManagementSystem.Web.Features.Family.OnFamilyInviteCreated;
 
+using Infrastructure.Persistence;
 using MediatR;
 using Models.Notification;
 using Notification.OnNotificationCreated;
-using Infrastructure.Persistence;
 
 public class CreateFamilyInviteNotificationHandler(
     IMediator mediator,

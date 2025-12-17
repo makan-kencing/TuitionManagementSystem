@@ -4,24 +4,15 @@ using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Models.User;
 using Services.Auth.Extensions;
 
-public class RemoveMemberCommandHandler(
-    ApplicationDbContext db,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<RemoveMemberCommand, Result>
+public class RemoveMemberCommandHandler(ApplicationDbContext db) : IRequestHandler<RemoveMemberCommand, Result>
 {
     public async Task<Result> Handle(RemoveMemberCommand request, CancellationToken cancellationToken)
     {
-        var accountId = httpContextAccessor.HttpContext?.User.GetUserId();
-
-        if (accountId is null)
-        {
-            return Result.Unauthorized();
-        }
-
-        var parent = await db.Parents
-            .Where(u => u.Account.Id == accountId)
+        var parent = await db.FamilyMembers
+            .AsNoTracking()
+            .Where(fm => fm.User.Id == request.UserId)
             .FirstOrDefaultAsync(cancellationToken);
 
         switch (parent)
@@ -32,23 +23,20 @@ public class RemoveMemberCommandHandler(
                 return Result.Invalid();
         }
 
-        var toRemove = await db.Users
-            .Where(u => u.Id == request.UserId)
-            .FirstOrDefaultAsync(cancellationToken);
+        var canRemove = await db.FamilyMembers
+            .Where(fm => fm.Family.Id == parent.FamilyId)
+            .Where(fm => fm.User.Id == request.RemoveUserId)
+            .AnyAsync(cancellationToken);
 
-        switch (toRemove)
+        if (!canRemove)
         {
-            case null:
-                return Result.NotFound();
-            case { Family: null }:
-                return Result.Invalid();
-            case { Family: not null } when toRemove.Family.Id != parent.Family.Id:
-                return Result.Forbidden();
+            return Result.Forbidden();
         }
 
-        toRemove.Family = null;
-
-        await db.SaveChangesAsync(cancellationToken);
+        await db.FamilyMembers
+            .Where(fm => fm.Family.Id == parent.FamilyId)
+            .Where(fm => fm.User.Id == request.RemoveUserId)
+            .ExecuteDeleteAsync(cancellationToken);
 
         return Result.Success();
     }

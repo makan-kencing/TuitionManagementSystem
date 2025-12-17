@@ -1,6 +1,3 @@
-using TuitionManagementSystem.Web.Features.Family.OnFamilyInviteCreated;
-using TuitionManagementSystem.Web.Services.Auth.Extensions;
-
 namespace TuitionManagementSystem.Web.Features.Family.SendFamilyInvite;
 
 using Ardalis.Result;
@@ -8,43 +5,33 @@ using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Models.Notification;
+using OnFamilyInviteCreated;
+using Services.Auth.Extensions;
 
-public class SendFamilyInviteCommandHandler(
-    ApplicationDbContext db,
-    IHttpContextAccessor httpContextAccessor,
-    IMediator mediator) : IRequestHandler<SendFamilyInviteCommand, Result<SendFamilyInviteResponse>>
+public class SendFamilyInviteCommandHandler(ApplicationDbContext db, IMediator mediator)
+    : IRequestHandler<SendFamilyInviteCommand, Result>
 {
-    public async Task<Result<SendFamilyInviteResponse>> Handle(
+    public async Task<Result> Handle(
         SendFamilyInviteCommand command,
         CancellationToken cancellationToken)
     {
-        var accountId = httpContextAccessor.HttpContext?.User.GetUserId();
-
-        if (accountId is null)
-        {
-            return Result.Unauthorized();
-        }
-
-        var parent = await db.Parents
-            .Where(u => u.Account.Id == accountId)
+        var parent = await db.FamilyMembers
+            .Where(fm => fm.User.Id == command.UserId)
             .FirstOrDefaultAsync(cancellationToken);
 
-        switch (parent)
+        if (parent is null)
         {
-            case null:
-                return Result.Unauthorized();
-            case { Family: null }:
-                return Result.Invalid();
+            return Result.NotFound();
         }
 
         var invited = await db.Users
             .Where(u => u.Account.Username == command.Username)
+            .Include(u => u.Family)
             .FirstOrDefaultAsync(cancellationToken);
 
         switch (invited)
         {
             case null:
-                return Result.NotFound();
             case { Family: not null }:
                 return Result.Forbidden();
         }
@@ -57,17 +44,12 @@ public class SendFamilyInviteCommandHandler(
             return Result.Conflict();
         }
 
-        var invite = new FamilyInvite
-        {
-            Family = parent.Family,
-            User = invited,
-            Requester = parent
-        };
+        var invite = new FamilyInvite { FamilyId = parent.FamilyId, User = invited, RequesterId = parent.UserId };
         await db.FamilyInvites.AddAsync(invite, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
         await mediator.Publish(new OnFamilyInviteCreatedEvent(invite), cancellationToken);
 
-        return Result.Success(new SendFamilyInviteResponse());
+        return Result.Success();
     }
 }
