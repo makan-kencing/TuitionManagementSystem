@@ -21,7 +21,7 @@ public class PhysicalFileService : IFileService
     public async Task<SavedFile> UploadFileAsync(IFormFile formFile)
     {
         var dayPrefix = DateTime.UtcNow.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
-        var filename = $"{Guid.NewGuid()}.{Path.GetExtension(formFile.Name)}";
+        var filename = $"{Guid.NewGuid()}{Path.GetExtension(formFile.FileName)}";
 
         var mappedPath = Path.Combine(this.MappedPath, dayPrefix, filename);
         var canonicalPath = Path.Combine(this.PhysicalPath, dayPrefix, filename);
