@@ -32,7 +32,11 @@ public class FamilyController(IMediator mediator) : Controller
         var family = await mediator.Send(new GetFamilyQuery(this.User.GetUserId()));
         if (family.IsNotFound())
         {
-            return this.View("NoFamilyFound");
+            return this.User.GetUserType() switch
+            {
+                nameof(Family) => this.View("CreateFamily"),
+                _ => this.View("NoFamily")
+            };
         }
 
         return this.View(new ViewFamilyViewModel { Family = family.Value });
