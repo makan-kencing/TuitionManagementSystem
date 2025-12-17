@@ -1,10 +1,31 @@
 ﻿@model TuitionManagementSystem.Web.Features.Family.CheckInviteViewModel
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Invite to Family";
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="card">
+    <div class="card-header">
+        Family Invitation
+    </div>
+
+    <div class="card-body">
+        <h4 class="card-title">You have been invited to @Model.Invite.Family.Name</h4>
+        <small>by @Model.Invite.Requester.AccountDisplayName</small>
+
+        <div class="d-flex">
+            <form asp-controller="Family" asp-action="Decline">
+                <button type="submit" class="btn btn-danger text-white">Decline</button>
+            </form>
+            <form asp-controller="Family" asp-action="Accept">
+                <button type="submit" class="btn btn-primary text-white">Accept</button>
+            </form>
+        </div>
+    </div>
+    <div class="card-footer text-body-secondary">
+        <time datetime="@Model.Invite.RequestedAt">
+            From @TimeZoneInfo.ConvertTimeFromUtc(Model.Invite.RequestedAt, timezone)
+        </time>
+    </div>
 </div>
