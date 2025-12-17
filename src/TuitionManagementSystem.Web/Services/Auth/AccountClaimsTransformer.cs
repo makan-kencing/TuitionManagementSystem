@@ -32,7 +32,7 @@ public class AccountClaimsTransformer(ApplicationDbContext db) : IClaimsTransfor
         var claims = new List<Claim>
         {
             new(ClaimTypes.Name, account.Username),
-            new(ClaimTypes.Role, account.AccessRole.ToString())
+            new(ClaimTypes.Role, account.AccessRole.ToString()),
         };
 
         if (account.DisplayName is not null)

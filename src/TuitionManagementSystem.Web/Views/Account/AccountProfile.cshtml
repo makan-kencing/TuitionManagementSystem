@@ -2,7 +2,7 @@
 @model TuitionManagementSystem.Web.Features.Accounts.AccountProfileViewModel
 
 @{
-ViewData["Title"] = "Account Profile";
+    ViewData["Title"] = "Account Profile";
 }
 
 <div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
@@ -14,42 +14,29 @@ ViewData["Title"] = "Account Profile";
         </div>
 
         <div class="card-body">
-            <form id="profileForm">
+            <form asp-controller="AccountsApi" asp-action="UpdateProfile" id="profileForm">
                 <div class="mb-3">
-                    <label>Username</label>
-                    <input type="text"
-                           class="form-control"
-                           id="username"
-                           name="Username"
-                           value="@User.GetUsername()"
-                           disabled />
+                    <label asp-for="Username"></label>
+                    <input asp-for="Username" id="username" class="form-control" disabled/>
+                    <span asp-validation-for="Username"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label>Email</label>
-                    <input type="email"
-                           class="form-control"
-                           id="email"
-                           name="Email"
-                           value="@User.GetUserEmail()"
-                           disabled />
+                    <label asp-for="Email"></label>
+                    <input asp-for="Email" id="email" class="form-control" disabled/>
+                    <span asp-validation-for="Email"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label>Password</label>
-                    <input type="password"
-                           class="form-control"
-                           id="password"
-                           value="******"
-                           disabled />
+                    <label asp-for="Password"></label>
+                    <input asp-for="Password" id="password" placeholder="*******" class="form-control" disabled/>
+                    <span asp-validation-for="Password"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label>Confirm Password</label>
-                    <input type="password"
-                           class="form-control"
-                           id="confirmPassword"
-                           disabled />
+                    <label asp-for="ConfirmPassword"></label>
+                    <input asp-for="ConfirmPassword" id="confirmPassword" placeholder="*******" class="form-control" disabled/>
+                    <span asp-validation-for="ConfirmPassword"></span>
                 </div>
 
                 <div class="d-flex justify-content-between">
@@ -164,7 +151,7 @@ ViewData["Title"] = "Account Profile";
             };
 
             $.ajax({
-                url: '@Url.Action("UpdateProfile", "Account")',
+                url: '@Url.Action("UpdateProfile", "AccountsApi")',
                 type: 'POST',
                 data: formData,
                 success: function (res) {
@@ -189,6 +176,8 @@ ViewData["Title"] = "Account Profile";
         $("#changePasswordBtn").click(function () {
 
             if ($(this).prop("disabled")) return;
+            const route = this.action;
+            const method = this.method;
 
             Swal.fire({
                 title: 'Change Password',
@@ -232,8 +221,8 @@ ViewData["Title"] = "Account Profile";
                 if (!result.isConfirmed) return;
 
                 $.ajax({
-                    url: '/Account/ChangePassword',
-                    type: 'POST',
+                    url: route,
+                    type: method,
                     data: result.value,
                     success: function (res) {
                         if (res.success) {
