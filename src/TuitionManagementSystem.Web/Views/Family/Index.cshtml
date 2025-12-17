@@ -22,7 +22,7 @@
                               .OrderByDescending(fm => fm.User.Type == nameof(Parent))
                               .ThenBy(fm => fm.User.Id == User.GetUserId()))
             {
-                <div class="list-group-item list-group-item-action d-flex">
+                <div id="member-@(member.User.Id)" class="list-group-item list-group-item-action d-flex">
                     <div class="">
                         <a href="@member.User.AccountProfileImageUri" alt=""
                            class="rounded-circle" width="30" height="30"></a>
@@ -62,3 +62,15 @@
         }
     </div>
 </div>
+
+<div id="modal" class="modal modal-blur fade"
+     aria-hidden="false"
+     tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content"></div>
+    </div>
+</div>
+
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3">
+</div>
+

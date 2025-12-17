@@ -1,0 +1,26 @@
+﻿@model TuitionManagementSystem.Web.Features.Attendance.TakeAttendanceCode.TakeAttendanceCodeResponse
+
+@{
+
+}
+
+<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title"></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+                <div class="alert alert-success">Attendance recorded successfully</div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
+<span id="status-@Model.UserId" hx-swap-oob="true" class="badge bg-success">
+    Attend
+</span>
