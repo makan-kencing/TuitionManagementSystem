@@ -2,6 +2,7 @@ namespace TuitionManagementSystem.Web.Features.Family.OnFamilyInviteCreated;
 
 using Infrastructure.Persistence;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Models.Notification;
 using Notification.OnNotificationCreated;
 
@@ -13,12 +14,15 @@ public class CreateFamilyInviteNotificationHandler(
         OnFamilyInviteCreatedEvent @event,
         CancellationToken cancellationToken)
     {
-        var notification = new Notification
-        {
-            Message = $"You're invited to join {@event.Invite.Family.Name}",
-            ActionUrl = new Uri("/family"),
-            User = @event.Invite.User
-        };
+        var notification = await db.FamilyInvites
+            .Where(fi => fi.Id == @event.FamilyInviteId)
+            .Select(fi => new Notification
+            {
+                Message = $"You're invited to join {fi.Family.Name}",
+                ActionUrl = new Uri("/family"),
+                UserId = fi.UserId
+            })
+            .FirstAsync(cancellationToken);
 
         await db.Notifications.AddAsync(notification, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);

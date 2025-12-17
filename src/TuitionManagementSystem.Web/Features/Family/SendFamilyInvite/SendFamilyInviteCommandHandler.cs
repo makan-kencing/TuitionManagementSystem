@@ -48,7 +48,7 @@ public class SendFamilyInviteCommandHandler(ApplicationDbContext db, IMediator m
         await db.FamilyInvites.AddAsync(invite, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
-        await mediator.Publish(new OnFamilyInviteCreatedEvent(invite), cancellationToken);
+        await mediator.Publish(new OnFamilyInviteCreatedEvent(invite.Id), cancellationToken);
 
         return Result.Success();
     }
