@@ -24,26 +24,43 @@
                 <div>
                     @if (student.Status == "Attend")
                     {
-                        <span class="badge bg-success">@student.Status</span>
+                        <span id="status-@student.StudentId" class="badge bg-success">@student.Status</span>
                     }
                     else if (student.Status == "NotTaken")
                     {
-                        <span class="badge bg-warning text-dark">@student.Status</span>
+                        <span id="status-@student.StudentId" class="badge bg-warning text-dark">@student.Status</span>
                     }
                     else if (student.Status == "Absent")
                     {
-                        <span class="badge bg-danger">@student.Status</span>
+                        <span id="status-@student.StudentId" class="badge bg-danger">@student.Status</span>
                     }
                     else
                     {
-                        <span class="badge bg-secondary">@student.Status</span>
+                        <span id="status-@student.StudentId" class="badge bg-secondary">@student.Status</span>
                     }
+
                 </div>
             </td>
             <td>
-                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#statusModal" data-student="@student.Name">
-                    &#x22EF;
+                <button
+                    hx-post="/attendance/take"
+                    hx-vals='{"id": "@Model.SessionId", "userId": "@student.StudentId"}'
+                    hx-target="#takecode-modal"
+                    type="submit"
+                    class=""
+                    data-bs-toggle="modal" data-bs-target="#takecode-modal">
+                    <i class="fa-solid fa-handshake-angle"></i>
                 </button>
+                @* <button hx-post *@
+                @*         hx-controller="Attendance" *@
+                @*         hx-action="Delete" *@
+                @*         hx-route-id="@student.AttendanceId" *@
+                @*         hx-target="#deletecode-modal" *@
+                @*         type="submit" *@
+                @*         class="" *@
+                @*         data-bs-toggle="modal" data-bs-target="#code-modal"> *@
+                @*     <i class="fa-solid fa-delete-left"></i> *@
+                @* </button> *@
             </td>
 
         </tr>
@@ -52,20 +69,16 @@
     </tbody>
 </table>
 
-<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="statusModalLabel"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p id="modalStudentName"></p>
-                <div class="d-grid gap-2">
-                    <button class="btn btn-success"></button>
-                    <button class="btn btn-danger"></button>
-                </div>
-            </div>
-        </div>
+<div id="takecode-modal" class="modal"
+     aria-hidden="false"
+     tabindex="-1"
+>
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content"></div>
     </div>
 </div>
+
+
+
+
+
