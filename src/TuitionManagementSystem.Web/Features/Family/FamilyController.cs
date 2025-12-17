@@ -9,6 +9,7 @@ using GetChild;
 using GetFamily;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using RemoveMember;
 using Services.Auth.Extensions;
 
 public class FamilyController(IMediator mediator) : Controller
@@ -57,6 +58,49 @@ public class FamilyController(IMediator mediator) : Controller
         return this.RedirectToAction("Index");
     }
 
+    // Partials
+
+    [HttpGet]
+    [Route("~/[controller]/invite")]
+    public async Task<IActionResult> GetInvite()
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        return this.PartialView("Dialog/_Invite");
+    }
+
+    [HttpPost]
+    [Route("~/[controller]/invite")]
+    public async Task<IActionResult> Invite([FromForm] string username)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        var response = await mediator.Send(new SendFamilyInviteCommand(this.User.GetUserId(), username));
+        if (response.IsConflict())
+        {
+            return this.PartialView("Toast/Invite/_PendingInviteToast");
+        }
+
+        if (response.IsForbidden())
+        {
+            return this.PartialView("Toast/Invite/_MemberAlreadyHasFamily");
+        }
+
+        return this.PartialView("Toast/Invite/_InviteSuccessToast");
+    }
+
+    public class InviteFamilyViewModel
+    {
+        [DisplayName("Username")]
+        public required string Username { get; set; }
+    }
+
     [HttpGet]
     [Route("~/[controller]/delete")]
     public IActionResult GetDelete()
@@ -82,5 +126,39 @@ public class FamilyController(IMediator mediator) : Controller
 
         this.Response.Htmx(h => h.Redirect(this.Url.Action("Index")!));
         return this.Ok();
+    }
+
+    [HttpGet]
+    [Route("~/[controller]/member/remove/{id:int:required}")]
+    public IActionResult GetRemoveMember(int id)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        return this.PartialView("Dialog/_RemoveMember");
+    }
+
+    [HttpDelete]
+    [Route("~/[controller]/member/{id:int:required}")]
+    public async Task<IActionResult> RemoveMember(int id)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        await mediator.Send(new RemoveMemberCommand(this.User.GetUserId(), id));
+
+        return this.PartialView("Toast/_MemberRemoveSuccessToast", new MemberRemoveSuccessViewModel
+        {
+            RemovedUserId = id
+        });
+    }
+
+    public class MemberRemoveSuccessViewModel
+    {
+        public int RemovedUserId { get; set; }
     }
 }
