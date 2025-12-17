@@ -13,7 +13,8 @@ public class File
     [StringLength(127)]
     public required string MimeType { get; set; }
 
-    public required Uri Uri { get; set; }
+    [StringLength(500)]
+    public required string Uri { get; set; }
 
     [StringLength(255)] public string? CanonicalPath { get; set; }
 

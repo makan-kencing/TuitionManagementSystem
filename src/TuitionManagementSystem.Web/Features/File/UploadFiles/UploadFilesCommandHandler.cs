@@ -6,14 +6,10 @@ using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Models;
-using Models.User;
-using Services.Auth.Extensions;
 using Services.File;
 
-public class UploadFilesCommandHandler(
-    ApplicationDbContext db,
-    IFileService fileService,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<UploadFilesCommand, Result<UploadFilesResponse>>
+public class UploadFilesCommandHandler(ApplicationDbContext db, IFileService fileService)
+    : IRequestHandler<UploadFilesCommand, Result<UploadFilesResponse>>
 {
     public static readonly string[] AllowedMimeTypes =
     [
@@ -38,17 +34,11 @@ public class UploadFilesCommandHandler(
         MediaTypeNames.Text.Xml
     ];
 
-    public async Task<Result<UploadFilesResponse>> Handle(UploadFilesCommand request, CancellationToken cancellationToken)
+    public async Task<Result<UploadFilesResponse>> Handle(UploadFilesCommand request,
+        CancellationToken cancellationToken)
     {
-        var userId = httpContextAccessor.HttpContext?.User.GetUserId() ?? -1;
-
-        if (userId == -1)
-        {
-            return Result.Unauthorized();
-        }
-
         var user = await db.Users
-            .Where(u => u.Id == userId)
+            .Where(u => u.Id == request.UserId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (user is null)
@@ -61,7 +51,7 @@ public class UploadFilesCommandHandler(
         {
             if (!AllowedMimeTypes.Contains(formFile.ContentType))
             {
-                return Result.Invalid();
+                return Result.Invalid(new ValidationError($"Filetype {formFile.ContentType} is not accepted."));
             }
 
             var saved = await fileService.UploadFileAsync(formFile);
@@ -70,7 +60,7 @@ public class UploadFilesCommandHandler(
             {
                 FileName = formFile.FileName,
                 MimeType = formFile.ContentType,
-                Uri = new Uri(saved.MappedPath),
+                Uri = saved.MappedPath,
                 CanonicalPath = saved.CanonicalPath,
                 CreatedBy = user
             });
@@ -80,7 +70,7 @@ public class UploadFilesCommandHandler(
         await db.SaveChangesAsync(cancellationToken);
 
         var response = new UploadFilesResponse();
-        response.AddRange(files.Select(f => new UploadedFile(f.Id, f.Uri)));
+        response.AddRange(files.Select(f => new UploadedFile(f.Id, f.FileName, f.Uri)));
 
         return Result.Success(response);
     }

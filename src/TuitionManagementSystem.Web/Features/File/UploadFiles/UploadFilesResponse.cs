@@ -4,4 +4,5 @@ public class UploadFilesResponse : List<UploadedFile>;
 
 public record UploadedFile(
     int Id,
-    Uri MappedPath);
+    string Filename,
+    string MappedPath);
