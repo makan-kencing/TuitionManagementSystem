@@ -51,16 +51,15 @@
                     data-bs-toggle="modal" data-bs-target="#takecode-modal">
                     <i class="fa-solid fa-handshake-angle"></i>
                 </button>
-                @* <button hx-post *@
-                @*         hx-controller="Attendance" *@
-                @*         hx-action="Delete" *@
-                @*         hx-route-id="@student.AttendanceId" *@
-                @*         hx-target="#deletecode-modal" *@
-                @*         type="submit" *@
-                @*         class="" *@
-                @*         data-bs-toggle="modal" data-bs-target="#code-modal"> *@
-                @*     <i class="fa-solid fa-delete-left"></i> *@
-                @* </button> *@
+                <button
+                    hx-delete="/attendance/delete"
+                    hx-vals='{"id":"@student.AttendanceId", "userId": "@student.StudentId","sessionid": "@Model.SessionId"}'
+                    hx-target="#code-modal"
+                    type="submit"
+                    class=""
+                    data-bs-toggle="modal" data-bs-target="#code-modal">
+                    <i class="fa-solid fa-delete-left"></i>
+                </button>
             </td>
 
         </tr>
@@ -77,6 +76,17 @@
         <div class="modal-content"></div>
     </div>
 </div>
+
+<div id="code-modal" class="modal"
+     aria-hidden="false"
+     tabindex="-1"
+>
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content"></div>
+    </div>
+</div>
+
+
 
 
 
