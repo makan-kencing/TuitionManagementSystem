@@ -12,11 +12,9 @@ public abstract class User
 
     public int AccountId { get; set; }
 
-    public int? FamilyId { get; set; }
-
     public Account Account { get; set; } = null!;
 
-    public Family? Family { get; set; }
+    public FamilyMember? Family { get; set; }
 
     public ICollection<File> Files { get; set; } = [];
 

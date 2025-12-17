@@ -14,8 +14,10 @@ public class Family
     public ICollection<FamilyMember> Members { get; set; } = [];
 
     [NotMapped]
-    public IEnumerable<FamilyMember> Parents => this.Members.Where(m => m.User is Parent);
+    public IQueryable<FamilyMember> Parents => this.Members.AsQueryable()
+        .Where(m => m.User is Parent);
 
     [NotMapped]
-    public IEnumerable<FamilyMember> Children => this.Members.Where(m => m.User is Student);
+    public IQueryable<FamilyMember> Children => this.Members.AsQueryable()
+        .Where(m => m.User is Student);
 }

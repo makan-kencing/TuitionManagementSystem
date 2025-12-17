@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 [Index(nameof(FamilyId), nameof(UserId), IsUnique = true)]
+[Index(nameof(UserId), IsUnique = true)]
 public class FamilyMember
 {
     [Key]

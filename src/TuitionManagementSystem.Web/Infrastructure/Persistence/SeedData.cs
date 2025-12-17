@@ -7,6 +7,8 @@ using Models.Class;
 using Models.User;
 using Services.Auth.Constants;
 using Microsoft.AspNetCore.Identity;
+using Newtonsoft.Json;
+using NuGet.Protocol;
 
 public class SeedData
 {
@@ -17,6 +19,7 @@ public class SeedData
     private readonly List<Teacher> teachers;
     private readonly List<Student> students;
     private readonly List<Parent> parents;
+    private readonly List<Family> families;
     private readonly List<Course> courses;
     private readonly List<Enrollment> enrollments;
     private readonly List<Session> sessions;
@@ -108,6 +111,19 @@ public class SeedData
                 }
             }).ToList();
 
+        {
+            var studentsCursor = this.students.GetEnumerator().ToIEnumerable();
+            this.families = this.parents
+                .Select((p, i) => new Family
+                {
+                    Name = $"Family {i + 1}",
+                    Members = studentsCursor.Take(this.random.Next(0, 3))
+                        .Select(s => new FamilyMember { User = s })
+                        .Append(new FamilyMember { User = p }).ToList()
+                })
+                .ToList();
+        }
+
         this.enrollments = this.students
             .Select(s => this.courses.OrderBy(_ => this.random.Next())
                     .Take(this.random.Next(this.courses.Count))
@@ -159,6 +175,7 @@ public class SeedData
         await this.Seed(this.classrooms, cancellationToken);
         await this.Seed(this.courses, cancellationToken);
         await this.Seed(this.Users, cancellationToken);
+        await this.Seed(this.families, cancellationToken);
         await this.Seed(this.enrollments, cancellationToken);
         await this.Seed(this.sessions, cancellationToken);
         await this.BulkSeed(this.attendances, cancellationToken);
@@ -192,4 +209,14 @@ public class SeedData
             {
                 Id = index + 1, Code = v.ToString("D6", CultureInfo.InvariantCulture)
             }), cancellationToken);
+}
+
+internal static class IEnumeratorExtensions
+{
+    public static IEnumerable<T> ToIEnumerable<T>(this IEnumerator<T> enumerator) {
+        while (enumerator.MoveNext())
+        {
+            yield return enumerator.Current;
+        }
+    }
 }
