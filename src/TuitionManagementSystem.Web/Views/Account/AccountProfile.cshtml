@@ -35,7 +35,7 @@
 
                 <div class="mb-3">
                     <label asp-for="ConfirmPassword"></label>
-                    <input asp-for="ConfirmPassword" id="confirmPassword" placeholder="*******" class="form-control" disabled/>
+                    <input asp-for="ConfirmPassword" id="confirmPassword" placeholder="Enter password" class="form-control" disabled/>
                     <span asp-validation-for="ConfirmPassword"></span>
                 </div>
 
@@ -176,8 +176,6 @@
         $("#changePasswordBtn").click(function () {
 
             if ($(this).prop("disabled")) return;
-            const route = this.action;
-            const method = this.method;
 
             Swal.fire({
                 title: 'Change Password',
@@ -221,8 +219,8 @@
                 if (!result.isConfirmed) return;
 
                 $.ajax({
-                    url: route,
-                    type: method,
+                    url: '@Url.Action("ChangePassword", "AccountsApi")',
+                    type: 'POST',
                     data: result.value,
                     success: function (res) {
                         if (res.success) {
@@ -230,6 +228,9 @@
                         } else {
                             Swal.fire("Error", res.message, "error");
                         }
+                    },
+                    error: function () {
+                        Swal.fire("Error", "Server error occurred.", "error");
                     }
                 });
             });

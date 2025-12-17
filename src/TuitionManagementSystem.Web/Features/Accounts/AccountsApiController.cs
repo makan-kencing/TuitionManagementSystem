@@ -30,7 +30,8 @@ public sealed class AccountsApiController(ApplicationDbContext db, IMediator med
             .AnyAsync(cancellationToken);
 
     [HttpPost]
-    public async Task<object> UpdateProfile(AccountProfileViewModel model)
+    [Route("profile")]
+    public async Task<object> UpdateProfile([FromForm]AccountProfileViewModel model)
     {
         var userId = this.User.GetUserId();
         var user = await db.Accounts.FirstOrDefaultAsync(a => a.Id == userId);
@@ -67,7 +68,8 @@ public sealed class AccountsApiController(ApplicationDbContext db, IMediator med
     }
 
     [HttpPost]
-    public async Task<object> ChangePassword(ChangePasswordRequest request)
+    [Route("password")]
+    public async Task<object> ChangePassword([FromForm]ChangePasswordRequest request)
     {
         var result = await mediator.Send(request);
         return new { success = result.Success, message = result.Message };
