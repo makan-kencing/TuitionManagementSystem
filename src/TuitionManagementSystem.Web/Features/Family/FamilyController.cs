@@ -1,5 +1,6 @@
 namespace TuitionManagementSystem.Web.Features.Family;
 
+using System.ComponentModel;
 using AcceptInvite;
 using Ardalis.Result;
 using CheckInvite;
@@ -8,6 +9,7 @@ using DeleteFamily;
 using GetChild;
 using GetFamily;
 using Htmx;
+using LeaveFamily;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RemoveMember;
@@ -125,6 +127,33 @@ public class FamilyController(IMediator mediator) : Controller
         }
 
         await mediator.Send(new DeleteFamilyCommand(this.User.GetUserId()));
+
+        this.Response.Htmx(h => h.Redirect(this.Url.Action("Index")!));
+        return this.Ok();
+    }
+
+    [HttpGet]
+    [Route("~/[controller]/leave")]
+    public IActionResult GetLeaveFamily()
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        return this.PartialView("Dialog/_LeaveFamily");
+    }
+
+    [HttpPost]
+    [Route("~/[controller]/leave")]
+    public async Task<IActionResult> LeaveFamily()
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        await mediator.Send(new LeaveFamilyCommand(this.User.GetUserId()));
 
         this.Response.Htmx(h => h.Redirect(this.Url.Action("Index")!));
         return this.Ok();
