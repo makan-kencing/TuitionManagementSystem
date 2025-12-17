@@ -3,6 +3,7 @@
 using Ardalis.Result;
 using AttendanceHistory;
 using AttendanceSummary;
+using DeleteAttendance;
 using GenerateAttendanceCode;
 using GetAttendanceCode;
 using Infrastructure.Persistence;
@@ -130,7 +131,20 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
         {
             return this.NotFound("Helping take attendance code not function");
         }
-        return this.PartialView("_AttendanceManagerModel",takeAttendance.Value);
+        return this.PartialView("_AttendanceManagerModal",takeAttendance.Value);
+    }
+
+    [HttpDelete]
+    [Authorize(Policy = "TeacherOnly")]
+    public async Task<IActionResult> Delete(int id,int userId,int sessionId, CancellationToken cancellationToken)
+    {
+
+        var deleteAttendance = await mediator.Send(new DeleteAttendanceRequest(id,userId, sessionId), cancellationToken);
+        if (deleteAttendance.IsError())
+        {
+            return this.BadRequest("Unable to delete attendance record.");
+        }
+        return this.PartialView("_DeleteAttendanceModal",deleteAttendance.Value);
     }
 
 }
