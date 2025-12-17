@@ -19,7 +19,7 @@ public class CreateFamilyInviteNotificationHandler(
             .Select(fi => new Notification
             {
                 Message = $"You're invited to join {fi.Family.Name}",
-                ActionUrl = new Uri("/family"),
+                ActionUrl = "/family",
                 UserId = fi.UserId
             })
             .FirstAsync(cancellationToken);

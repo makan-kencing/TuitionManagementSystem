@@ -10,7 +10,8 @@ public class Notification
     [StringLength(500)]
     public required string Message { get; set; }
 
-    public virtual Uri? ActionUrl { get; set; }
+    [StringLength(500)]
+    public string? ActionUrl { get; set; }
 
     public int UserId { get; set; }
 
