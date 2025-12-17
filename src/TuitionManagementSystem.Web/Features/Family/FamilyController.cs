@@ -4,6 +4,7 @@ using AcceptInvite;
 using Ardalis.Result;
 using CheckInvite;
 using DeclineInvite;
+using DeleteFamily;
 using GetChild;
 using GetFamily;
 using MediatR;
@@ -54,5 +55,32 @@ public class FamilyController(IMediator mediator) : Controller
     {
         await mediator.Send(new DeclineInviteCommand(this.User.GetUserId()));
         return this.RedirectToAction("Index");
+    }
+
+    [HttpGet]
+    [Route("~/[controller]/delete")]
+    public IActionResult GetDelete()
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        return this.PartialView("Dialog/_DeleteFamily");
+    }
+
+    [HttpDelete]
+    [Route("~/[controller]")]
+    public async Task<IActionResult> DeleteFamily()
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        await mediator.Send(new DeleteFamilyCommand(this.User.GetUserId()));
+
+        this.Response.Htmx(h => h.Redirect(this.Url.Action("Index")!));
+        return this.Ok();
     }
 }
