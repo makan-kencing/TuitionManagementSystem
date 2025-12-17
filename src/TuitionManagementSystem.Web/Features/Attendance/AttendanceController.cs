@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Auth.Extensions;
 using SessionStudentList;
+using TakeAttendanceCode;
 using TeacherDailySessionList;
 
 public class AttendanceController(IMediator mediator, ApplicationDbContext db) : Controller
@@ -103,6 +104,8 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
     }
 
 
+
+
     // public IActionResult CourseSessionListing() => this.View();
     [HttpGet]
     public async Task<IActionResult> CourseSessionListing(int sessionId, CancellationToken cancellationToken)
@@ -110,4 +113,24 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
         var result = await mediator.Send(new GetSessionStudentListRequest(sessionId), cancellationToken);
         return this.View(result.Value);
     }
+
+    [HttpPost]
+    [Authorize(Policy = "TeacherOnly")]
+    public async Task<IActionResult> Take(int id,int userId, CancellationToken cancellationToken)
+    {
+        var code = await mediator.Send(new GetAttendanceCodeQuery(id), cancellationToken);
+        if (code.IsError())
+        {
+            return this.NotFound("Helping take attendance code not function");
+        }
+
+        var takeAttendance =
+            await mediator.Send(new TakeAttendanceCodeRequest(userId, code.Value.Code), cancellationToken);
+        if (takeAttendance.IsNotFound())
+        {
+            return this.NotFound("Helping take attendance code not function");
+        }
+        return this.PartialView("_AttendanceManagerModel",takeAttendance.Value);
+    }
+
 }
