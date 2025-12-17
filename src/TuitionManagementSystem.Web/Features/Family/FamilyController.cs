@@ -4,6 +4,7 @@ using System.ComponentModel;
 using AcceptInvite;
 using Ardalis.Result;
 using CheckInvite;
+using CreateFamily;
 using DeclineInvite;
 using DeleteFamily;
 using GetChild;
@@ -40,6 +41,18 @@ public class FamilyController(IMediator mediator) : Controller
         }
 
         return this.View(new ViewFamilyViewModel { Family = family.Value });
+    }
+
+    public class CheckInviteViewModel
+    {
+        public required CheckInviteResponse Invite { get; init; }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateFamily()
+    {
+        await mediator.Send(new CreateFamilyCommand(this.User.GetUserId()));
+        return this.RedirectToAction("Index");
     }
 
     [HttpGet]
