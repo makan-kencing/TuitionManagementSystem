@@ -1,0 +1,71 @@
+﻿@model TuitionManagementSystem.Web.Features.Attendance.SessionStudentList.GetSessionStudentListResponse
+@{
+    ViewData["Title"] = "Student Management";
+}
+
+<h2>Student Management</h2>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var student in Model.StudentList)
+    {
+        <tr>
+            <td>@student.StudentId</td>
+            <td>@student.Name</td>
+            <td>
+                <div>
+                    @if (student.Status == "Attend")
+                    {
+                        <span class="badge bg-success">@student.Status</span>
+                    }
+                    else if (student.Status == "NotTaken")
+                    {
+                        <span class="badge bg-warning text-dark">@student.Status</span>
+                    }
+                    else if (student.Status == "Absent")
+                    {
+                        <span class="badge bg-danger">@student.Status</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">@student.Status</span>
+                    }
+                </div>
+            </td>
+            <td>
+                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#statusModal" data-student="@student.Name">
+                    &#x22EF;
+                </button>
+            </td>
+
+        </tr>
+    }
+
+    </tbody>
+</table>
+
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modalStudentName"></p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success"></button>
+                    <button class="btn btn-danger"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
