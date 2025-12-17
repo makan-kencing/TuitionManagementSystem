@@ -10,6 +10,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Auth.Extensions;
+using SessionStudentList;
 using TeacherDailySessionList;
 
 public class AttendanceController(IMediator mediator, ApplicationDbContext db) : Controller
@@ -102,11 +103,11 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
     }
 
 
-    public IActionResult CourseSessionListing() => this.View();
-    // [HttpGet]
-    // public async Task<IActionResult> CourseSessionListing(int sessionId, CancellationToken cancellationToken)
-    // {
-    //     var result = await mediator.Send(new GetTeacherDailySessionListRequest(sessionId), cancellationToken);
-    //     return this.View(result.Value);
-    // }
+    // public IActionResult CourseSessionListing() => this.View();
+    [HttpGet]
+    public async Task<IActionResult> CourseSessionListing(int sessionId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetSessionStudentListRequest(sessionId), cancellationToken);
+        return this.View(result.Value);
+    }
 }
