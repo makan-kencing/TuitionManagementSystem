@@ -1,0 +1,32 @@
+﻿@model TuitionManagementSystem.Web.Features.Attendance.DeleteAttendance.DeleteAttendanceResponse
+
+<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title"></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+            <div class="alert alert-success">Attendance Remove successfully</div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
+@if (Model.CurrentAt < Model.SessionTime.EndAt)
+{
+    <span id="status-@Model.UserId" hx-swap-oob="true"  class="badge bg-warning text-dark">
+        NotTaken
+</span>
+}
+else
+{
+    <span id="status-@Model.UserId" hx-swap-oob="true"  class="badge bg-danger">
+        Absent
+    </span>
+}
+
