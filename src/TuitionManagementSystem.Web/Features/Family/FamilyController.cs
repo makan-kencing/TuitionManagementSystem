@@ -9,9 +9,11 @@ using DeleteFamily;
 using GetChild;
 using GetFamily;
 using Htmx;
+using Infrastructure.Persistence;
 using LeaveFamily;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RemoveMember;
 using SendFamilyInvite;
 using Services.Auth.Extensions;
@@ -161,14 +163,39 @@ public class FamilyController(IMediator mediator) : Controller
 
     [HttpGet]
     [Route("~/[controller]/member/remove/{id:int:required}")]
-    public IActionResult GetRemoveMember(int id)
+    public async Task<IActionResult> GetRemoveMember([FromServices] ApplicationDbContext db, int id)
     {
         if (!this.Request.IsHtmx())
         {
             return this.NotFound();
         }
 
-        return this.PartialView("Dialog/_RemoveMember");
+        return this.PartialView("Dialog/_RemoveMember", await db.Users
+            .Where(u => u.Id == id)
+            .Select(u => new RemoveMemberViewModel
+            {
+                Id = u.Id,
+                Username = u.Account.Username,
+                DisplayName = u.Account.DisplayName,
+                Email = u.Account.Email,
+                Type = u.GetType().Name
+            })
+            .FirstAsync());
+    }
+
+    public class RemoveMemberViewModel
+    {
+        public int Id { get; set; }
+
+        public required string Username { get; set; }
+
+        public string? DisplayName { get; set; }
+
+        public Uri? ProfileImageUri { get; set; }
+
+        public string? Email { get; set; }
+
+        public string? Type { get; set; }
     }
 
     [HttpDelete]
