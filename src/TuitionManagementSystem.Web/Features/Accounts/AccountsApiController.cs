@@ -33,12 +33,7 @@ public sealed class AccountsApiController(ApplicationDbContext db, IMediator med
     public async Task<object> UpdateProfile(AccountProfileViewModel model)
     {
         var userId = this.User.GetUserId();
-        if (userId == null)
-        {
-            return new { success = false, message = "User not authenticated." };
-        }
-
-        var user = await db.Accounts.FirstOrDefaultAsync(a => a.Id == userId.Value);
+        var user = await db.Accounts.FirstOrDefaultAsync(a => a.Id == userId);
         if (user == null)
         {
             return new { success = false, message = "User not found." };

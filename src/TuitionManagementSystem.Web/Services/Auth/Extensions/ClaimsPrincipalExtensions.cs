@@ -40,6 +40,6 @@ public static class ClaimsPrincipalExtensions
             v => int.Parse(v, CultureInfo.InvariantCulture))
         ?? throw new KeyNotFoundException();
 
-    public static string GetUserType(this ClaimsPrincipal user) =>
-        user.FindFirstValue(InternalClaimTypes.UserType) ?? throw new KeyNotFoundException();
+    public static string? GetUserType(this ClaimsPrincipal user) =>
+        user.FindFirstValue(InternalClaimTypes.UserType);
 }

@@ -24,16 +24,8 @@
             }
 
             var userId = user.GetUserId();
-            if (userId == null)
-            {
-                return new ChangePasswordResponse
-                {
-                    Success = false,
-                    Message = "User ID not found."
-                };
-            }
 
-            var account = await db.Accounts.FirstOrDefaultAsync(a => a.Id == userId.Value, cancellationToken);
+            var account = await db.Accounts.FirstOrDefaultAsync(a => a.Id == userId, cancellationToken);
             if (account == null)
             {
                 return new ChangePasswordResponse
