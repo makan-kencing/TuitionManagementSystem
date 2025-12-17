@@ -104,8 +104,6 @@ public sealed class LoginRequestHandler(
         {
             new(ClaimTypes.NameIdentifier, session.Account.Id.ToString(CultureInfo.InvariantCulture)),
             new(ClaimTypes.Thumbprint, session.SessionId.ToString()),
-            new(ClaimTypes.Role, session.Account.AccessRole.ToString()),
-            new(ClaimTypes.Email, session.Account.Email ?? "")
         };
         return new(
             new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)
