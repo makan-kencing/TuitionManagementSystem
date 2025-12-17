@@ -33,6 +33,7 @@
                     @foreach (var session in course.Sessions)
                     {
                         <div class="list-group mt-3">
+                            <a href="@Url.Action("CourseSessionListing", "Attendance", new { sessionId=session.Id })">
                             <div class="list-group-item d-flex justify-content-between">
                                 <h6>Session Time : @TimeZoneInfo.ConvertTimeFromUtc(session.StartAt, timezone)
                                     to @TimeZoneInfo.ConvertTimeFromUtc(session.EndAt, timezone)</h6>
@@ -53,6 +54,8 @@
                                     </button>
                                 </div>
                             </div>
+                            </a>
+
                         </div>
                     }
                 </div>
