@@ -9,6 +9,8 @@ public class CourseDaily
 {
      public required string Name { get; set; }
 
+     public string? SubjectName { get; set; }
+
      public ICollection<SessionDaily> Sessions { get; set; } = [];
 }
 
