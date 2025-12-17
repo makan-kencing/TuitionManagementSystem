@@ -68,7 +68,7 @@ public class FamilyController(IMediator mediator) : Controller
 
     [HttpGet]
     [Route("~/[controller]/invite")]
-    public async Task<IActionResult> GetInvite()
+    public IActionResult GetInvite()
     {
         if (!this.Request.IsHtmx())
         {
@@ -109,7 +109,7 @@ public class FamilyController(IMediator mediator) : Controller
 
     [HttpGet]
     [Route("~/[controller]/delete")]
-    public IActionResult GetDelete()
+    public IActionResult GetDeleteFamily()
     {
         if (!this.Request.IsHtmx())
         {
