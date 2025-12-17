@@ -27,9 +27,9 @@ public class AttendanceApiController(IMediator mediator) : ApiController
         CancellationToken cancellationToken) =>
         await mediator.Send(new TakeAttendanceCodeRequest(this.User.GetUserId(), code), cancellationToken);
 
-    [HttpDelete("delete/{attendanceId}")]
+    [HttpDelete("delete")]
     public async Task<Result> DeleteAttendance(
-        [FromRoute] int attendanceId,
+        [FromForm] int attendanceId,
         CancellationToken cancellationToken) =>
         await mediator.Send(new DeleteAttendanceRequest(attendanceId), cancellationToken);
 
