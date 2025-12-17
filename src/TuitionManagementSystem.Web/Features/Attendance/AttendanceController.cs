@@ -100,4 +100,13 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
                 Code = generatedCode.Value.Code
             });
     }
+
+
+    public IActionResult CourseSessionListing() => this.View();
+    // [HttpGet]
+    // public async Task<IActionResult> CourseSessionListing(int sessionId, CancellationToken cancellationToken)
+    // {
+    //     var result = await mediator.Send(new GetTeacherDailySessionListRequest(sessionId), cancellationToken);
+    //     return this.View(result.Value);
+    // }
 }
