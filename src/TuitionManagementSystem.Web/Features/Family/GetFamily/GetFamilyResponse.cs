@@ -22,7 +22,7 @@ public class FamilyUser
 
     public string? AccountDisplayName { get; set; }
 
-    public Uri? AccountProfileImageUri { get; set; }
+    public string? AccountProfileImageUri { get; set; }
 
     public required string Type { get; set; }
 }

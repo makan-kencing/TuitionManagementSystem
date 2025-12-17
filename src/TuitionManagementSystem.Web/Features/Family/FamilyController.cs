@@ -191,7 +191,7 @@ public class FamilyController(IMediator mediator) : Controller
 
         public string? DisplayName { get; set; }
 
-        public Uri? ProfileImageUri { get; set; }
+        public string? ProfileImageUri { get; set; }
 
         public string? Email { get; set; }
 
