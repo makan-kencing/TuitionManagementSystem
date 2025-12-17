@@ -32,31 +32,31 @@
                     }
                     @foreach (var session in course.Sessions)
                     {
-                        <div class="list-group mt-3">
-                            <a href="@Url.Action("CourseSessionListing", "Attendance", new { sessionId=session.Id })">
-                            <div class="list-group-item d-flex justify-content-between">
-                                <h6>Session Time : @TimeZoneInfo.ConvertTimeFromUtc(session.StartAt, timezone)
-                                    to @TimeZoneInfo.ConvertTimeFromUtc(session.EndAt, timezone)</h6>
+                        <a href="@Url.Action("CourseSessionListing", "Attendance", new { sessionId = session.Id })">
+                            <div class="list-group mt-3">
 
-                                <div class="btn-group btn-group-sm">
-                                    <button
-                                        hx-post
-                                        hx-controller="Attendance"
-                                        hx-action="Generate"
-                                        hx-route-id="@session.Id"
-                                        hx-target="#code-modal"
-                                        type="submit"
-                                        class=""
-                                        data-bs-toggle="modal" data-bs-target="#code-modal">
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <h6>Session Time : @TimeZoneInfo.ConvertTimeFromUtc(session.StartAt, timezone)
+                                        to @TimeZoneInfo.ConvertTimeFromUtc(session.EndAt, timezone)</h6>
+
+                                    <div class="btn-group btn-group-sm">
+                                        <button
+                                            hx-post
+                                            hx-controller="Attendance"
+                                            hx-action="Generate"
+                                            hx-route-id="@session.Id"
+                                            hx-target="#code-modal"
+                                            type="submit"
+                                            class=""
+                                            data-bs-toggle="modal" data-bs-target="#code-modal">
                                         <span id="code-button@(session.Id)">
                                             @(session.Code ?? "Generate")
                                         </span>
-                                    </button>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            </a>
-
-                        </div>
+                        </a>
                     }
                 </div>
             </div>
@@ -71,7 +71,6 @@
         <div class="modal-content"></div>
     </div>
 </div>
-
 
 
 
