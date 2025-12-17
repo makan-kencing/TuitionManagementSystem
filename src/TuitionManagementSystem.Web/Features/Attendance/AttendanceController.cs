@@ -18,7 +18,7 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
     public async Task<IActionResult> Summary(
         CancellationToken cancellationToken)
     {
-        var userId = this.User.GetUserId() ?? -1;
+        var userId = this.User.GetUserId();
         if (userId == -1)
         {
             return this.Unauthorized();
@@ -36,7 +36,7 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
     [HttpGet]
     public async Task<IActionResult> History(int courseId, CancellationToken cancellationToken)
     {
-        var userId = this.User.GetUserId() ?? -1;
+        var userId = this.User.GetUserId();
         if (userId == -1)
         {
             return this.Unauthorized();
@@ -60,7 +60,7 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
     [Authorize(Policy = "TeacherOnly")]
     public async Task<IActionResult> GenerateAttendance(CancellationToken cancellationToken)
     {
-        var userId = this.User.GetUserId() ?? -1;
+        var userId = this.User.GetUserId();
         if (userId == -1)
         {
             return this.Unauthorized();

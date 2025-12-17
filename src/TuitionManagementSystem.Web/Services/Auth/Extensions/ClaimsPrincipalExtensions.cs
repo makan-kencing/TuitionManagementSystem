@@ -6,72 +6,40 @@ using Constants;
 
 public static class ClaimsPrincipalExtensions
 {
-    public static string? GetUsername(this ClaimsPrincipal user) =>
-        user.FindFirstValue(ClaimTypes.Name);
-
-    public static int? GetUserId(this ClaimsPrincipal user)
+    private static T? FindFirstValue<T>(this ClaimsPrincipal principal, string claimType, Func<string, T> converter)
+        where T : struct
     {
-        var value = user.FindFirstValue(InternalClaimTypes.UserId);
-        try
-        {
-            return string.IsNullOrEmpty(value)
-                ? null
-                : int.Parse(value, CultureInfo.InvariantCulture);
-        }
-        catch (FormatException)
-        {
-            return null;
-        }
+        var value = principal.FindFirstValue(claimType);
+        return value is null ? default : converter.Invoke(value);
     }
 
-    public static int? GetAccountId(this ClaimsPrincipal user)
-    {
-        var value = user.FindFirstValue(ClaimTypes.NameIdentifier);
-        try
-        {
-            return string.IsNullOrEmpty(value)
-                ? null
-                : int.Parse(value, CultureInfo.InvariantCulture);
-        }
-        catch (FormatException)
-        {
-            return null;
-        }
-    }
+    public static int GetAccountId(this ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.NameIdentifier,
+            v => int.Parse(v, CultureInfo.InvariantCulture))
+        ?? throw new KeyNotFoundException();
 
-    public static DateTime? GetLastChanged(this ClaimsPrincipal user)
-    {
-
-        var value = user.FindFirstValue(ClaimTypes.Version);
-        try
-        {
-            return value == null
-                ? null
-                : DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
-        }
-        catch (FormatException)
-        {
-            return null;
-        }
-    }
-
-    public static Guid? GetGuid(this ClaimsPrincipal user)
-    {
-        var value = user.FindFirstValue(ClaimTypes.Thumbprint);
-        return value == null ? null : Guid.Parse(value);
-    }
-
-    public static string? GetUserType(this ClaimsPrincipal user) =>
-        user.FindFirstValue(InternalClaimTypes.UserType);
-
-    public static string? GetProfileImageUri(this ClaimsPrincipal user) =>
-        user.FindFirstValue(ClaimTypes.Uri);
+    public static string GetUsername(this ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.Name) ?? throw new KeyNotFoundException();
 
     public static string? GetDisplayName(this ClaimsPrincipal user) =>
         user.FindFirstValue(InternalClaimTypes.DisplayName);
 
-    public static string? GetUserEmail(this ClaimsPrincipal user) =>
-        user.FindFirstValue(ClaimTypes.Email);
+    public static DateTime? GetLastChanged(this ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.Version,
+            v => DateTime.Parse(v, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal))
+        ?? throw new KeyNotFoundException();
+
+    public static string? GetProfileImageUri(this ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.Uri);
+
+    public static Guid GetGuid(this ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.Thumbprint, Guid.Parse) ?? throw new KeyNotFoundException();
+
+    public static int GetUserId(this ClaimsPrincipal user) =>
+        user.FindFirstValue(InternalClaimTypes.UserId,
+            v => int.Parse(v, CultureInfo.InvariantCulture))
+        ?? throw new KeyNotFoundException();
+
+    public static string GetUserType(this ClaimsPrincipal user) =>
+        user.FindFirstValue(InternalClaimTypes.UserType) ?? throw new KeyNotFoundException();
 }
-
-
