@@ -1,0 +1,8 @@
+@model TuitionManagementSystem.Web.Features.Family.FamilyController.EditFamilyNameViewModel
+
+<form hx-put hx-controller="Family" hx-action="EditName" hx-target="this" hx-swap="outerHTML" class="d-flex gap-3">
+    <input asp-for="Name" class="mb-0"></input>
+
+    <button hx-get hx-controller="Family" hx-action="GetName" type="button" class="btn btn-secondary">Cancel</button>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

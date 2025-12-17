@@ -1,4 +1,5 @@
-﻿@using TuitionManagementSystem.Web.Models.User
+﻿@using TuitionManagementSystem.Web.Features.Family
+@using TuitionManagementSystem.Web.Models.User
 @using TuitionManagementSystem.Web.Services.Auth.Extensions
 @model TuitionManagementSystem.Web.Features.Family.ViewFamilyViewModel
 
@@ -7,9 +8,8 @@
 }
 
 <div class="container py-4">
-    <div>
-        <h2 class="mb-0">@Model.Family.Name</h2>
-    </div>
+    <partial name="Form/_EditNameDisplay"
+             model="@new FamilyController.EditFamilyNameViewModel { Name = Model.Family.Name}"/>
 
     <div class="mt-4">
         <div>

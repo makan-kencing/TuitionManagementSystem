@@ -1,0 +1,11 @@
+@model TuitionManagementSystem.Web.Features.Family.FamilyController.EditFamilyNameViewModel
+
+<div hx-target="this" hx-swap="outerHTML" class="d-flex gap-3">
+    <h2 class="mb-0">@Model.Name</h2>
+
+    <button hx-get hx-controller="Family" hx-action="GetEditName">
+        <i class="fa-solid fa-pen-to-square"></i>
+    </button>
+</div>
+
+
