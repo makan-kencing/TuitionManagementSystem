@@ -15,12 +15,9 @@ public class RemoveMemberCommandHandler(ApplicationDbContext db) : IRequestHandl
             .Where(fm => fm.User.Id == request.UserId)
             .FirstOrDefaultAsync(cancellationToken);
 
-        switch (parent)
+        if (parent is null)
         {
-            case null:
-                return Result.Unauthorized();
-            case { Family: null }:
-                return Result.Invalid();
+            return Result.Unauthorized();
         }
 
         var canRemove = await db.FamilyMembers
