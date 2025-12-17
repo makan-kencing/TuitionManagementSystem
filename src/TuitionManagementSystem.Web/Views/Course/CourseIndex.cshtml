@@ -1,36 +1,133 @@
-@model IEnumerable<TuitionManagementSystem.Web.Features.Course.CourseResponse>
+@using Microsoft.AspNetCore.Mvc.Rendering
+@model IReadOnlyList<TuitionManagementSystem.Web.Features.Course.CourseIndexRowResponse>
+
 @{
     ViewData["Title"] = "Courses";
+    var subjects = (IEnumerable<SelectListItem>)ViewBag.Subjects;
+    var classrooms = (IEnumerable<SelectListItem>)ViewBag.Classrooms;
+    var teachers = (IEnumerable<SelectListItem>)ViewBag.Teachers;
 }
+
 <h2>Courses</h2>
-<p><a asp-action="Create" class="btn btn-primary">Create New</a></p>
-<table class="table table-striped">
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<form id="antiForgeryForm" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<table class="table">
     <thead>
-    <tr>
-        <th>Name</th>
-        <th>Subject</th>
-        <th>Preferred Classroom</th>
-        <th>Price</th>
-        <th></th>
-    </tr>
+        <tr>
+            <th>Name</th>
+            <th>Subject</th>
+            <th>Preferred Classroom</th>
+            <th>Teacher</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
     </thead>
+
     <tbody>
     @foreach (var c in Model)
     {
         <tr>
             <td>@c.Name</td>
-            <td>@c.SubjectName</td>
-            <td>@c.PreferredClassroomLocation</td>
-            <td>@c.Price.ToString("C")</td>
+
+            <td>
+                <select class="form-select subject-select" data-course-id="@c.Id">
+                    @foreach (var s in subjects)
+                    {
+                        <option value="@s.Value" selected="@(s.Value == c.SubjectId.ToString() ? "selected" : null)">
+                            @s.Text
+                        </option>
+                    }
+                </select>
+            </td>
+
+            <td>
+                <select class="form-select classroom-select" data-course-id="@c.Id">
+                    @foreach (var r in classrooms)
+                    {
+                        <option value="@r.Value" selected="@(r.Value == c.PreferredClassroomId.ToString() ? "selected" : null)">
+                            @r.Text
+                        </option>
+                    }
+                </select>
+            </td>
+
+            <td>
+                <select class="form-select teacher-select" data-course-id="@c.Id">
+                    <option value="">-- Select teacher --</option>
+                    @foreach (var t in teachers)
+                    {
+                        <option value="@t.Value" selected="@(c.TeacherId?.ToString() == t.Value ? "selected" : null)">
+                            @t.Text
+                        </option>
+                    }
+                </select>
+                <div class="small text-muted mt-1">
+                    @c.TeacherNames
+                </div>
+            </td>
+
+            <td>@c.Price.ToString("0.00")</td>
+
             <td>
                 <a asp-action="Details" asp-route-id="@c.Id">Details</a> |
                 <a asp-action="Edit" asp-route-id="@c.Id">Edit</a> |
-                <form asp-action="Delete" asp-route-id="@c.Id" method="post" class="d-inline">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-link text-danger p-0">Delete</button>
-                </form>
+                <a asp-action="Delete" asp-route-id="@c.Id" class="text-danger">Delete</a>
             </td>
         </tr>
     }
     </tbody>
 </table>
+
+@section Scripts {
+<script>
+(() => {
+  const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
+
+  async function postJson(url, body) {
+    return await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'RequestVerificationToken': token
+      },
+      body: JSON.stringify(body)
+    });
+  }
+
+  async function updateLookups(courseId) {
+    const subjectId = Number(document.querySelector(`.subject-select[data-course-id="${courseId}"]`).value);
+    const preferredClassroomId = Number(document.querySelector(`.classroom-select[data-course-id="${courseId}"]`).value);
+
+    const res = await postJson(`/courses/${courseId}/inline-lookups`, { subjectId, preferredClassroomId });
+    if (!res.ok) alert('Failed updating subject/classroom.');
+  }
+
+    async function updateTeacher(courseId) {
+        const v = document.querySelector(`.teacher-select[data-course-id="${courseId}"]`).value;
+        const teacherId = v ? Number(v) : null;
+
+        const res = await postJson(`/courses/${courseId}/inline-teacher`, { teacherId });
+        if (!res.ok) alert('Failed updating teacher.');
+    }
+
+  document.querySelectorAll('.subject-select').forEach(el => {
+    el.addEventListener('change', () => updateLookups(el.dataset.courseId));
+  });
+
+  document.querySelectorAll('.classroom-select').forEach(el => {
+    el.addEventListener('change', () => updateLookups(el.dataset.courseId));
+  });
+
+  document.querySelectorAll('.teacher-select').forEach(el => {
+    el.addEventListener('change', () => updateTeacher(el.dataset.courseId));
+  });
+})();
+</script>
+}

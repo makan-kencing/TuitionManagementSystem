@@ -11,6 +11,7 @@ public record CourseResponse(
     string SubjectName,
     int PreferredClassroomId,
     string PreferredClassroomLocation)
+
 {
     public static CourseResponse FromEntity(Models.Class.Course c) =>
         new(
@@ -22,4 +23,22 @@ public record CourseResponse(
             c.Subject.Name,
             c.PreferredClassroom.Id,
             c.PreferredClassroom.Location);
+
 }
+
+public record CourseIndexRowResponse(
+    int Id,
+    string Name,
+    decimal Price,
+    int SubjectId,
+    string SubjectName,
+    int PreferredClassroomId,
+    string PreferredClassroomLocation,
+    string TeacherNames,
+    int? TeacherId
+);
+
+public record TeacherLookupResponse(
+    int Id,
+    string FullName
+);
