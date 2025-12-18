@@ -175,7 +175,6 @@ public class SeedData
                     .Select(c => new CourseTeacher { Course = c, Teacher = t }))
                 .SelectMany(i => i)
                 .ToList();
-            Console.WriteLine(this.courseTeachers.ToJson(Formatting.Indented));
         }
     }
 
@@ -190,7 +189,7 @@ public class SeedData
         await this.Seed(this.enrollments, cancellationToken);
         await this.Seed(this.sessions, cancellationToken);
         await this.BulkSeed(this.attendances, cancellationToken);
-        await this.BulkSeed(this.courseTeachers, cancellationToken);
+        await this.Seed(this.courseTeachers, cancellationToken);
     }
 
     private async Task Seed<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
