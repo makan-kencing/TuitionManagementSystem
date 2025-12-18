@@ -4,6 +4,7 @@ public class GetAttendanceHistoryResponse
 {
     public required string CourseName { get; set; }
 
+    public DateTime EnrollmentAt { get; set; }
     public List<SessionAttendanceItem> Sessions { get; set; } = [];
 }
 

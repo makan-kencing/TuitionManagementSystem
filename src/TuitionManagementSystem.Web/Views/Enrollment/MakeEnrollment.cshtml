@@ -1,7 +1,6 @@
 @model TuitionManagementSystem.Web.Models.ViewModels.EnrollmentViewModel
 @using TuitionManagementSystem.Web.Services.Auth.Extensions
 
-
 @{
     Layout = "_Layout";
 }
@@ -160,7 +159,7 @@
                 $("#enrollModalTitle").text(`Courses Available for ${subjectName}`);
                 $("#backToSubjectsBtn").removeClass("d-none");
 
-                const res = await fetch(`/courses/api?subjectId=${subjectId}`);
+                const res = await fetch(`/courses/api/by-subject/${subjectId}`);
                 const courses = await res.json();
 
                 let html = "";

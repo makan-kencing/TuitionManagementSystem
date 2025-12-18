@@ -109,9 +109,14 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
 
     // public IActionResult CourseSessionListing() => this.View();
     [HttpGet]
-    public async Task<IActionResult> CourseSessionListing(int sessionId, CancellationToken cancellationToken)
+    public async Task<IActionResult> CourseSessionListing(int id, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetSessionStudentListRequest(sessionId), cancellationToken);
+        var result = await mediator.Send(new GetSessionStudentListRequest(id), cancellationToken);
+        if (result.IsNotFound())
+        {
+            return this.NotFound();
+        }
+
         return this.View(result.Value);
     }
 

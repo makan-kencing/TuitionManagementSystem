@@ -1,4 +1,5 @@
 ﻿@model TuitionManagementSystem.Web.Features.Attendance.SessionStudentList.GetSessionStudentListResponse
+
 @{
     ViewData["Title"] = "Student Management";
 }
@@ -15,63 +16,86 @@
     </tr>
     </thead>
     <tbody>
-    @foreach (var student in Model.StudentList)
+    @if (Model.StudentList.Count == 0)
     {
         <tr>
+            <td colspan="4">
+                No students enrolled for this session
+            </td>
+        </tr>
+    }
+    @foreach (var student in Model.StudentList)
+    {
+        var attend = student.AttendanceId is not null;
+
+        <tr>
             <td>@student.StudentId</td>
-            <td>@student.Name</td>
+            <td>@student.DisplayName</td>
             <td>
                 <div>
-                    @if (student.Status == "Attend")
+                    @if (attend)
                     {
-                        <span id="status-@student.StudentId" class="badge bg-success">@student.Status</span>
+                        <span id="status-@student.StudentId" class="badge bg-success">Attend</span>
                     }
-                    else if (student.Status == "NotTaken")
+                    else if (Model.CreatedOn < Model.EndDate)
                     {
-                        <span id="status-@student.StudentId" class="badge bg-warning text-dark">@student.Status</span>
-                    }
-                    else if (student.Status == "Absent")
-                    {
-                        <span id="status-@student.StudentId" class="badge bg-danger">@student.Status</span>
+                        <span id="status-@student.StudentId" class="badge bg-warning text-dark">Not Taken</span>
                     }
                     else
                     {
-                        <span id="status-@student.StudentId" class="badge bg-secondary">@student.Status</span>
+                        <span id="status-@student.StudentId" class="badge bg-danger">Absent</span>
                     }
-
                 </div>
             </td>
-            <td>
-                <button
-                    hx-post="/attendance/take"
-                    hx-vals='{"id": "@Model.SessionId", "userId": "@student.StudentId"}'
-                    hx-target="#takecode-modal"
-                    type="submit"
-                    class=""
-                    data-bs-toggle="modal" data-bs-target="#takecode-modal">
-                    <i class="fa-solid fa-handshake-angle"></i>
-                </button>
-                <button
-                    hx-delete="/attendance/delete"
-                    hx-vals='{"id":"@student.AttendanceId", "userId": "@student.StudentId","sessionid": "@Model.SessionId"}'
-                    hx-target="#code-modal"
-                    type="submit"
-                    class=""
-                    data-bs-toggle="modal" data-bs-target="#code-modal">
-                    <i class="fa-solid fa-delete-left"></i>
-                </button>
+            <td id="action-@student.StudentId">
+                @if (Model.CanTakeAttendance)
+                {
+                    if (attend)
+                    {
+                        <button
+                            hx-delete="/attendance/delete"
+                            hx-vals='{"id":"@student.AttendanceId", "userId": "@student.StudentId","sessionid": "@Model.SessionId"}'
+                            hx-target="#code-modal"
+                            type="submit"
+                            class=""
+                            data-bs-toggle="modal" data-bs-target="#code-modal">
+                            <i class="fa-solid fa-delete-left"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <button
+                            hx-post="/attendance/take"
+                            hx-vals='{"id": "@Model.SessionId", "userId": "@student.StudentId"}'
+                            hx-target="#takecode-modal"
+                            type="submit"
+                            class=""
+                            data-bs-toggle="modal" data-bs-target="#takecode-modal">
+                            <i class="fa-solid fa-handshake-angle"></i>
+                        </button>
+                    }
+                }
+                else if (!Model.IsCodeGenerated)
+                {
+                    <span class="badge bg-danger">
+                        The code haven generate yet
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">
+                        Over The Taken Time
+                    </span>
+                }
             </td>
-
         </tr>
     }
-
     </tbody>
 </table>
 
 <div id="takecode-modal" class="modal"
      aria-hidden="false"
-     tabindex="-1"
->
+     tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content"></div>
     </div>
@@ -79,13 +103,11 @@
 
 <div id="code-modal" class="modal"
      aria-hidden="false"
-     tabindex="-1"
->
+     tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content"></div>
     </div>
 </div>
-
 
 
 

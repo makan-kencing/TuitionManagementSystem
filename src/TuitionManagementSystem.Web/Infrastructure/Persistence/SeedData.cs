@@ -2,6 +2,7 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence;
 
 using System.Globalization;
 using EFCore.BulkExtensions;
+using Htmx.Net.Toast.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Models.Class;
 using Models.User;
@@ -24,6 +25,7 @@ public class SeedData
     private readonly List<Enrollment> enrollments;
     private readonly List<Session> sessions;
     private readonly List<Attendance> attendances;
+    private readonly List<CourseTeacher> courseTeachers;
 
     private IEnumerable<User> Users => this.teachers.Cast<User>()
         .Concat(this.students)
@@ -142,8 +144,7 @@ public class SeedData
                 .Select(i =>
                 {
                     var start = DateTime.UtcNow.Date
-                        .AddDays(-14 + (i * 2))
-                        .AddHours(9);
+                        .AddDays(i * 2);
 
                     return new Session
                     {
@@ -166,6 +167,15 @@ public class SeedData
                 }))
             .SelectMany(i => i)
             .ToList();
+
+        {
+            var coursesCursor = this.courses.GetEnumerator().ToIEnumerable();
+            this.courseTeachers = this.teachers
+                .Select(t => coursesCursor.Take(this.random.Next(1, 3))
+                    .Select(c => new CourseTeacher { Course = c, Teacher = t }))
+                .SelectMany(i => i)
+                .ToList();
+        }
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -179,6 +189,7 @@ public class SeedData
         await this.Seed(this.enrollments, cancellationToken);
         await this.Seed(this.sessions, cancellationToken);
         await this.BulkSeed(this.attendances, cancellationToken);
+        await this.Seed(this.courseTeachers, cancellationToken);
     }
 
     private async Task Seed<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
