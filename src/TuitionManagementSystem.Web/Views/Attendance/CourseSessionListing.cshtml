@@ -41,25 +41,49 @@
 
                 </div>
             </td>
-            <td>
-                <button
-                    hx-post="/attendance/take"
-                    hx-vals='{"id": "@Model.SessionId", "userId": "@student.StudentId"}'
-                    hx-target="#takecode-modal"
-                    type="submit"
-                    class=""
-                    data-bs-toggle="modal" data-bs-target="#takecode-modal">
-                    <i class="fa-solid fa-handshake-angle"></i>
-                </button>
-                <button
-                    hx-delete="/attendance/delete"
-                    hx-vals='{"id":"@student.AttendanceId", "userId": "@student.StudentId","sessionid": "@Model.SessionId"}'
-                    hx-target="#code-modal"
-                    type="submit"
-                    class=""
-                    data-bs-toggle="modal" data-bs-target="#code-modal">
-                    <i class="fa-solid fa-delete-left"></i>
-                </button>
+            <td id="action-@student.StudentId">
+                @if (student.StartDate <= student.CreatedOn && student.CreatedOn <= student.EndDate  && Model.IsCodeGenerated )
+                {
+                    if (student.Status == "Attend")
+                    {
+                        <button
+                        hx-delete="/attendance/delete"
+                        hx-vals='{"id":"@student.AttendanceId", "userId": "@student.StudentId","sessionid": "@Model.SessionId"}'
+                        hx-target="#code-modal"
+                        type="submit"
+                        class=""
+                        data-bs-toggle="modal" data-bs-target="#code-modal">
+                            <i class="fa-solid fa-delete-left"></i>
+                    </button>
+
+                    }
+                    else
+                    {
+                        <button
+                            hx-post="/attendance/take"
+                            hx-vals='{"id": "@Model.SessionId", "userId": "@student.StudentId"}'
+                            hx-target="#takecode-modal"
+                            type="submit"
+                            class=""
+                            data-bs-toggle="modal" data-bs-target="#takecode-modal">
+                            <i class="fa-solid fa-handshake-angle"></i>
+                        </button>
+                    }
+
+
+                }
+                else if(!Model.IsCodeGenerated){
+                    <span class="badge bg-danger">
+                        The code haven generate yet
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">
+                    Over The Taken Time
+                    </span>
+                }
+
             </td>
 
         </tr>
