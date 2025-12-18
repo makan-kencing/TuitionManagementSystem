@@ -1,0 +1,50 @@
+﻿@model TuitionManagementSystem.Web.Features.Homework.StudentHomework.GetStudentHomeworkResponse
+@{
+    ViewData["Title"] = "Student Homework Menu";
+}
+
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="text-primary">
+                    <i class="bi bi-journal-bookmark-fill me-2"></i>
+                    Course List
+                </h1>
+                <p class="text-muted">@Model.Name</p>
+            </div>
+        </div>
+        @foreach (var subject in @Model.CourseInfos)
+        {
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-primary mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title mb-0">@subject.SubjectName</h5>
+                                    <p class="card-text mb-0">@subject.CourseName</p>
+                                </div>
+                                <span class="badge bg-light text-primary">Tutorial</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">@subject.TeacherName</h6>
+                            @* <p class="card-text">THAMARAI A/P SUBRAMANIAM</p> *@
+                            @* <div class="d-flex justify-content-between align-items-center"> *@
+                            @*     <div> *@
+                            @*         <i class="bi bi-calendar-check me-1"></i> *@
+                            @*         <span class="text-danger fw-bold">学期: 202505</span> *@
+                            @*     </div> *@
+                            @*     <div> *@
+                            @*         <i class="bi bi-clock me-1"></i> *@
+                            @*         <span class="text-muted">周三 2pm, 周四 2:30pm</span> *@
+                            @*     </div> *@
+                            @* </div> *@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</body>

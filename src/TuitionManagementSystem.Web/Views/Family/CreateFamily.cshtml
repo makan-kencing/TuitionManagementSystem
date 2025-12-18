@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Create Family";
+}
+
+<div class="container py-4">
+    <div>
+        <h2 class="mb-0">You currently does not have a family.</h2>
+    </div>
+
+    <form asp-controller="Family" asp-action="CreateFamily" class="mt-4">
+        <div>
+            <h4>Create a family</h4>
+            <small>Create your family with your children</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Create Family
+        </button>
+    </form>
+</div>

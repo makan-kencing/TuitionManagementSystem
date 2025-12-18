@@ -4,8 +4,10 @@ using System.ComponentModel;
 using AcceptInvite;
 using Ardalis.Result;
 using CheckInvite;
+using CreateFamily;
 using DeclineInvite;
 using DeleteFamily;
+using EditFamilyName;
 using GetChild;
 using GetFamily;
 using Htmx;
@@ -32,10 +34,26 @@ public class FamilyController(IMediator mediator) : Controller
         var family = await mediator.Send(new GetFamilyQuery(this.User.GetUserId()));
         if (family.IsNotFound())
         {
-            return this.View("NoFamilyFound");
+            return this.User.GetUserType() switch
+            {
+                nameof(Family) => this.View("CreateFamily"),
+                _ => this.View("NoFamily")
+            };
         }
 
         return this.View(new ViewFamilyViewModel { Family = family.Value });
+    }
+
+    public class CheckInviteViewModel
+    {
+        public required CheckInviteResponse Invite { get; init; }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateFamily()
+    {
+        await mediator.Send(new CreateFamilyCommand(this.User.GetUserId()));
+        return this.RedirectToAction("Index");
     }
 
     [HttpGet]
@@ -65,6 +83,60 @@ public class FamilyController(IMediator mediator) : Controller
     }
 
     // Partials
+
+    [HttpGet]
+    public async Task<IActionResult> GetName()
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        var family = await mediator.Send(new GetFamilyQuery(this.User.GetUserId()));
+        if (family.IsNotFound())
+        {
+            return this.NotFound();
+        }
+
+        return this.PartialView("Form/_EditNameDisplay", new EditFamilyNameViewModel { Name = family.Value.Name });
+    }
+
+    [HttpGet]
+    [Route("~/[controller]/name/edit")]
+    public async Task<IActionResult> GetEditName()
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        var family = await mediator.Send(new GetFamilyQuery(this.User.GetUserId()));
+        if (family.IsNotFound())
+        {
+            return this.NotFound();
+        }
+
+        return this.PartialView("Form/_EditNameEditable", new EditFamilyNameViewModel { Name = family.Value.Name });
+    }
+
+    [HttpPut]
+    [Route("~/[controller]/name")]
+    public async Task<IActionResult> EditName(EditFamilyNameViewModel model)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        await mediator.Send(new EditFamilyNameCommand(this.User.GetUserId(), model.Name));
+
+        return this.PartialView("Form/_EditNameDisplay", model);
+    }
+
+    public class EditFamilyNameViewModel
+    {
+        public required string Name { get; set; }
+    }
 
     [HttpGet]
     [Route("~/[controller]/invite")]

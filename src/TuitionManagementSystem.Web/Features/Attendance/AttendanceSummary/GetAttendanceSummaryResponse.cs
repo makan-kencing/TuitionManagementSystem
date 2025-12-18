@@ -29,7 +29,8 @@ public record StudentInfo(
 
 public record CourseInfo(
     int Id,
-    string Name
+    string Name,
+    string SubjectName
 );
 
 public record AttendanceStats(

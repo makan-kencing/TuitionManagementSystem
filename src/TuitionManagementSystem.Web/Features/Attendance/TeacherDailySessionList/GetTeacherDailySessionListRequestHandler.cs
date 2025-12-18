@@ -20,6 +20,7 @@ public sealed class GetTeacherDailySessionListRequestHandler(ApplicationDbContex
             .Select(ct => ct.Course)
             .Select(c => new CourseDaily
             {
+                SubjectName =  c.Subject.Name,
                 Name = c.Name,
                 Sessions = c.Sessions
                     .Where(s => s.StartAt >= hour0 && s.StartAt < hour24)

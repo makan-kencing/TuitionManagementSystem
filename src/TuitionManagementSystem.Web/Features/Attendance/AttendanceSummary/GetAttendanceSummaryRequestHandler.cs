@@ -33,9 +33,10 @@ public sealed class GetAttendanceSummaryRequestHandler(
         var courseSummary = await db.Database
             .SqlQuery<CourseQuery>
             ($"""
-              SELECT C."Id", C."Name", Count(S."Id") "Total", Count(Att."Id") "Attended"
+              SELECT C."Id", C."Name" "CourseName", S."Name" "SubjectName", Count(S."Id") "Total", Count(Att."Id") "Attended"
               FROM "Enrollments" E
                        JOIN public."Courses" C on E."CourseId" = C."Id"
+                       JOIN public."Subjects" S on C."SubjectId" = S."Id"
                        LEFT JOIN public."Sessions" S on C."Id" = S."CourseId"
                        LEFT JOIN public."Attendances" Att on S."Id" = Att."SessionId" AND E."StudentId"=Att."StudentId"
               WHERE E."StudentId" = {request.UserId}
@@ -60,14 +61,16 @@ public sealed class GetAttendanceSummaryRequestHandler(
 
     private record CourseQuery(
         int Id,
-        string Name,
+        string CourseName,
+        string SubjectName,
         int Total,
         int Attended)
     {
         public CourseAttendanceSummary ToSummary =>
             new()
             {
-                Course = new CourseInfo(this.Id, this.Name), Stats = new AttendanceStats(this.Total, this.Attended)
+                Course = new CourseInfo(this.Id, this.CourseName, this.SubjectName),
+                Stats = new AttendanceStats(this.Total, this.Attended)
             };
     }
 }

@@ -1,4 +1,5 @@
-﻿@using TuitionManagementSystem.Web.Models.User
+﻿@using TuitionManagementSystem.Web.Features.Family
+@using TuitionManagementSystem.Web.Models.User
 @using TuitionManagementSystem.Web.Services.Auth.Extensions
 @model TuitionManagementSystem.Web.Features.Family.ViewFamilyViewModel
 
@@ -7,9 +8,8 @@
 }
 
 <div class="container py-4">
-    <div>
-        <h2 class="mb-0">@Model.Family.Name</h2>
-    </div>
+    <partial name="Form/_EditNameDisplay"
+             model="@new FamilyController.EditFamilyNameViewModel { Name = Model.Family.Name}"/>
 
     <div class="mt-4">
         <div>
@@ -31,6 +31,22 @@
                     <div>
                         <h5>@member.User.AccountDisplayName @(member.User.Id == User.GetUserId() ? "(You)" : "")</h5>
                         <small>@member.User.Type</small>
+                    </div>
+
+                    <div class="ms-auto d-flex">
+                        @if (member.User.Id != User.GetUserId())
+                        {
+                            <button hx-get
+                                    hx-controller="Family"
+                                    hx-action="GetRemoveMember"
+                                    hx-route-id="@member.User.Id"
+                                    hx-target="#modal"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modal"
+                                    class="btn" title="Remove Member">
+                                <i class="fa-solid fa-delete-left"></i>
+                            </button>
+                        }
                     </div>
                 </div>
             }
