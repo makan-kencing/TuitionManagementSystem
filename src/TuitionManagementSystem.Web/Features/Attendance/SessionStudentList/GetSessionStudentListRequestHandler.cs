@@ -14,58 +14,32 @@ public sealed class GetSessionStudentListRequestHandler(ApplicationDbContext db)
     {
         var session = await db.Sessions
             .Where(s => s.Id == request.SessionId)
-            .Select(s => new { s.CourseId, s.StartAt, s.EndAt })
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (session == null)
-        {
-            return Result<GetSessionStudentListResponse>.NotFound();
-        }
-
-        var enrolledStudents = await db.Enrollments
-            .Where(e => e.CourseId == session.CourseId)
-            .Select(e => new { e.StudentId, Name = e.Student.Account.DisplayName })
-            .ToListAsync(cancellationToken);
-
-        var attendanceRecords = await db.Attendances
-            .Where(a => a.SessionId == request.SessionId)
-            .ToListAsync(cancellationToken);
-
-        var now = DateTime.UtcNow;
-
-        var code = await db.AttendanceCodes
-            .Where(c => c.SessionId == request.SessionId)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        var isCodeGenerated = code != null;
-
-
-            var studentList = enrolledStudents.Select(s =>
+            .Select(s => new GetSessionStudentListResponse
             {
-                var record = attendanceRecords.FirstOrDefault(e => e.StudentId == s.StudentId);
+                SessionId = s.Id,
+                IsCodeGenerated = s.AttendanceCode != null,
+                StartDate = s.StartAt,
+                EndDate = s.EndAt,
+                CreatedOn = DateTime.UtcNow,
+                StudentList = s.Course.Enrollments.Join(
+                    s.Attendances.DefaultIfEmpty(),
+                    e => e.Student.Id,
+                    a => a!.Student.Id,
+                    (e, a) => new StudentInfo
+                    {
+                        StudentId = e.Student.Id,
+                        DisplayName = e.Student.Account.DisplayName,
+                        AttendanceId = a == null ? null : a.Id
+                    }
+                ).ToList()
+            })
+            .FirstOrDefaultAsync(cancellationToken);
 
-                string status;
-
-                if (record != null)
-                {
-                    status = "Attend";
-                }
-                else if (now < session.EndAt)
-                {
-                    status = "NotTaken";
-                }
-                else
-                {
-                    status = "Absent";
-                }
-
-                return new StudentInfo
-                {
-                    StudentId = s.StudentId, Name = s.Name, Status = status ,AttendanceId = record?.Id ,StartDate = session.StartAt, EndDate = session.EndAt ,CreatedOn = now
-                };
-            }).ToList();
-            return Result<GetSessionStudentListResponse>.Success(
-                new GetSessionStudentListResponse {  SessionId = request.SessionId, StudentList = studentList, IsCodeGenerated = isCodeGenerated}
-            );
+        if (session is null)
+        {
+            return Result.NotFound();
         }
+
+        return Result.Success(session);
+    }
 }
