@@ -103,4 +103,81 @@ public class InvoiceController : Controller
                 SelectedStatus = status
             });
     }
+
+    [HttpGet("history")]
+    public async Task<IActionResult> InvoiceHistory(
+        [FromQuery] string? status = null,
+        [FromQuery] int? month = null,
+        [FromQuery] int? year = null,
+        CancellationToken cancellationToken = default)
+    {
+        var studentId = User.GetUserId();
+
+        InvoiceStatus? parsedStatus = null;
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (!Enum.TryParse<InvoiceStatus>(status, true, out var s))
+            {
+                return BadRequest(new
+                {
+                    errors = new[] { "Invalid status value. Allowed: Paid, Cancelled, Withdrawn." }
+                });
+            }
+
+            parsedStatus = s;
+        }
+
+        var result = await _mediator.Send(
+            new ListInvoiceRequest
+            {
+                StudentId = studentId,
+                Status = parsedStatus,
+                PendingOnly = false,
+                OverdueOnly = false,
+                Month = month,
+                Year = year ?? DateTime.Now.Year
+            },
+            cancellationToken);
+
+        if (!result.IsSuccess)
+            return BadRequest(new { errors = result.Errors });
+
+        var invoices = result.Value
+            .Where(i => i.Status != InvoiceStatus.Pending)
+            .Select(invoice => new InvoiceViewModel
+            {
+                InvoiceId = invoice.Id,
+                StudentId = invoice.Student?.Id ?? 0,
+                StudentName = invoice.Student?.Account?.Username ?? "N/A",
+                EnrollmentId = invoice.Enrollment?.Id ?? 0,
+                SubjectName = invoice.Enrollment?.Course?.Subject?.Name ?? "N/A",
+                CourseName = invoice.Enrollment?.Course?.Name ?? "N/A",
+                Amount = invoice.Amount,
+                InvoicedAt = invoice.InvoicedAt,
+                DueAt = invoice.DueAt,
+                CancelledAt = invoice.CancelledAt,
+                Status = invoice.Status,
+                IsOverdue = false
+            })
+            .OrderByDescending(i => i.InvoicedAt)
+            .ToList();
+
+        var availableMonths = invoices
+            .Where(i => i.InvoicedAt != default)
+            .Select(i => i.InvoicedAt.Month)
+            .Distinct()
+            .OrderBy(m => m)
+            .ToList();
+
+        return View("InvoiceHistory",
+            new ListInvoiceViewModel
+            {
+                Invoices = invoices,
+                SelectedMonth = month,
+                SelectedYear = year ?? DateTime.Now.Year,
+                SelectedStatus = status,
+                AvailableMonths = availableMonths
+            });
+    }
 }

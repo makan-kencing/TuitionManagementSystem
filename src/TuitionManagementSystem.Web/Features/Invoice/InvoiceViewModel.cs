@@ -14,6 +14,8 @@ namespace TuitionManagementSystem.Web.Models.ViewModels
         public decimal Amount { get; set; }
         public DateTime InvoicedAt { get; set; }
         public DateTime? DueAt { get; set; }
+
+        public DateTime? CancelledAt { get; set; }
         public InvoiceStatus Status { get; set; }
         public bool IsOverdue { get; set; }
         public bool IsSelected { get; set; }
