@@ -12,11 +12,19 @@ public sealed class GetAttendanceHistoryRequestHandler(ApplicationDbContext db)
         GetAttendanceHistoryRequest request,
         CancellationToken cancellationToken)
     {
+
+        var enrollmentAt=await  db.Enrollments
+            .Where(a => a.CourseId == request.CourseId)
+            .Where(a => a.StudentId == request.UserId)
+            .Select(a=> a.EnrolledAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
         var response = await db.Courses
             .Where(c => c.Id == request.CourseId)
             .Select(c => new GetAttendanceHistoryResponse
             {
                 CourseName = c.Name,
+                EnrollmentAt = enrollmentAt,
                 Sessions = c.Sessions.Select(s => new SessionAttendanceItem
                     {
                         SessionId = s.Id,
