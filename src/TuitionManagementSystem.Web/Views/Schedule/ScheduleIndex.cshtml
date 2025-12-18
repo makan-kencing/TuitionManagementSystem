@@ -1,0 +1,53 @@
+@model TuitionManagementSystem.Web.ViewModels.Schedule.ScheduleIndexVm
+
+<h2>Schedules</h2>
+
+<form method="get" action="/schedules">
+    <label>Course</label>
+    <select name="courseId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Courses">
+        <option value="">All</option>
+    </select>
+
+    <label>Year</label>
+    <input type="number" name="year" value="@Model.Year" min="2000" max="2100" />
+
+    <label>Month</label>
+    <input type="number" name="month" value="@Model.Month" min="1" max="12" />
+
+    <button type="submit">Go</button>
+    <a href="/schedules/create">Create</a>
+    <a href="/schedules/calendar">Open Timetable</a>
+
+    @if (Model.CourseId.HasValue)
+    {
+        <a href="/schedules/calendar/course/@Model.CourseId.Value">Timetable (This Course)</a>
+    }
+</form>
+
+<hr />
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Course</th>
+        <th>Classroom</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Schedule</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var o in Model.Occurrences.OrderBy(x => x.Start))
+    {
+        <tr>
+            <td>@o.CourseName</td>
+            <td>@o.ClassroomName</td>
+            <td>@o.Start.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>@o.End.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>
+                <a href="/schedules/@o.ScheduleId/edit">Edit</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

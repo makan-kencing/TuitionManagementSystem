@@ -1,0 +1,275 @@
+namespace TuitionManagementSystem.Web.Features.Schedule;
+
+
+using System.Globalization;
+using System.Linq.Expressions;
+using Infrastructure.Persistence;
+using Ical.Net.DataTypes;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Models.Class;
+
+public class ScheduleRequestHandler(ApplicationDbContext db) :
+    IRequestHandler<CreateSchedule, ScheduleResponse>,
+    IRequestHandler<UpdateSchedule, bool>,
+    IRequestHandler<DeleteSchedule, bool>,
+    IRequestHandler<GetSchedulesByCourse, IEnumerable<ScheduleResponse>>,
+    IRequestHandler<GetScheduleById, ScheduleDetailResponse?>,
+    IRequestHandler<GetScheduleOccurrencesByMonth, IEnumerable<ScheduleOccurrence>>,
+    IRequestHandler<GetScheduleOccurrencesByDateRange, IReadOnlyList<ScheduleOccurrence>>
+{
+    private static readonly TimeSpan MinTime = TimeSpan.FromHours(9);
+    private static readonly TimeSpan MaxTime = TimeSpan.FromHours(23);
+
+
+    public async Task<ScheduleResponse> Handle(CreateSchedule request, CancellationToken ct)
+    {
+        ValidateTimeWindow(request.Start, request.End);
+
+        var startUtc = DateTimeUtc.ToUtcAssumingLocal(request.Start);
+        var endUtc = DateTimeUtc.ToUtcAssumingLocal(request.End);
+
+        var entity = new Schedule
+        {
+            CourseId = request.CourseId,
+            Summary = request.Summary,
+            Description = request.Description,
+            Start = startUtc,
+            End = endUtc,
+            RecurrencePatterns = request.RecurrencePatterns.Select(MapPatternUtc).ToList(),
+            RecurrenceDates = DateTimeUtc.ToUtcAssumingLocal(request.RecurrenceDates ?? []),
+            ExceptionDates = DateTimeUtc.ToUtcAssumingLocal(request.ExceptionDates ?? [])
+        };
+
+        await db.Schedules.AddAsync(entity, ct);
+        await db.SaveChangesAsync(ct);
+
+        return new ScheduleResponse(entity.Id, entity.CourseId, entity.Summary, entity.Description, entity.Start, entity.End);
+    }
+
+
+    public async Task<bool> Handle(UpdateSchedule request, CancellationToken ct)
+    {
+        ValidateTimeWindow(request.Start, request.End);
+
+        var entity = await db.Schedules
+            .Include(s => s.RecurrencePatterns)
+            .FirstOrDefaultAsync(s => s.Id == request.Id, ct);
+
+        if (entity is null) return false;
+
+        entity.CourseId = request.CourseId;
+        entity.Summary = request.Summary;
+        entity.Description = request.Description;
+        entity.Start = DateTimeUtc.ToUtcAssumingLocal(request.Start);
+        entity.End   = DateTimeUtc.ToUtcAssumingLocal(request.End);
+        entity.RecurrenceDates = DateTimeUtc.ToUtcAssumingLocal(request.RecurrenceDates ?? []);
+        entity.ExceptionDates  = DateTimeUtc.ToUtcAssumingLocal(request.ExceptionDates ?? []);
+
+        entity.RecurrencePatterns.Clear();
+        foreach (var rp in request.RecurrencePatterns.Select(MapPatternUtc))
+            entity.RecurrencePatterns.Add(rp);
+
+        await db.SaveChangesAsync(ct);
+        return true;
+    }
+
+
+    public async Task<bool> Handle(DeleteSchedule request, CancellationToken ct)
+    {
+        var entity = await db.Schedules.FirstOrDefaultAsync(s => s.Id == request.Id, ct);
+        if (entity is null) return false;
+
+        db.Schedules.Remove(entity);
+        await db.SaveChangesAsync(ct);
+        return true;
+    }
+
+
+    public async Task<IEnumerable<ScheduleResponse>> Handle(GetSchedulesByCourse request, CancellationToken ct)
+    {
+        return await db.Schedules
+            .AsNoTracking()
+            .Where(s => s.CourseId == request.CourseId)
+            .Select(s => new ScheduleResponse(s.Id, s.CourseId, s.Summary, s.Description, s.Start, s.End))
+            .ToListAsync(ct);
+    }
+
+
+    public async Task<ScheduleDetailResponse?> Handle(GetScheduleById request, CancellationToken ct)
+    {
+        var s = await db.Schedules
+            .AsNoTracking()
+            .Include(x => x.RecurrencePatterns)
+            .FirstOrDefaultAsync(x => x.Id == request.Id, ct);
+
+        if (s is null) return null;
+
+        var patterns = s.RecurrencePatterns.Select(p => new RecurrencePatternDto(
+            FrequencyType: p.FrequencyType,
+            Until: p.Until,
+            Count: p.Count,
+            Interval: p.Interval <= 0 ? 1 : p.Interval,
+            ByDay: p.ByDay.ToList()
+        ));
+
+        return new ScheduleDetailResponse(
+            s.Id,
+            s.CourseId,
+            s.Summary,
+            s.Description,
+            s.Start,
+            s.End,
+            patterns.ToList(),
+            s.RecurrenceDates.ToList(),
+            s.ExceptionDates.ToList());
+    }
+
+
+    public async Task<IEnumerable<ScheduleOccurrence>> Handle(GetScheduleOccurrencesByMonth request, CancellationToken ct)
+    {
+        var fromLocal = new DateTime(request.Year, request.Month, 1, 0, 0, 0, DateTimeKind.Local);
+        var toLocal = fromLocal.AddMonths(1);
+
+        return await Handle(new GetScheduleOccurrencesByDateRange(
+            From: fromLocal,
+            To: toLocal,
+            CourseId: request.CourseId
+        ), ct);
+    }
+
+
+    public async Task<IReadOnlyList<ScheduleOccurrence>> Handle(GetScheduleOccurrencesByDateRange request, CancellationToken ct)
+{
+    var fromUtc = request.From.Kind == DateTimeKind.Utc
+        ? request.From
+        : DateTimeUtc.ToUtcAssumingLocal(request.From);
+
+    var toUtc = request.To.Kind == DateTimeKind.Utc
+        ? request.To
+        : DateTimeUtc.ToUtcAssumingLocal(request.To);
+
+    if (toUtc <= fromUtc) return Array.Empty<ScheduleOccurrence>();
+
+    var schedulesQuery = db.Schedules
+    .AsNoTracking()
+    .Include(s => s.RecurrencePatterns)
+    .Include(s => s.Course).ThenInclude(c => c.PreferredClassroom)
+    .Where(s => s.Start < toUtc && s.End > fromUtc); // overlap
+
+
+    if (request.CourseId.HasValue)
+        schedulesQuery = schedulesQuery.Where(s => s.CourseId == request.CourseId.Value);
+
+    if (request.TeacherId.HasValue)
+    {
+        var teacherId = request.TeacherId.Value;
+        schedulesQuery = schedulesQuery.Where(s =>
+            db.CourseTeachers.Any(ct2 => ct2.CourseId == s.CourseId && ct2.TeacherId == teacherId));
+    }
+
+    if (request.StudentId.HasValue)
+    {
+        var studentId = request.StudentId.Value;
+        schedulesQuery = schedulesQuery.Where(s =>
+            db.Enrollments.Any(e2 => e2.CourseId == s.CourseId && e2.StudentId == studentId));
+    }
+
+        schedulesQuery = db.Schedules
+        .AsNoTracking()
+        .Include(s => s.RecurrencePatterns)
+        .Include(s => s.Course).ThenInclude(c => c.PreferredClassroom)
+        .Where(s => s.Start < toUtc && s.End > fromUtc); // overlap
+    var schedules = await schedulesQuery.ToListAsync(ct);
+
+    var list = new List<ScheduleOccurrence>(capacity: schedules.Count * 8);
+
+    foreach (var s in schedules)
+    {
+        var duration = s.End - s.Start;
+        if (duration <= TimeSpan.Zero) continue;
+
+        var isRecurring = s.RecurrencePatterns.Count > 0 || s.RecurrenceDates.Count > 0;
+
+// Non-recurring schedule: add the single instance directly
+        if (!isRecurring)
+        {
+            if (s.Start < toUtc && s.End > fromUtc)
+            {
+                list.Add(new ScheduleOccurrence(
+                    ScheduleId: s.Id,
+                    CourseId: s.CourseId,
+                    CourseName: s.Course.Name,
+                    ClassroomId: s.Course.PreferredClassroom.Id,
+                    ClassroomName: s.Course.PreferredClassroom.Location,
+                    Start: s.Start,
+                    End: s.End
+                ));
+            }
+
+            continue;
+        }
+
+// Recurring schedule: use Ical.Net expansion
+        var ev = s.ToICalendarEvent();
+        var occ = ev.GetOccurrences(startTime: new CalDateTime(fromUtc));
+
+        foreach (var o in occ)
+        {
+            var startLocal = o.Period.StartTime?.Value ?? default;
+            if (startLocal == default) continue;
+
+            var endLocal = o.Period.EndTime?.Value ?? startLocal + duration;
+
+            if (startLocal >= toUtc) break;
+            if (endLocal <= fromUtc) continue;
+
+            list.Add(new ScheduleOccurrence(
+                ScheduleId: s.Id,
+                CourseId: s.CourseId,
+                CourseName: s.Course.Name,
+                ClassroomId: s.Course.PreferredClassroom.Id,
+                ClassroomName: s.Course.PreferredClassroom.Location,
+                Start: startLocal,
+                End: endLocal
+            ));
+        }
+    }
+
+    return list.OrderBy(x => x.Start).ToList();
+}
+
+
+    private static ScheduleRecurrencePattern MapPatternUtc(RecurrencePatternDto dto) =>
+        new()
+        {
+            FrequencyType = dto.FrequencyType,
+            Until = dto.Until is null ? null : DateTimeUtc.ToUtcAssumingLocal(dto.Until.Value),            Count = dto.Count,
+            Interval = dto.Interval <= 0 ? 1 : dto.Interval,
+            ByDay = dto.ByDay?.ToList() ?? []
+        };
+
+    public async Task<IReadOnlyList<ScheduleFeedItem>> Handle(GetAllSchedulesForFeed request, CancellationToken ct)
+    {
+        var schedules = await db.Schedules
+            .AsNoTracking()
+            .Include(s => s.RecurrencePatterns)
+            .Include(s => s.Course).ThenInclude(c => c.PreferredClassroom)
+            .ToListAsync(ct);
+
+        return schedules.Select(s => new ScheduleFeedItem(
+            Schedule: s,
+            CourseName: s.Course.Name,
+            ClassroomLocation: s.Course.PreferredClassroom?.Location
+        )).ToList();
+    }
+
+    private static void ValidateTimeWindow(DateTime start, DateTime end)
+    {
+        if (start >= end) throw new InvalidOperationException("Start must be before end.");
+        var startLocal = start.ToLocalTime();
+        var endLocal = end.ToLocalTime();
+        if (startLocal.TimeOfDay < MinTime || endLocal.TimeOfDay > MaxTime)
+            throw new InvalidOperationException("Schedules must be between 09:00 and 23:00.");
+    }
+}

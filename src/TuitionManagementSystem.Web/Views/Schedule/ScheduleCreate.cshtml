@@ -1,0 +1,15 @@
+@model TuitionManagementSystem.Web.ViewModels.Schedule.ScheduleFormVm
+
+<h2>Create Schedule</h2>
+
+<form method="post" action="/schedules/create">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <span asp-validation-for="CourseId" class="text-danger"></span>
+
+    <partial name="_ScheduleForm" model="Model" />
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="/schedules" class="btn btn-secondary">Cancel</a>
+</form>

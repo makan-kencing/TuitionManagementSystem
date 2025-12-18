@@ -1,0 +1,21 @@
+@model TuitionManagementSystem.Web.ViewModels.Schedule.ScheduleFormVm
+
+<h2>Edit Schedule</h2>
+
+<form method="post" action="/schedules/@Model.Id/edit">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <partial name="_ScheduleForm" model="Model" />
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="/schedules" class="btn btn-secondary">Back</a>
+</form>
+
+<form method="post" action="/schedules/@Model.Id/delete" style="margin-top:12px;">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger"
+            onclick="return confirm('Delete this schedule?');">
+        Delete
+    </button>
+</form>
