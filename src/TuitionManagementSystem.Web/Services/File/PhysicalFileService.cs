@@ -23,18 +23,16 @@ public class PhysicalFileService : IFileService
         var dayPrefix = DateTime.UtcNow.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
         var filename = $"{Guid.NewGuid()}{Path.GetExtension(formFile.FileName)}";
 
-        var mappedPath = Path.Combine(this.MappedPath, dayPrefix, filename);
+        var mappedPath = $"/uploads/{dayPrefix}/{filename}";
         var canonicalPath = Path.Combine(this.PhysicalPath, dayPrefix, filename);
         Directory.CreateDirectory(Path.Combine(this.PhysicalPath, dayPrefix));
 
-        await using (var stream = File.Create(canonicalPath))
+        await using (var stream = System.IO.File.Create(canonicalPath))
         {
             await formFile.CopyToAsync(stream);
         }
 
-        return new SavedFile(
-            mappedPath,
-            canonicalPath);
+        return new SavedFile(mappedPath, canonicalPath);
     }
 
     public Task DeleteFileAsync(string canonicalPath)
