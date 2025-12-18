@@ -9,20 +9,31 @@ using Microsoft.EntityFrameworkCore;
 using Models.User;
 using Services.Auth.Extensions;
 
-public class AccountController(ApplicationDbContext db, IMediator _mediator) : Controller
+public class AccountController(ApplicationDbContext db) : Controller
 {
-    public async Task<IActionResult> AccountProfile(CancellationToken cancellationToken)
-    {
-        var profile = await db.Accounts
-            .Where(a => a.Id == this.User.GetUserId())
-            .Select(a => new AccountProfileViewModel { Username = a.Username, Email = a.Email })
-            .FirstOrDefaultAsync(cancellationToken);
+   public async Task<IActionResult> AccountProfile(CancellationToken cancellationToken)
+   {
+       var accountId = this.User.GetAccountId();
 
-        if (profile == null)
-        {
-            return this.Challenge();
-        }
+       var profile = await db.Accounts
+           .Where(a => a.Id == accountId)
+           .Select(a => new AccountProfileViewModel
+           {
+               Username = a.Username,
+               Email = a.Email,
 
-        return this.View(profile);
-    }
+               ProfileImageUrl = a.ProfileImage != null
+                   ? a.ProfileImage.Uri
+                   : "/assets/uploads/DefaultProfile.png"
+           })
+           .FirstOrDefaultAsync(cancellationToken);
+
+       if (profile == null)
+       {
+           return this.Challenge();
+       }
+
+       return this.View(profile);
+   }
+
 }
