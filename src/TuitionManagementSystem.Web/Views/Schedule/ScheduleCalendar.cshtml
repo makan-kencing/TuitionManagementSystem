@@ -1,0 +1,50 @@
+<h2>Timetable</h2>
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <div id="calendar"></div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
+
+      const courseId = '@(Model.CourseId?.ToString() ?? "")';
+      const teacherId = '@(Model.TeacherId?.ToString() ?? "")';
+      const studentId = '@(Model.StudentId?.ToString() ?? "")';
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        height: 850,
+        expandRows: true,
+        nowIndicator: true,
+        slotMinTime: '09:00:00',
+        slotMaxTime: '23:00:00',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: function (info, successCallback, failureCallback) {
+          const url = new URL('@Url.Action("Events", "Schedule")', window.location.origin);
+          url.searchParams.set('start', info.startStr);
+          url.searchParams.set('end', info.endStr);
+
+          if (courseId) url.searchParams.set('courseId', courseId);
+          if (teacherId) url.searchParams.set('teacherId', teacherId);
+          if (studentId) url.searchParams.set('studentId', studentId);
+
+          fetch(url.toString(), { headers: { 'Accept': 'application/json' } })
+            .then(r => r.ok ? r.json() : Promise.reject(r))
+            .then(data => successCallback(data))
+            .catch(err => failureCallback(err));
+        }
+      });
+
+      calendar.render();
+    });
+  </script>
+}

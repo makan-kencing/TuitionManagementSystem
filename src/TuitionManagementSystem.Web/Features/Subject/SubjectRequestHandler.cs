@@ -54,7 +54,6 @@ public class SubjectRequestHandler(ApplicationDbContext db) :
     {
         var entities = await db.Subjects
             .AsNoTracking()
-            // .Where(s => s.DeletedAt == null)
             .ToListAsync(ct);
 
         return entities.Select(SubjectResponse.FromEntity);
@@ -66,7 +65,7 @@ public class SubjectRequestHandler(ApplicationDbContext db) :
             .AsNoTracking()
             .Where(s => s.Id == request.Id)
             .FirstOrDefaultAsync(ct);
-        
+
         return entity is null ? null : SubjectResponse.FromEntity(entity);
     }
 }

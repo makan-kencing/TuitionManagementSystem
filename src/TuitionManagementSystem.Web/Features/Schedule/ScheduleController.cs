@@ -225,6 +225,7 @@ public sealed class ScheduleController(IMediator mediator) : Controller
         return list;
     }
 
+
     [HttpGet("calendar")]
     public IActionResult CalendarAll()
         => View("ScheduleCalendar", new ScheduleCalendarVm());

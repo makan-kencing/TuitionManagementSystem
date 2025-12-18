@@ -1,0 +1,18 @@
+{
+    "name": "tuitionmanagementsystem-web",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite build --watch",
+        "build": "vite build"
+    },
+    "dependencies": {
+        "@fullcalendar/core": "^6.1.19",
+        "@fullcalendar/daygrid": "^6.1.19",
+        "@fullcalendar/timegrid": "^6.1.19",
+        "@fullcalendar/icalendar": "^6.1.19"
+    },
+    "devDependencies": {
+        "vite": "^5.4.0"
+    }
+}
