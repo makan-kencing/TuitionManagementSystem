@@ -33,6 +33,12 @@ public sealed class GetSessionStudentListRequestHandler(ApplicationDbContext db)
 
         var now = DateTime.UtcNow;
 
+        var code = await db.AttendanceCodes
+            .Where(c => c.SessionId == request.SessionId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var isCodeGenerated = code != null;
+
 
             var studentList = enrolledStudents.Select(s =>
             {
@@ -55,11 +61,11 @@ public sealed class GetSessionStudentListRequestHandler(ApplicationDbContext db)
 
                 return new StudentInfo
                 {
-                    StudentId = s.StudentId, Name = s.Name, Status = status ,AttendanceId = record?.Id
+                    StudentId = s.StudentId, Name = s.Name, Status = status ,AttendanceId = record?.Id ,StartDate = session.StartAt, EndDate = session.EndAt ,CreatedOn = now
                 };
             }).ToList();
             return Result<GetSessionStudentListResponse>.Success(
-                new GetSessionStudentListResponse {  SessionId = request.SessionId, StudentList = studentList }
+                new GetSessionStudentListResponse {  SessionId = request.SessionId, StudentList = studentList, IsCodeGenerated = isCodeGenerated}
             );
         }
 }
