@@ -55,6 +55,6 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db, IHttpCont
         await db.Attendances.AddAsync(attendance, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
-        return Result<TakeAttendanceCodeResponse>.Success(new TakeAttendanceCodeResponse { SessionId = attendanceCode.Id ,UserId = request.UserId});
+        return Result<TakeAttendanceCodeResponse>.Success(new TakeAttendanceCodeResponse { SessionId = attendanceCode.Id ,UserId = request.UserId ,AttendanceId = attendance.Id });
     }
 }
