@@ -2,192 +2,224 @@
 @model TuitionManagementSystem.Web.Features.Accounts.AccountProfileViewModel
 
 @{
-    ViewData["Title"] = "Account Profile";
+ViewData["Title"] = "Account Profile";
 }
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
-    <div class="card shadow-lg border-0 rounded-4" style="max-width: 600px; width: 100%;">
+<div class="min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="card shadow border-0 rounded-4" style="max-width: 520px; width: 100%;">
 
         <!-- HEADER -->
         <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
-            <h3>@User.GetUsername()</h3>
+
+            <div class="d-flex flex-column align-items-center mb-2">
+                <img id="profilePreview"
+                     src="@Model.ProfileImageUrl"
+                     alt="Profile Image"
+                     class="rounded-circle shadow-sm"
+                     style="
+                    width: 88px;
+                    height: 88px;
+                    object-fit: cover;
+                    border: 3px solid rgba(255,255,255,0.7);
+                    cursor: pointer;
+                 " />
+
+                <input type="file"
+                       name="ProfileImage"
+                       id="profileImage"
+                       accept="image/*"
+                       hidden />
+            </div>
+
+            <h5 class="mb-1 fw-semibold">@User.GetUsername()</h5>
+            <small class="text-light">Account settings</small>
         </div>
 
-        <div class="card-body">
-            <form asp-controller="AccountsApi" asp-action="UpdateProfile" id="profileForm">
-                <div class="mb-3">
-                    <label asp-for="Username"></label>
-                    <input asp-for="Username" id="username" class="form-control" disabled/>
-                    <span asp-validation-for="Username"></span>
+        <!-- BODY -->
+        <div class="card-body p-4">
+            <form asp-controller="AccountsApi" asp-action="UpdateProfile" id="profileForm" enctype="multipart/form-data">
+
+                <div class="mb-2">
+                    <label asp-for="Username" class="form-label small fw-semibold"></label>
+                    <input asp-for="Username" id="username" class="form-control form-control-sm" disabled />
+                </div>
+
+                <div class="mb-2">
+                    <label asp-for="Email" class="form-label small fw-semibold"></label>
+                    <input asp-for="Email" id="email" class="form-control form-control-sm" disabled />
+                </div>
+
+                <div class="mb-2">
+                    <label asp-for="Password" class="form-label small fw-semibold"></label>
+                    <input asp-for="Password"
+                           id="password"
+                           placeholder="*******"
+                           class="form-control form-control-sm"
+                           disabled />
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Email"></label>
-                    <input asp-for="Email" id="email" class="form-control" disabled/>
-                    <span asp-validation-for="Email"></span>
+                    <label asp-for="ConfirmPassword" class="form-label small fw-semibold"></label>
+                    <input asp-for="ConfirmPassword"
+                           id="confirmPassword"
+                           placeholder="Enter current password"
+                           class="form-control form-control-sm"
+                           disabled />
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="Password"></label>
-                    <input asp-for="Password" id="password" placeholder="*******" class="form-control" disabled/>
-                    <span asp-validation-for="Password"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="ConfirmPassword"></label>
-                    <input asp-for="ConfirmPassword" id="confirmPassword" placeholder="Enter password" class="form-control" disabled/>
-                    <span asp-validation-for="ConfirmPassword"></span>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <button type="button"
-                                id="editProfileBtn"
-                                class="btn btn-primary">
-                            Edit Profile
-                        </button>
-                    </div>
-
-                    <div>
-                        <button type="button"
-                                id="changePasswordBtn"
-                                class="btn btn-secondary">
-                            Change Password
-                        </button>
-                    </div>
+                <div class="d-flex justify-content-between gap-2 mt-3">
+                    <button type="button" id="editProfileBtn" class="btn btn-sm btn-primary w-100">Edit Profile</button>
+                    <button type="button" id="changePasswordBtn" class="btn btn-sm btn-outline-secondary w-100">Change Password</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-@section Scripts {
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    $(function () {
+<style>
+    .card-header i {
+        color: rgba(255,255,255,0.9);
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        padding: 10px;
+    }
+    .form-control[disabled] {
+        opacity: 0.7;
+    }
+    .btn-outline-secondary {
+        border-width: 2px;
+    }
+</style>
 
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    $(function () {
         let editMode = false;
         let originalValues = {};
+        let selectedProfileFile = null;
+        const originalProfileSrc = $("#profilePreview").attr("src");
 
         function enterEditMode() {
             editMode = true;
-
-            $("#profileForm input")
-                .not("#password")
-                .prop("disabled", false);
-
-            $("#changePasswordBtn")
-                .prop("disabled", true)
-                .css({ opacity: 0.7, cursor: "not-allowed" });
-
+            $("#profileForm input").not("#password").prop("disabled", false);
+            $("#profileImageWrapper").removeClass("d-none");
+            $("#profilePreview").css({ cursor: "pointer", opacity: 1 });
+            $("#changePasswordBtn").prop("disabled", true).css({ opacity: 0.7, cursor: "not-allowed" });
             $("#editProfileBtn").text("Save Changes");
         }
 
         function exitEditMode() {
             editMode = false;
-
             $("#profileForm input").prop("disabled", true);
             $("#confirmPassword").val("");
-
-            $("#changePasswordBtn")
-                .prop("disabled", false)
-                .css({ opacity: "", cursor: "" });
-
+            $("#profileImageWrapper").addClass("d-none");
+            $("#changePasswordBtn").prop("disabled", false).css({ opacity: "", cursor: "" });
             $("#editProfileBtn").text("Edit Profile");
             $("#cancelBtn").remove();
+            selectedProfileFile = null;
+            $("#profilePreview").attr("src", originalProfileSrc)
         }
 
         $("#editProfileBtn").click(function () {
-
             const $inputs = $("#profileForm input").not("#password");
             const $editBtn = $(this);
 
             if (!editMode) {
-
-                $inputs.each(function () {
-                    originalValues[this.id] = $(this).val();
-                });
-
+                $inputs.each(function () { originalValues[this.id] = $(this).val(); });
                 enterEditMode();
 
                 if ($("#cancelBtn").length === 0) {
                     $("<button>", {
                         id: "cancelBtn",
                         type: "button",
-                        class: "btn btn-danger ms-2",
+                        class: "btn btn-danger btn-lg ms-0 ms-sm-2 mt-2 mt-sm-0 flex-fill",
                         text: "Cancel"
-                    })
-                        .insertAfter($editBtn)
-                        .on("click", function () {
-
-                            $inputs.each(function () {
-                                $(this)
-                                    .val(originalValues[this.id])
-                                    .prop("disabled", true);
-                            });
-
-                            exitEditMode();
-                        });
+                    }).insertAfter($editBtn).on("click", function () {
+                        $inputs.each(function () { $(this).val(originalValues[this.id]).prop("disabled", true); });
+                        exitEditMode();
+                    });
                 }
-
                 return;
             }
 
             const confirmPwd = $("#confirmPassword").val().trim();
-
             if (!confirmPwd) {
-                Swal.fire(
-                    "Error",
-                    "Please enter your current password to confirm changes.",
-                    "error"
-                );
+                Swal.fire("Error", "Please enter your current password to confirm changes.", "error");
                 return;
             }
 
-            const formData = {
-                Username: $("#username").val(),
-                Email: $("#email").val(),
-                ConfirmPassword: confirmPwd
-            };
+            const formData = new FormData();
+            formData.append("Username", $("#username").val());
+            formData.append("Email", $("#email").val());
+            formData.append("ConfirmPassword", confirmPwd);
+
+            const fileInput = document.getElementById("profileImage");
+            if (fileInput.files.length > 0) {
+                formData.append("ProfileImage", fileInput.files[0]);
+            }
 
             $.ajax({
                 url: '@Url.Action("UpdateProfile", "AccountsApi")',
                 type: 'POST',
                 data: formData,
+                processData: false,
+                contentType: false,
                 success: function (res) {
                     if (res.success) {
-                        Swal.fire("Success", res.message, "success")
-                            .then(() => {
-                                exitEditMode();
-                                location.reload();
-                            });
+                        Swal.fire("Success", res.message, "success").then(() => { exitEditMode(); location.reload(); });
                     } else {
-                        Swal.fire(
-                            "Error",
-                            res.message.replace(/\n/g, "<br>"),
-                            "error"
-                        );
+                        Swal.fire("Error", res.message.replace(/\n/g, "<br>"), "error");
                         enterEditMode();
                     }
+                },
+                error: function () {
+                    Swal.fire("Error", "Server error occurred.", "error");
                 }
             });
         });
 
-        $("#changePasswordBtn").click(function () {
+        $("#profilePreview").click(function () {
+            if (!editMode) return;
+            $("#profileImage").click();
+        });
 
+        $("#profileImage").on("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+                Swal.fire("Error", "Only image files allowed.", "error");
+                this.value = null;
+                return;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                Swal.fire("Error", "Image must be under 2MB.", "error");
+                this.value = null;
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = e => $("#profilePreview").attr("src", e.target.result);
+            reader.readAsDataURL(file);
+
+            selectedProfileFile = file;
+        });
+
+        $("#changePasswordBtn").click(function () {
             if ($(this).prop("disabled")) return;
 
             Swal.fire({
                 title: 'Change Password',
                 html: `
-            <input type="password" id="currentPwd" class="swal2-input" placeholder="Current Password">
-            <input type="password" id="newPwd" class="swal2-input" placeholder="New Password">
-            <input type="password" id="confirmPwd" class="swal2-input" placeholder="Confirm New Password">
-        `,
+                <input type="password" id="currentPwd" class="swal2-input" placeholder="Current Password">
+                <input type="password" id="newPwd" class="swal2-input" placeholder="New Password">
+                <input type="password" id="confirmPwd" class="swal2-input" placeholder="Confirm New Password">
+            `,
                 showCancelButton: true,
                 confirmButtonText: 'Change',
                 focusConfirm: false,
-
                 preConfirm: () => {
                     const current = $("#currentPwd").val();
                     const newPass = $("#newPwd").val();
@@ -197,25 +229,17 @@
                         Swal.showValidationMessage("All fields are required");
                         return false;
                     }
-
                     if (newPass.length < 6) {
                         Swal.showValidationMessage("New password must be at least 6 characters");
                         return false;
                     }
-
                     if (newPass !== confirm) {
                         Swal.showValidationMessage("Passwords do not match");
                         return false;
                     }
-
-                    return {
-                        currentPassword: current,
-                        newPassword: newPass,
-                        ConfirmPassword: confirm
-                    };
+                    return { currentPassword: current, newPassword: newPass, ConfirmPassword: confirm };
                 }
             }).then(result => {
-
                 if (!result.isConfirmed) return;
 
                 $.ajax({
@@ -223,15 +247,10 @@
                     type: 'POST',
                     data: result.value,
                     success: function (res) {
-                        if (res.success) {
-                            Swal.fire("Success", res.message, "success");
-                        } else {
-                            Swal.fire("Error", res.message, "error");
-                        }
+                        if (res.success) Swal.fire("Success", res.message, "success");
+                        else Swal.fire("Error", res.message, "error");
                     },
-                    error: function () {
-                        Swal.fire("Error", "Server error occurred.", "error");
-                    }
+                    error: function () { Swal.fire("Error", "Server error occurred.", "error"); }
                 });
             });
         });
