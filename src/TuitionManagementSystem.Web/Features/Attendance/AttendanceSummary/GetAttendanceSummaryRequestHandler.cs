@@ -33,15 +33,15 @@ public sealed class GetAttendanceSummaryRequestHandler(
         var courseSummary = await db.Database
             .SqlQuery<CourseQuery>
             ($"""
-              SELECT C."Id", C."Name" "CourseName", S."Name" "SubjectName", Count(SS."Id") "Total", Count(Att."Id") "Attended"
-              FROM "Enrollments" E
-                       JOIN public."Courses" C on E."CourseId" = C."Id"
-                       JOIN public."Subjects" S on C."SubjectId" = S."Id"
-                       LEFT JOIN public."Sessions" SS on C."Id" = SS."CourseId"
-                       LEFT JOIN public."Attendances" Att on SS."Id" = Att."SessionId" AND E."StudentId"=Att."StudentId"
-              WHERE E."StudentId" = {request.UserId}
-              GROUP BY C."Id", C."Name", S."Name"
-              """)
+               SELECT C."Id", C."Name" "CourseName", S."Name" "SubjectName", Count(SS."Id") "Total", Count(Att."Id") "Attended"
+               FROM "Enrollments" E
+                        JOIN public."Courses" C on E."CourseId" = C."Id"
+                        JOIN public."Subjects" S on C."SubjectId" = S."Id"
+                        LEFT JOIN public."Sessions" SS on C."Id" = SS."CourseId"
+                        LEFT JOIN public."Attendances" Att on SS."Id" = Att."SessionId" AND E."StudentId"=Att."StudentId"
+               WHERE E."StudentId" = {request.UserId} AND SS."StartAt" >= E."EnrolledAt"
+               GROUP BY C."Id", C."Name", S."Name"
+               """)
             .Select(r => r.ToSummary)
             .ToListAsync(cancellationToken);
 
