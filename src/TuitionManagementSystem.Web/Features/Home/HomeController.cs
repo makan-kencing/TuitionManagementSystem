@@ -15,7 +15,7 @@ public class HomeController(IMediator mediator) : Controller
     {
         if (User.IsInRole(nameof(AccessRoles.Administrator)))
         {
-            return RedirectToAction("Index", "Admin");
+            return RedirectToAction("AdminDashBoard", "Admin");
         }
 
         switch (this.User.GetUserType())
