@@ -22,7 +22,6 @@ using Models.User;
 using Services;
 using Services.Auth.Constants;
 using Services.File;
-using Services.Payment;
 using Services.Background;
 
 public class Startup(IConfiguration configuration)
@@ -124,7 +123,6 @@ public class Startup(IConfiguration configuration)
             });
 
         services.AddSingleton<IEmailService, SmtpEmailService>();
-        services.AddSingleton<IPaymentService, StripePaymentService>();
         services.AddSingleton<IFileService, PhysicalFileService>();
         services.AddSingleton<IAuthorizationHandler, FamilyAuthorizationHandler>();
 
