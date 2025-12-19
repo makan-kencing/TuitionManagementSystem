@@ -99,14 +99,19 @@ public class CheckoutController : WebController
                 .Select(s => int.Parse(s, CultureInfo.InvariantCulture))
                 .ToList();
 
+            var invoices = await this.db.Invoices
+                .Where(i => invoiceIds.Contains(i.Id))
+                .ToListAsync();
+
             var payment = new Payment
             {
                 Amount = session.PaymentIntent.Amount,
                 Method = paymentMethod,
-                Invoices = await this.db.Invoices
-                    .Where(i => invoiceIds.Contains(i.Id))
-                    .ToListAsync()
+                Invoices = invoices
             };
+
+            invoices.ForEach(i => i.Status = InvoiceStatus.Paid);
+
             this.db.Payments.Add(payment);
             await this.db.SaveChangesAsync();
         }
