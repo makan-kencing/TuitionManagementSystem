@@ -22,7 +22,7 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                 c.Name,
                 SubjectName = c.Subject.Name,
                 TeacherName = c.TeachersInCharge.First().Teacher.Account.DisplayName,
-                Announcements=c.Announcements.ToList()
+                c.Announcements
             })
             .FirstOrDefaultAsync(cancellationToken);
 
