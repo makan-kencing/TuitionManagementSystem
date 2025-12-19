@@ -114,7 +114,6 @@ public class InvoiceController : Controller
         var studentId = User.GetUserId();
 
         InvoiceStatus? parsedStatus = null;
-
         if (!string.IsNullOrWhiteSpace(status))
         {
             if (!Enum.TryParse<InvoiceStatus>(status, true, out var s))
@@ -125,26 +124,39 @@ public class InvoiceController : Controller
                 });
             }
 
+            if (s == InvoiceStatus.Pending || s == InvoiceStatus.Overdue)
+            {
+                return BadRequest(new
+                {
+                    errors = new[] { "History page only shows Paid, Cancelled, or Withdrawn invoices." }
+                });
+            }
+
             parsedStatus = s;
         }
 
         var result = await _mediator.Send(
-            new ListInvoiceRequest
-            {
-                StudentId = studentId,
-                Status = parsedStatus,
-                PendingOnly = false,
-                OverdueOnly = false,
-                Month = month,
-                Year = year ?? DateTime.Now.Year
-            },
+            new ListInvoiceRequest { StudentId = studentId, Status = parsedStatus },
             cancellationToken);
 
         if (!result.IsSuccess)
             return BadRequest(new { errors = result.Errors });
 
-        var invoices = result.Value
-            .Where(i => i.Status != InvoiceStatus.Pending)
+        var query = result.Value
+            .Where(i => i.Status != InvoiceStatus.Pending &&
+                        i.Status != InvoiceStatus.Overdue);
+
+        if (year.HasValue)
+        {
+            query = query.Where(i => i.InvoicedAt.Year == year.Value);
+        }
+
+        if (month.HasValue)
+        {
+            query = query.Where(i => i.InvoicedAt.Month == month.Value);
+        }
+
+        var invoices = query
             .Select(invoice => new InvoiceViewModel
             {
                 InvoiceId = invoice.Id,
@@ -164,7 +176,6 @@ public class InvoiceController : Controller
             .ToList();
 
         var availableMonths = invoices
-            .Where(i => i.InvoicedAt != default)
             .Select(i => i.InvoicedAt.Month)
             .Distinct()
             .OrderBy(m => m)
