@@ -16,20 +16,23 @@
         </div>
     </div>
 
-    <div id="make-announcement-@()">
-        <button hx-post
+    <div class="d-flex gap-2" id="make-announcement-@(Model.CourseInfo.CourseId)">
+        <button hx-get
                 hx-controller="Homework"
-                hx-action=""
-                hx-route="@Model.CourseInfo.CourseId"
+                hx-action="GetMakeAnnouncementModal"
+                hx-route-id="@Model.CourseInfo.CourseId"
                 hx-target="#modal"
                 data-bs-toggle="modal"
-                data-bs-target="#modal">>
+                data-bs-target="#modal">
             New Announcement
         </button>
+
+        <button>View Submission Status</button>
     </div>
 
+
     <div class="row">
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4 mt-3">
             <div class="bg-white border rounded p-3" style="max-height: 420px; overflow-y: auto;">
                 <h5 class="mb-3">Upcoming</h5>
                 <ul class="list-group list-group-flush">
@@ -47,12 +50,13 @@
             </div>
         </div>
 
-        @foreach (var announcement in Model.AnnouncementInfos)
-        {
-            <div class="col-md-8">
-                <div class="row gy-4">
-                    <div class="col-12">
-                        <div class="card shadow-sm">
+
+        <div class="col-md-8">
+            <div class="row gy-4">
+                <div class="col-12">
+                    @foreach (var announcement in Model.AnnouncementInfos)
+                    {
+                        <div class="card shadow-sm mt-3">
                             <div class="card-body">
                                 <h5 class="card-title mb-2">@announcement.Title</h5>
                                 <p class="card-text">@announcement.Description</p>
@@ -72,10 +76,12 @@
                                 }
                             </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
-        }
+        </div>
+
+
     </div>
 </div>
 

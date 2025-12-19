@@ -19,6 +19,7 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
             .ThenInclude(a => a.CreatedBy.Account)
             .Select(c => new
             {
+                c.Id,
                 c.Name,
                 SubjectName = c.Subject.Name,
                 TeacherName = c.TeachersInCharge.First().Teacher.Account.DisplayName,
@@ -35,7 +36,8 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
         var courseAnnouncements = new GetAnnouncementInfoResponse
         {
             TeacherName = course.TeacherName,
-            CourseInfo = new CourseInfo { CourseName = course.Name, Subject = course.SubjectName },
+            CourseInfo =
+                new CourseInfo { CourseName = course.Name, Subject = course.SubjectName, CourseId = course.Id },
             AnnouncementInfos = course.Announcements
                 .Select(announcement => announcement switch
                 {

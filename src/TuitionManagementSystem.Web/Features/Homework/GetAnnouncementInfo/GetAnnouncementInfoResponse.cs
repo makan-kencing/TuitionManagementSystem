@@ -33,6 +33,7 @@ public class MaterialInfo : AnnouncementInfo;
 
 public class CourseInfo
 {
+    public required int CourseId { get; set; }
     public required string CourseName { get; set; }
 
     public required string Subject { get; set; }
