@@ -58,7 +58,7 @@
             <h1 class="h3 mb-2">
                 <i class="fas fa-file-invoice-dollar me-2"></i>Tuition Fees
             </h1>
-            <p class="text-muted mb-0">View and manage your tuition fees</p>
+            <p class="text-muted mb-0">View and manage your pending and overdue tuition fees</p>
         </div>
     </div>
 
@@ -70,17 +70,6 @@
         </div>
         <div class="card-body">
             <form id="filterForm" method="get" action="@Url.Action("ListInvoices", "Invoice")" class="row g-3">
-                @* <div class="col-md-3"> *@
-                @*     <label class="form-label">Status</label> *@
-                @*     <select name="status" class="form-select" onchange="this.form.submit()"> *@
-                @*         <option value="">All Statuses</option> *@
-                @*         <option value="Pending" selected="@(Model.SelectedStatus == "Pending")">Pending</option> *@
-                @*         <option value="Overdue" selected="@(Model.SelectedStatus == "Overdue")">Overdue</option> *@
-                @*         $1$ <option value="Cancelled" selected="@(Model.SelectedStatus == "Cancelled")">Cancelled</option> #1# *@
-                @*         $1$ <option value="Withdrawn" selected="@(Model.SelectedStatus == "Withdrawn")">Withdrawn</option> #1# *@
-                @*     </select> *@
-                @* </div> *@
-
                 <div class="col-md-3">
                     <label class="form-label">Month</label>
                     <select name="month" class="form-select" onchange="this.form.submit()">
@@ -106,7 +95,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Status</label>
+                    <label class="form-label">Show</label>
                     <div class="btn-group w-100" role="group">
                         <input type="checkbox" class="btn-check" name="overdueOnly" id="overdueOnly"
                                value="true" @(Model.OverdueOnly ? "checked" : "") onchange="this.form.submit()">
@@ -130,7 +119,6 @@
                         <i class="fas fa-exclamation-triangle me-1"></i>Overdue Only
                         <a href="@Url.Action("ListInvoices", "Invoice", new
                                  {
-                                     status = Model.SelectedStatus,
                                      month = Model.SelectedMonth,
                                      year = Model.SelectedYear,
                                      pendingOnly = Model.PendingOnly
@@ -143,7 +131,6 @@
                         <i class="fas fa-clock me-1"></i>Pending Only
                         <a href="@Url.Action("ListInvoices", "Invoice", new
                                  {
-                                     status = Model.SelectedStatus,
                                      month = Model.SelectedMonth,
                                      year = Model.SelectedYear,
                                      overdueOnly = Model.OverdueOnly
@@ -157,20 +144,6 @@
                         <i class="fas fa-calendar-alt me-1"></i>@monthName
                         <a href="@Url.Action("ListInvoices", "Invoice", new
                                  {
-                                     status = Model.SelectedStatus,
-                                     year = Model.SelectedYear,
-                                     overdueOnly = Model.OverdueOnly,
-                                     pendingOnly = Model.PendingOnly
-                                 })" class="text-white ms-2" title="Remove filter">×</a>
-                    </span>
-                }
-                @if (!string.IsNullOrEmpty(Model.SelectedStatus))
-                {
-                    <span class="badge bg-primary filter-badge me-2 mb-2">
-                        <i class="fas fa-tag me-1"></i>@Model.SelectedStatus
-                        <a href="@Url.Action("ListInvoices", "Invoice", new
-                                 {
-                                     month = Model.SelectedMonth,
                                      year = Model.SelectedYear,
                                      overdueOnly = Model.OverdueOnly,
                                      pendingOnly = Model.PendingOnly
@@ -188,19 +161,28 @@
                     <h5 class="mb-0">
                         <i class="fas fa-list me-2"></i>Tuition Fees (@Model.Invoices.Count)
                     </h5>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="selectAllInvoices">
-                        <label class="form-check-label text-muted" for="selectAllInvoices">
-                            Select All
-                        </label>
-                    </div>
+                    @if (Model.Invoices.Any(i => i.Status == InvoiceStatus.Pending || i.Status == InvoiceStatus.Overdue))
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="selectAllInvoices">
+                            <label class="form-check-label text-muted" for="selectAllInvoices">
+                                Select All
+                            </label>
+                        </div>
+                    }
                 </div>
                 <div class="card-body p-0">
-                    @if (!Model.Invoices.Any())
+                    @{
+                        var displayInvoices = Model.Invoices
+                            .Where(i => i.Status == InvoiceStatus.Pending || i.Status == InvoiceStatus.Overdue)
+                            .ToList();
+                    }
+
+                    @if (!displayInvoices.Any())
                     {
                         <div class="text-center py-5">
                             <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No fees found with current filters</p>
+                            <p class="text-muted">No pending or overdue fees found with current filters</p>
                             <a href="@Url.Action("ListInvoices", "Invoice")" class="btn btn-primary">
                                 Clear Filters
                             </a>
@@ -209,25 +191,26 @@
                     else
                     {
                         <div class="list-group list-group-flush">
-                            @foreach (var invoice in Model.Invoices)
+                            @foreach (var invoice in displayInvoices)
                             {
-                                var cardClass = invoice.Status == InvoiceStatus.Paid ? "paid" :
-                                    invoice.IsOverdue ? "overdue" :
-                                    invoice.Status == InvoiceStatus.Pending ? "pending" : "";
+                                var cardClass = invoice.Status == InvoiceStatus.Overdue ? "overdue" : "pending";
+                                var isPayable = invoice.Status == InvoiceStatus.Pending || invoice.Status == InvoiceStatus.Overdue;
 
                                 <div class="list-group-item p-0">
                                     <div class="invoice-card card m-3 @cardClass">
                                         <div class="card-body">
                                             <div class="row align-items-center">
                                                 <div class="col-auto">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input invoice-checkbox"
-                                                               type="checkbox"
-                                                               value="@invoice.InvoiceId"
-                                                               id="invoice-@invoice.InvoiceId"
-                                                               data-amount="@invoice.Amount"
-                                                               @(invoice.Status != InvoiceStatus.Pending ? "disabled" : "")>
-                                                    </div>
+                                                    @if (isPayable)
+                                                    {
+                                                        <div class="form-check">
+                                                            <input class="form-check-input invoice-checkbox"
+                                                                   type="checkbox"
+                                                                   value="@invoice.InvoiceId"
+                                                                   id="invoice-@invoice.InvoiceId"
+                                                                   data-amount="@invoice.Amount">
+                                                        </div>
+                                                    }
                                                 </div>
 
                                                 <!-- Invoice Info -->
@@ -241,11 +224,9 @@
                                                                 @invoice.StudentName
                                                             </p>
                                                             <span
-                                                                class="badge @(invoice.Status == InvoiceStatus.Pending ? "bg-warning" :
-                                                                             invoice.Status == InvoiceStatus.Paid ? "bg-success" :
-                                                                             invoice.Status == InvoiceStatus.Cancelled ? "bg-secondary" : "bg-danger") status-badge">
+                                                                class="badge @(invoice.Status == InvoiceStatus.Pending ? "bg-warning" : "bg-danger") status-badge">
                                                                 @invoice.Status
-                                                                @if (invoice.IsOverdue)
+                                                                @if (invoice.Status == InvoiceStatus.Overdue)
                                                                 {
                                                                     <i class="fas fa-exclamation-circle ms-1"></i>
                                                                 }
@@ -260,16 +241,17 @@
                                                                 </div>
                                                                 <div class="col-6">
                                                                     <small class="text-muted">Due Date</small>
-                                                                    <p class="mb-0 @(invoice.IsOverdue ? "text-danger fw-bold" : "")">
+                                                                    <p class="mb-0 @(invoice.Status == InvoiceStatus.Overdue ? "text-danger fw-bold" : "")">
                                                                         @(invoice.DueAt?.ToString("MMM dd, yyyy") ?? "N/A")
-                                                                        @if (invoice.IsOverdue)
+                                                                        @if (invoice.Status == InvoiceStatus.Overdue)
                                                                         {
                                                                             <i class="fas fa-exclamation-triangle ms-1"></i>
                                                                         }
                                                                     </p>
                                                                 </div>
                                                                 <div class="col-12 mt-2">
-                                                                    <h5 class="text-primary">RM@(invoice.Amount)</h5>
+                                                                    <h5 class="text-primary">
+                                                                        RM@(invoice.Amount.ToString("0.00"))</h5>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -277,17 +259,13 @@
                                                 </div>
 
                                                 <div class="col-auto">
-                                                    @if (invoice.Status == InvoiceStatus.Pending)
+                                                    @if (isPayable)
                                                     {
                                                         <button class="btn btn-sm btn-primary pay-single"
                                                                 data-invoice-id="@invoice.InvoiceId"
                                                                 data-amount="@invoice.Amount">
                                                             <i class="fas fa-credit-card me-1"></i>Pay Now
                                                         </button>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="text-muted small">Paid</span>
                                                     }
                                                 </div>
                                             </div>
@@ -318,26 +296,25 @@
                     <div class="mb-4">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Selected Fees:</span>
-                            <span class="fw-bold" id="selectedCount">@Model.SelectedCount</span>
+                            <span class="fw-bold" id="selectedCount">0</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Subtotal:</span>
-                            <span id="subtotal">@Model.SelectedTotal.ToString("C")</span>
+                            <span id="subtotal">RM0.00</span>
                         </div>
                         <div class="d-flex justify-content-between mb-3">
                             <span>Processing Fee (2%):</span>
-                            <span id="processingFee">@((Model.SelectedTotal * 0.02m).ToString("C"))</span>
+                            <span id="processingFee">RM0.00</span>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between">
                             <h5>Total Amount:</h5>
-                            <h4 class="text-primary"
-                                id="totalAmount">@((Model.SelectedTotal * 1.02m).ToString("C"))</h4>
+                            <h4 class="text-primary" id="totalAmount">RM0.00</h4>
                         </div>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button id="checkoutBtn" class="btn btn-success btn-lg">
+                        <button id="checkoutBtn" class="btn btn-success btn-lg" disabled>
                             <i class="fas fa-lock me-2"></i>Checkout Now
                         </button>
                         <button id="clearSelectionBtn" class="btn btn-outline-secondary">
@@ -376,6 +353,8 @@
                 $('#subtotal').text('RM' + total.toFixed(2));
                 $('#processingFee').text('RM' + processingFee.toFixed(2));
                 $('#totalAmount').text('RM' + totalAmount.toFixed(2));
+
+                $('#checkoutBtn').prop('disabled', selectedCount === 0);
             }
 
             $('#selectAllInvoices').change(function () {
@@ -389,8 +368,10 @@
 
                 const allCheckboxes = $('.invoice-checkbox');
                 const checkedCount = allCheckboxes.filter(':checked').length;
+                const totalCheckboxes = allCheckboxes.length;
+
                 $('#selectAllInvoices').prop('checked',
-                    checkedCount > 0 && checkedCount === allCheckboxes.length);
+                    totalCheckboxes > 0 && checkedCount === totalCheckboxes);
             });
 
             $('#clearSelectionBtn').click(function () {
@@ -436,12 +417,14 @@
                             success: function (response) {
                                 if (response.success) {
                                     selectedInvoices.forEach(id => {
-                                        const checkbox = $('#invoice-' + id);
-                                        checkbox.closest('.invoice-card').removeClass('pending overdue').addClass('paid');
-                                        checkbox.closest('.invoice-card').find('.status-badge')
+                                        const card = $('#invoice-' + id).closest('.invoice-card');
+                                        card.removeClass('pending overdue').addClass('paid');
+                                        card.find('.status-badge')
                                             .removeClass('bg-warning bg-danger')
                                             .addClass('bg-success')
                                             .text('Paid');
+                                        card.find('.pay-single').remove();
+                                        $('#invoice-' + id).prop('disabled', true).prop('checked', false);
                                     });
 
                                     updatePaymentSummary();
@@ -449,8 +432,11 @@
                                     Swal.fire({
                                         icon: 'success',
                                         title: 'Payment initiated!',
+                                        text: 'Your payment has been processed successfully.',
                                         showConfirmButton: false,
                                         timer: 1500
+                                    }).then(() => {
+                                        location.reload();
                                     });
                                 } else {
                                     Swal.fire({
@@ -478,7 +464,7 @@
 
                 Swal.fire({
                     title: `Pay invoice #${invoiceId}?`,
-                    text: `Amount: RM${amount}`,
+                    text: `Amount: RM${amount.toFixed(2)}`,
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, pay now',
@@ -491,24 +477,28 @@
                             contentType: 'application/json',
                             data: JSON.stringify({
                                 InvoiceIds: [invoiceId],
-                                TotalAmount: amount
                             }),
                             success: function (response) {
                                 if (response.success) {
-                                    const checkbox = $('#invoice-' + invoiceId);
-                                    checkbox.closest('.invoice-card').removeClass('pending overdue').addClass('paid');
-                                    checkbox.closest('.invoice-card').find('.status-badge')
+                                    const card = $('#invoice-' + invoiceId).closest('.invoice-card');
+                                    card.removeClass('pending overdue').addClass('paid');
+                                    card.find('.status-badge')
                                         .removeClass('bg-warning bg-danger')
                                         .addClass('bg-success')
                                         .text('Paid');
+                                    $(this).remove();
+                                    $('#invoice-' + invoiceId).prop('disabled', true).prop('checked', false);
 
                                     updatePaymentSummary();
 
                                     Swal.fire({
                                         icon: 'success',
                                         title: 'Payment initiated!',
+                                        text: 'Your payment has been processed successfully.',
                                         showConfirmButton: false,
                                         timer: 1500
+                                    }).then(() => {
+                                        location.reload();
                                     });
                                 } else {
                                     Swal.fire({
@@ -548,5 +538,3 @@
         });
     </script>
 }
-
-

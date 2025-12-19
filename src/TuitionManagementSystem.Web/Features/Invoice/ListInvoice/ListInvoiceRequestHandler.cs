@@ -34,7 +34,7 @@ public class ListInvoiceRequestHandler : IRequestHandler<ListInvoiceRequest, Res
         {
             var today = DateTime.UtcNow;
             query = query.Where(i =>
-                i.Status == InvoiceStatus.Pending &&
+                i.Status == InvoiceStatus.Overdue &&
                 i.DueAt.HasValue &&
                 i.DueAt.Value < today);
         }
