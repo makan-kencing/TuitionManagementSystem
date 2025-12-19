@@ -75,11 +75,21 @@
             <div class="d-flex align-items-center gap-2">
                 @if (User.Identity!.IsAuthenticated)
                 {
-                    <a class="btn btn-outline-secondary"
-                       asp-controller="Notification"
-                       asp-action="Index">
-                        <i class="fa-solid fa-bell"></i>
-                    </a>
+                    <div class="dropdown">
+                        <a class="btn btn-outline-secondary dropdown-toggle"
+                           hx-get
+                           hx-controller="Notification"
+                           hx-action="GetNotifications"
+                           hx-target="#notification-drawer"
+                           hx-trigger="load"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="notification-badge"></span>
+                        </a>
+
+                        <div id="notification-drawer" class="dropdown-menu dropdown-menu-end"></div>
+                    </div>
 
                     <div class="dropdown">
                         <a class="btn btn-outline-secondary dropdown-toggle"
@@ -125,7 +135,9 @@
 
                             @if (User.IsInRole(nameof(AccessRoles.Administrator)))
                             {
-                                <li><hr class="dropdown-divider"/></li>
+                                <li>
+                                    <hr class="dropdown-divider"/>
+                                </li>
                                 <li>
                                     <a class="dropdown-item"
                                        asp-controller="Admin"
@@ -135,7 +147,9 @@
                                 </li>
                             }
 
-                            <li><hr class="dropdown-divider"/></li>
+                            <li>
+                                <hr class="dropdown-divider"/>
+                            </li>
                             <li>
                                 <form asp-controller="Authentication" asp-action="Logout">
                                     <button type="submit"
@@ -206,7 +220,9 @@
 
                 @if (User.IsInRole(nameof(AccessRoles.Administrator)))
                 {
-                    <li><hr/></li>
+                    <li>
+                        <hr/>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link text-danger"
                            asp-controller="Admin"
