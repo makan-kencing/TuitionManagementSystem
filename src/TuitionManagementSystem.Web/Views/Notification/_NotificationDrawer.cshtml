@@ -5,54 +5,54 @@
     var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
 }
 
-<div class="list-group">
-    @foreach (var notification in Model.Notifications)
-    {
-        var localizedDt = TimeZoneInfo.ConvertTimeFromUtc(notification.NotifiedAt, timezone);
-        if (notification.ActionUrl is not null)
-        {
-            <div id="notification-@notification.Id" class="list-group-item list-group-item-action d-flex justify-content-between"
-                 href="@notification.ActionUrl">
-                <div>
-                    <h5>@notification.Message</h5>
-                    <small>
-                        <time datetime="@notification.NotifiedAt">@localizedDt.Humanize()</time>
-                    </small>
-                </div>
-
-                <button type="button" class="btn-close"
-                        hx-post
-                        hx-controller="Notification"
-                        hx-action="DismissNotification"
-                        hx-route-id="@notification.Id"
-                        hx-target="#notification-drawer"
-                        aria-label="Dismiss"></button>
-            </div>
-        }
-        else
-        {
-            <div id="notification-@notification.Id" class="list-group-item d-flex justify-content-between">
-                <div>
-                    <h5>@notification.Message</h5>
-                    <small>
-                        <time datetime="@notification.NotifiedAt">@localizedDt.Humanize()</time>
-                    </small>
-                </div>
-
-                <button type="button" class="btn-close"
-                        hx-post
-                        hx-controller="Notification"
-                        hx-action="DismissNotification"
-                        hx-route-id="@notification.Id"
-                        hx-target="#notification-drawer"
-                        aria-label="Dismiss"></button>
-            </div>
-        }
-    }
-</div>
-
 @if (Model.Notifications.Count > 0)
 {
+    <div class="list-group">
+        @foreach (var notification in Model.Notifications)
+        {
+            var localizedDt = TimeZoneInfo.ConvertTimeFromUtc(notification.NotifiedAt, timezone);
+            if (notification.ActionUrl is not null)
+            {
+                <div id="notification-@notification.Id" class="list-group-item list-group-item-action d-flex justify-content-between"
+                     href="@notification.ActionUrl">
+                    <div>
+                        <h5>@notification.Message</h5>
+                        <small>
+                            <time datetime="@notification.NotifiedAt">@localizedDt.Humanize()</time>
+                        </small>
+                    </div>
+
+                    <button type="button" class="btn-close"
+                            hx-post
+                            hx-controller="Notification"
+                            hx-action="DismissNotification"
+                            hx-route-id="@notification.Id"
+                            hx-target="#notification-drawer"
+                            aria-label="Dismiss"></button>
+                </div>
+            }
+            else
+            {
+                <div id="notification-@notification.Id" class="list-group-item d-flex justify-content-between">
+                    <div>
+                        <h5>@notification.Message</h5>
+                        <small>
+                            <time datetime="@notification.NotifiedAt">@localizedDt.Humanize()</time>
+                        </small>
+                    </div>
+
+                    <button type="button" class="btn-close"
+                            hx-post
+                            hx-controller="Notification"
+                            hx-action="DismissNotification"
+                            hx-route-id="@notification.Id"
+                            hx-target="#notification-drawer"
+                            aria-label="Dismiss"></button>
+                </div>
+            }
+        }
+    </div>
+
     <span id="notification-badge"
           class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
           hx-swap-oob="true">
@@ -62,5 +62,11 @@
 }
 else
 {
+    <div class="list-group">
+        <div class="list-group-item">
+            No notifications
+        </div>
+    </div>
+
     <span id="notification-badge" hx-swap-oob="true"></span>
 }
