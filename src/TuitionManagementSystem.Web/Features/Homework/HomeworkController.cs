@@ -4,6 +4,7 @@ using Ardalis.Result;
 using GetAnnouncementInfo;
 using Htmx;
 using Infrastructure.Persistence;
+using MakeAnnouncement;
 using MakeSubmission;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -63,6 +64,18 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         return this.PartialView("_MakeSubmissionModel", new MakeSubmissionViewModel { AssignmentId = id });
     }
 
+    [HttpGet]
+    [Route("~/[controller]/make-announcement/{id:int:required}")]
+    public IActionResult GetMakeAnnouncementModal(int id)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        return this.PartialView("_MakeAnnouncementModel", new MakeAnnouncementViewModel { CourseId = id });
+    }
+
     [HttpPost]
     [Route("~/[controller]/submission")]
     public async Task<IActionResult> MakeSubmission(MakeSubmissionViewModel model)
@@ -79,6 +92,26 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         var response = await mediator.Send(new MakeSubmissionRequest(model.AssignmentId, userId,model.FileIds,model.Content));
         return this.PartialView("_SubmissionSuccess", model);
     }
+
+
+
+    [HttpPost]
+    [Route("~/[controller]/announcement")]
+    public async Task<IActionResult> MakeAnnouncement(MakeAnnouncementViewModel model)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+        var userId = this.User.GetUserId();
+        if (userId == -1)
+        {
+            return this.Unauthorized();
+        }
+        var response = await mediator.Send(new MakeAnnouncementInfoRequest(model.CourseId,userId,model.FileIds,model.Title,model.Description,model.DueAt));
+        return this.PartialView("_MakeAnnouncementSuccess", model);
+    }
+
 
     public async Task<IActionResult> TeacherHomeworkDashboard(int courseId,CancellationToken cancellationToken)
     {
