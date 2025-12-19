@@ -5,4 +5,5 @@ public class UploadFilesResponse : List<UploadedFile>;
 public record UploadedFile(
     int Id,
     string Filename,
+    string MimeType,
     string MappedPath);

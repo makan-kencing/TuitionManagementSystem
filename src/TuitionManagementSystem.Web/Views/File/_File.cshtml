@@ -1,0 +1,35 @@
+﻿@model TuitionManagementSystem.Web.Features.File.UploadFiles.UploadFilesResponse
+
+@foreach (var file in Model)
+{
+    <a href="@file.MappedPath" class="card d-flex">
+        <input type="hidden" name="fileIds" value="@file.Id"/>
+
+        if (file.MimeType.StartsWith("image"))
+        {
+            <img src="@file.MappedPath" alt="">
+
+            <div class="card-body">
+                <h5 class="card-title">@file.Filename</h5>
+                <small class="card-subtitle">Image</small>
+            </div>
+        }
+        else if (file.MimeType.StartsWith("text"))
+        {
+            <div class="card-body">
+                <h5 class="card-title">@file.Filename</h5>
+                <small class="card-subtitle">Text</small>
+            </div>
+        }
+        else
+        {
+            <div class="card-body">
+                <h5 class="card-title">@file.Filename</h5>
+                <small class="card-subtitle">File</small>
+            </div>
+        }
+
+        <button hx-delete
+                type="button" class="btn-close" aria-label="Remove"></button>
+    </a>
+}

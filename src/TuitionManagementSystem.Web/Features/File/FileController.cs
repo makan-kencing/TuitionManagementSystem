@@ -3,19 +3,25 @@ namespace TuitionManagementSystem.Web.Features.File;
 using Abstractions;
 using Ardalis.Result;
 using DeleteFile;
+using Htmx;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Services.Auth.Extensions;
 using UploadFiles;
 
-public class FileController(IMediator mediator) : ApiController
+public class FileController(IMediator mediator) : WebController
 {
     [HttpPost]
-    public async Task<Result<UploadFilesResponse>> Upload(IFormFileCollection files) =>
-        await mediator.Send(new UploadFilesCommand(this.User.GetUserId(), files));
+    [Route("~/file/upload")]
+    public async Task<IActionResult> Upload(IFormFileCollection files)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
 
-    [HttpDelete]
-    [Route("{id:int:required}")]
-    public async Task<Result> Delete(int id) =>
-        await mediator.Send(new DeleteFileCommand(id));
+        var response = await mediator.Send(new UploadFilesCommand(this.User.GetUserId(), files));
+
+        return this.PartialView("_File", response.Value);
+    }
 }
