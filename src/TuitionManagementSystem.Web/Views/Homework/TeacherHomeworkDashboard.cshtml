@@ -27,7 +27,9 @@
             New Announcement
         </button>
 
-        <button>View Submission Status</button>
+        <a  asp-controller="Homework" asp-action="SubmissionList" asp-route-courseId="@Model.CourseInfo.CourseId">
+            <span>View Submission Status</span>
+        </a>
     </div>
 
 

@@ -2,6 +2,7 @@
 
 using Ardalis.Result;
 using GetAnnouncementInfo;
+using GetAssignmentDetail;
 using Htmx;
 using Infrastructure.Persistence;
 using MakeAnnouncement;
@@ -143,6 +144,7 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         return this.View(response.Value);
     }
 
+
     [AllowAnonymous]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -161,6 +163,28 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
                 return this.NotFound();
         }
     }
+
+    public async Task<IActionResult> SubmissionList(int courseId, CancellationToken cancellationToken)
+    {
+        var response = await mediator.Send(new GetAnnouncementInfoRequest(courseId),cancellationToken);
+        if (response.IsNotFound())
+        {
+            return this.NotFound();
+        }
+        return this.View(response.Value);
+    }
+
+    // public IActionResult AssignmentDetail()=>this.View();
+     public async Task<IActionResult> GetAssignmentDetail(int assignmentId, CancellationToken cancellationToken)
+     {
+         var response = await mediator.Send(new GetAssignmentDetailsQuery(assignmentId),cancellationToken);
+         if (response.IsNotFound())
+         {
+             return this.NotFound();
+         }
+         return this.View(response.Value);
+    }
+
 
 
 }
