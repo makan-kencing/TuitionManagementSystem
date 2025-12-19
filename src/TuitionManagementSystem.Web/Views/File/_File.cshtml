@@ -2,10 +2,10 @@
 
 @foreach (var file in Model)
 {
-    <a href="@file.MappedPath" class="card d-flex">
+    <a href="@file.MappedPath" class="card d-flex"  target="_blank">
         <input type="hidden" name="fileIds" value="@file.Id"/>
 
-        if (file.MimeType.StartsWith("image"))
+        @if (file.MimeType.StartsWith("image"))
         {
             <img src="@file.MappedPath" alt="">
 
