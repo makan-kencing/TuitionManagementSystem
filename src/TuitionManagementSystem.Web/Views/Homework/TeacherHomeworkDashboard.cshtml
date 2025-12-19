@@ -1,0 +1,106 @@
+﻿@using TuitionManagementSystem.Web.Features.Homework.GetAnnouncementInfo
+@model TuitionManagementSystem.Web.Features.Homework.GetAnnouncementInfo.GetAnnouncementInfoResponse
+
+
+@{
+    var now = DateTime.UtcNow;
+}
+
+<div class="container py-4">
+    <div class="bg-light p-4 rounded shadow-sm mb-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
+            <div>
+                <h3 class="mb-1">@Model.CourseInfo.Subject : @Model.CourseInfo.CourseName</h3>
+                <h5 class="text-muted mb-0">@Model.TeacherName</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <button class="btn btn-primary btn-sm"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#publishModal">
+            New Announcement
+        </button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="bg-white border rounded p-3" style="max-height: 420px; overflow-y: auto;">
+                <h5 class="mb-3">Upcoming</h5>
+                <ul class="list-group list-group-flush">
+                    @foreach (var announcement in Model.AnnouncementInfos)
+                    {
+                        if (announcement is AssignmentInfo assignment)
+                        {
+                            if (now < assignment.DueAt)
+                            {
+                                <li class="list-group-item">@assignment.DueAt - @assignment.Title</li>
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+
+       @foreach(var announcement in Model.AnnouncementInfos){
+            <div class="col-md-8">
+                <div class="row gy-4">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title mb-2">@announcement.Title</h5>
+                                <p class="card-text">@announcement.Description</p>
+
+                                @if (announcement is AssignmentInfo assignment)
+                                {
+                                    <div id="make-submission-@(assignment.Id)">
+                                        <button hx-get
+                                                hx-controller="Homework"
+                                                hx-action="GetMakeSubmissionModal"
+                                                hx-target="#modal"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modal">
+                                            Submit Homework
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    }
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="publishModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">发布内容</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label class="form-label">标题</label>
+            <input type="text" class="form-control" placeholder="请输入内容标题">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">内容</label>
+            <textarea class="form-control" rows="5" placeholder="输入详细内容..."></textarea>
+          </div>
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">取消</button>
+            <button type="submit" class="btn btn-primary">发布</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

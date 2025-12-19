@@ -5,8 +5,8 @@ using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Models.Class.Announcement;
-using TeacherHomework;
 
+// GetCourseAnnouncements
 public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
     : IRequestHandler<GetAnnouncementInfoRequest, Result<GetAnnouncementInfoResponse>>
 {
@@ -70,8 +70,6 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                 }).ToList()
         };
 
-        return Result<GetAnnouncementInfoResponse>.Success(announcementInfomation);
-
+        return Result<GetAnnouncementInfoResponse>.Success(courseAnnouncements);
     }
-
 }

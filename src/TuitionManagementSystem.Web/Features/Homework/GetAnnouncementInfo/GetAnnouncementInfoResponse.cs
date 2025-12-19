@@ -2,7 +2,7 @@
 
 public class GetAnnouncementInfoResponse
 {
-    public required string TeacherName { get; set; }
+    public string? TeacherName { get; set; }
 
     public required CourseInfo CourseInfo { get; set; }
 
@@ -24,10 +24,16 @@ public class AnnouncementInfo
     public string? TeacherName { get; set; }
 }
 
-public class CourseInfo
+public class AssignmentInfo : AnnouncementInfo
 {
-    public string? CourseName { get; set; }
-    public string? Subject { get; set; }
+    public DateTime? DueAt { get; set; }
 }
 
+public class MaterialInfo : AnnouncementInfo;
 
+public class CourseInfo
+{
+    public required string CourseName { get; set; }
+
+    public required string Subject { get; set; }
+}
