@@ -18,8 +18,9 @@
         <div class="modal-body">
             <div class="text-center">
                 <!-- https://stackoverflow.com/questions/602642/server-urlencode-vs-httputility-urlencode -->
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@Uri.EscapeDataString(returnUrl)"
-                     alt="QR Code"/>
+                <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@Uri.EscapeDataString(returnUrl)"
+                    alt="QR Code"/>
 
                 <p class="mt-3">Code: @Model.Code</p>
             </div>

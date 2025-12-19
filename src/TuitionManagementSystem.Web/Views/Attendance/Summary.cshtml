@@ -15,7 +15,6 @@
     }
     else
     {
-
         @foreach (var course in Model.Courses)
         {
             var rate = course.Stats.AttendanceRate;
@@ -23,7 +22,7 @@
             string barClass =
                 rate >= 80 ? "bg-success" :
                 rate >= 60 ? "bg-warning" :
-                rate > 0   ? "bg-danger" :
+                rate > 0 ? "bg-danger" :
                 "bg-secondary";
 
             <a href="@Url.Action("History", "Attendance", new { courseId = course.Course.Id })"
@@ -63,7 +62,6 @@
                 </div>
             </a>
         }
-
     }
 
 

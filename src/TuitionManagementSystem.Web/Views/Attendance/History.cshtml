@@ -31,7 +31,7 @@
             <tbody>
             @foreach (var session in Model.Sessions)
             {
-                if (session.StartAt>=Model.EnrollmentAt)
+                if (session.StartAt >= Model.EnrollmentAt)
                 {
                     <tr>
                         <td>
@@ -62,7 +62,6 @@
                         <td colspan="3">Dont have session history data</td>
                     </tr>
                 }
-
             }
             </tbody>
         </table>

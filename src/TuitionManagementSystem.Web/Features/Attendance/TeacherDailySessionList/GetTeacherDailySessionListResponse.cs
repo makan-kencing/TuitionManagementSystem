@@ -2,16 +2,16 @@
 
 public class GetTeacherDailySessionListResponse
 {
-    public ICollection<CourseDaily>  Courses { get; set; } = [];
+    public ICollection<CourseDaily> Courses { get; set; } = [];
 }
 
 public class CourseDaily
 {
-     public required string Name { get; set; }
+    public required string Name { get; set; }
 
-     public string? SubjectName { get; set; }
+    public string? SubjectName { get; set; }
 
-     public ICollection<SessionDaily> Sessions { get; set; } = [];
+    public ICollection<SessionDaily> Sessions { get; set; } = [];
 }
 
 public class SessionDaily
@@ -24,5 +24,3 @@ public class SessionDaily
 
     public string? Code { get; set; }
 }
-
-

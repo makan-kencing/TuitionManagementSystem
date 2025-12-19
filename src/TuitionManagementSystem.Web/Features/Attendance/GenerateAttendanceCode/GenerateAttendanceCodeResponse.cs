@@ -4,5 +4,3 @@ public class GenerateAttendanceCodeResponse
 {
     public required string Code { get; set; }
 }
-
-

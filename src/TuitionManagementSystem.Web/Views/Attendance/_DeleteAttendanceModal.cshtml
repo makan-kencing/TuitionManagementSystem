@@ -19,13 +19,13 @@
 
 @if (Model.CurrentAt < Model.SessionTime.EndAt)
 {
-    <span id="status-@Model.UserId" hx-swap-oob="true"  class="badge bg-warning text-dark">
+    <span id="status-@Model.UserId" hx-swap-oob="true" class="badge bg-warning text-dark">
         NotTaken
 </span>
 }
 else
 {
-    <span id="status-@Model.UserId" hx-swap-oob="true"  class="badge bg-danger">
+    <span id="status-@Model.UserId" hx-swap-oob="true" class="badge bg-danger">
         Absent
     </span>
 }
