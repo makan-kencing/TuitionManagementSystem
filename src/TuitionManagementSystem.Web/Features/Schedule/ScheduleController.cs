@@ -16,16 +16,16 @@ using ViewModels.Schedule;
 public sealed class ScheduleController(IMediator mediator) : Controller
 {
     [HttpGet("")]
-    public async Task<IActionResult> Index(int? year, int? month, int? courseId)
+    public async Task<IActionResult> Index(int? year, int? month, int? CourseId)
     {
         var now = DateTime.Now;
         var y = year ?? now.Year;
         var m = month ?? now.Month;
 
-        await LoadCourses(courseId);
+        await LoadCourses(CourseId);
 
         var occ = await mediator.Send(new GetScheduleOccurrencesByMonth(
-            CourseId: courseId,
+            CourseId: CourseId,
             Year: y,
             Month: m
         ));
@@ -34,7 +34,7 @@ public sealed class ScheduleController(IMediator mediator) : Controller
         {
             Year = y,
             Month = m,
-            CourseId = courseId,
+            CourseId = CourseId,
             Occurrences = occ
         };
         return View("ScheduleIndex", vm);
@@ -263,18 +263,25 @@ public sealed class ScheduleController(IMediator mediator) : Controller
             StudentId: studentId
         ), ct);
 
-        return Ok(occ.Select(x => new
+        return Ok(occ.Select(x =>
         {
-            id = $"{x.ScheduleId}:{x.Start:O}",
-            title = $"{x.CourseName} ({x.ClassroomName})",
-            start = x.Start,
-            end = x.End,
-            extendedProps = new
+            var startLocal = x.Start.Kind == DateTimeKind.Utc ? x.Start.ToLocalTime() : x.Start;
+            var endLocal = x.End.Kind == DateTimeKind.Utc ? x.End.ToLocalTime() : x.End;
+
+            return new
             {
-                scheduleId = x.ScheduleId,
-                courseId = x.CourseId,
-                classroomId = x.ClassroomId
-            }
+                id = $"{x.ScheduleId}:{startLocal:O}",
+                title = x.CourseName,
+                start = startLocal,
+                end = endLocal,
+                extendedProps = new
+                {
+                    scheduleId = x.ScheduleId,
+                    courseId = x.CourseId,
+                    classroomId = x.ClassroomId,
+                    classroomName = x.ClassroomName
+                }
+            };
         }));
     }
 

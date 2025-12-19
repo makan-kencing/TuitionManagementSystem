@@ -2,17 +2,17 @@
 
 <h2>Schedules</h2>
 
-<form method="get" action="/schedules">
+<form method="get" asp-action="Index" asp-controller="Schedule">
     <label>Course</label>
-    <select name="courseId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Courses">
+    <select asp-for="CourseId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Courses">
         <option value="">All</option>
     </select>
 
     <label>Year</label>
-    <input type="number" name="year" value="@Model.Year" min="2000" max="2100" />
+    <input asp-for="Year" type="number" min="2000" max="2100" />
 
     <label>Month</label>
-    <input type="number" name="month" value="@Model.Month" min="1" max="12" />
+    <input asp-for="Month" type="number" min="1" max="12" />
 
     <button type="submit">Go</button>
     <a href="/schedules/create">Create</a>
@@ -42,8 +42,8 @@
         <tr>
             <td>@o.CourseName</td>
             <td>@o.ClassroomName</td>
-            <td>@o.Start.ToString("yyyy-MM-dd HH:mm")</td>
-            <td>@o.End.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>@o.Start.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+            <td>@o.End.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
             <td>
                 <a href="/schedules/@o.ScheduleId/edit">Edit</a>
             </td>

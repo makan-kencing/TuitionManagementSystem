@@ -1,3 +1,32 @@
+@model TuitionManagementSystem.Web.ViewModels.Schedule.ScheduleCalendarVm
+
+@{
+var isAdmin = User.IsInRole("Administrator");
+var userType = User.FindFirst(TuitionManagementSystem.Web.Services.Auth.Constants.InternalClaimTypes.UserType)?.Value;
+var userIdRaw = User.FindFirst(TuitionManagementSystem.Web.Services.Auth.Constants.InternalClaimTypes.UserId)?.Value;
+var hasUserId = int.TryParse(userIdRaw, out var currentUserId);
+
+// Defaults come from the controller (e.g., calendar/course/{id}).
+// For Teacher/Student, enforce "self" if we can resolve the ID from claims.
+var effectiveCourseId = Model.CourseId;
+int? effectiveTeacherId = Model.TeacherId;
+int? effectiveStudentId = Model.StudentId;
+
+if (!isAdmin && hasUserId)
+{
+if (string.Equals(userType, nameof(TuitionManagementSystem.Web.Models.User.Teacher), StringComparison.OrdinalIgnoreCase))
+{
+effectiveTeacherId = currentUserId;
+effectiveStudentId = null;
+}
+else if (string.Equals(userType, nameof(TuitionManagementSystem.Web.Models.User.Student), StringComparison.OrdinalIgnoreCase))
+{
+effectiveStudentId = currentUserId;
+effectiveTeacherId = null;
+}
+}
+}
+
 <h2>Timetable</h2>
 
 <div style="max-width: 1400px; margin: 0 auto;">
@@ -5,46 +34,66 @@
 </div>
 
 @section Scripts {
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
-    <script>
+<script>
     document.addEventListener('DOMContentLoaded', function () {
-      const calendarEl = document.getElementById('calendar');
+        const calendarEl = document.getElementById('calendar');
 
-      const courseId = '@(Model.CourseId?.ToString() ?? "")';
-      const teacherId = '@(Model.TeacherId?.ToString() ?? "")';
-      const studentId = '@(Model.StudentId?.ToString() ?? "")';
+        const courseId = '@(effectiveCourseId?.ToString() ?? "")';
+        const teacherId = '@(effectiveTeacherId?.ToString() ?? "")';
+        const studentId = '@(effectiveStudentId?.ToString() ?? "")';
 
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'timeGridWeek',
-        height: 850,
-        expandRows: true,
-        nowIndicator: true,
-        slotMinTime: '09:00:00',
-        slotMaxTime: '23:00:00',
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        events: function (info, successCallback, failureCallback) {
-          const url = new URL('@Url.Action("Events", "Schedule")', window.location.origin);
-          url.searchParams.set('start', info.startStr);
-          url.searchParams.set('end', info.endStr);
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            timeZone: 'local',
+            height: 850,
+            expandRows: true,
+            nowIndicator: true,
+            slotMinTime: '09:00:00',
+            slotMaxTime: '23:00:00',
+            views: {
+                dayGridMonth: { displayEventTime: false }
+            },
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            eventDidMount: function(info) {
+                const course = info.event.title || '';
+                const classroom = (info.event.extendedProps && info.event.extendedProps.classroomName) ? info.event.extendedProps.classroomName : '';
 
-          if (courseId) url.searchParams.set('courseId', courseId);
-          if (teacherId) url.searchParams.set('teacherId', teacherId);
-          if (studentId) url.searchParams.set('studentId', studentId);
+                const start = info.event.start;
+                const end = info.event.end;
 
-          fetch(url.toString(), { headers: { 'Accept': 'application/json' } })
-            .then(r => r.ok ? r.json() : Promise.reject(r))
-            .then(data => successCallback(data))
-            .catch(err => failureCallback(err));
-        }
-      });
+                const fmt = (d) => d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                const timeRange = (start && end) ? `${fmt(start)} - ${fmt(end)}` : (start ? fmt(start) : '');
 
-      calendar.render();
+                const parts = [course];
+                if (classroom) parts.push(classroom);
+                if (timeRange) parts.push(timeRange);
+
+                info.el.setAttribute('title', parts.filter(Boolean).join('\n'));
+            },
+            events: function (info, successCallback, failureCallback) {
+                const url = new URL('@Url.Action("Events", "Schedule")', window.location.origin);
+                url.searchParams.set('start', info.startStr);
+                url.searchParams.set('end', info.endStr);
+
+                if (courseId) url.searchParams.set('courseId', courseId);
+                if (teacherId) url.searchParams.set('teacherId', teacherId);
+                if (studentId) url.searchParams.set('studentId', studentId);
+
+                fetch(url.toString(), { headers: { 'Accept': 'application/json' } })
+                    .then(r => r.ok ? r.json() : Promise.reject(r))
+                    .then(data => successCallback(data))
+                    .catch(err => failureCallback(err));
+            }
+        });
+
+        calendar.render();
     });
-  </script>
+</script>
 }

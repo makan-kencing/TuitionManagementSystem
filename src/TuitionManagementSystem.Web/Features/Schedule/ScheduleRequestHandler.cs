@@ -37,8 +37,14 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
             Start = startUtc,
             End = endUtc,
             RecurrencePatterns = request.RecurrencePatterns.Select(MapPatternUtc).ToList(),
-            RecurrenceDates = DateTimeUtc.ToUtcAssumingLocal(request.RecurrenceDates ?? []),
-            ExceptionDates = DateTimeUtc.ToUtcAssumingLocal(request.ExceptionDates ?? [])
+            RecurrenceDates = DateTimeUtc.ToUtcAssumingLocal(
+                (request.RecurrenceDates ?? [])
+                    .Select(d => NormalizeExceptionOrRDate(d, request.Start))
+                    .ToList()),
+            ExceptionDates = DateTimeUtc.ToUtcAssumingLocal(
+                (request.ExceptionDates ?? [])
+                    .Select(d => NormalizeExceptionOrRDate(d, request.Start))
+                    .ToList())
         };
 
         await db.Schedules.AddAsync(entity, ct);
@@ -63,8 +69,14 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
         entity.Description = request.Description;
         entity.Start = DateTimeUtc.ToUtcAssumingLocal(request.Start);
         entity.End   = DateTimeUtc.ToUtcAssumingLocal(request.End);
-        entity.RecurrenceDates = DateTimeUtc.ToUtcAssumingLocal(request.RecurrenceDates ?? []);
-        entity.ExceptionDates  = DateTimeUtc.ToUtcAssumingLocal(request.ExceptionDates ?? []);
+        entity.RecurrenceDates = DateTimeUtc.ToUtcAssumingLocal(
+            (request.RecurrenceDates ?? [])
+                .Select(d => NormalizeExceptionOrRDate(d, request.Start))
+                .ToList());
+        entity.ExceptionDates  = DateTimeUtc.ToUtcAssumingLocal(
+            (request.ExceptionDates ?? [])
+                .Select(d => NormalizeExceptionOrRDate(d, request.Start))
+                .ToList());
 
         entity.RecurrencePatterns.Clear();
         foreach (var rp in request.RecurrencePatterns.Select(MapPatternUtc))
@@ -140,7 +152,7 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
 
 
     public async Task<IReadOnlyList<ScheduleOccurrence>> Handle(GetScheduleOccurrencesByDateRange request, CancellationToken ct)
-{
+    {
     var fromUtc = request.From.Kind == DateTimeKind.Utc
         ? request.From
         : DateTimeUtc.ToUtcAssumingLocal(request.From);
@@ -152,10 +164,17 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
     if (toUtc <= fromUtc) return Array.Empty<ScheduleOccurrence>();
 
     var schedulesQuery = db.Schedules
-    .AsNoTracking()
-    .Include(s => s.RecurrencePatterns)
-    .Include(s => s.Course).ThenInclude(c => c.PreferredClassroom)
-    .Where(s => s.Start < toUtc && s.End > fromUtc); // overlap
+        .AsNoTracking()
+        .Include(s => s.RecurrencePatterns)
+        .Include(s => s.Course).ThenInclude(c => c.PreferredClassroom)
+        .Where(s =>
+            // Non-recurring: only if the single instance overlaps the window
+            (s.End > fromUtc)
+            // Recurring: include if it could produce occurrences in/after fromUtc
+            || s.RecurrencePatterns.Any(p => p.Until == null || p.Until > fromUtc)
+            // RDATE-only schedules: include (EF Core can translate primitive collection count on supported providers)
+            || s.RecurrenceDates.Count > 0)
+        .Where(s => s.Start < toUtc);
 
 
     if (request.CourseId.HasValue)
@@ -175,11 +194,6 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
             db.Enrollments.Any(e2 => e2.CourseId == s.CourseId && e2.StudentId == studentId));
     }
 
-        schedulesQuery = db.Schedules
-        .AsNoTracking()
-        .Include(s => s.RecurrencePatterns)
-        .Include(s => s.Course).ThenInclude(c => c.PreferredClassroom)
-        .Where(s => s.Start < toUtc && s.End > fromUtc); // overlap
     var schedules = await schedulesQuery.ToListAsync(ct);
 
     var list = new List<ScheduleOccurrence>(capacity: schedules.Count * 8);
@@ -237,17 +251,33 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
     }
 
     return list.OrderBy(x => x.Start).ToList();
-}
+    }
 
 
     private static ScheduleRecurrencePattern MapPatternUtc(RecurrencePatternDto dto) =>
         new()
         {
             FrequencyType = dto.FrequencyType,
-            Until = dto.Until is null ? null : DateTimeUtc.ToUtcAssumingLocal(dto.Until.Value),            Count = dto.Count,
+            Until = dto.Until is null ? null : DateTimeUtc.ToUtcAssumingLocal(NormalizeUntil(dto.Until.Value)),
+            Count = dto.Count,
             Interval = dto.Interval <= 0 ? 1 : dto.Interval,
             ByDay = dto.ByDay?.ToList() ?? []
         };
+
+    private static DateTime NormalizeExceptionOrRDate(DateTime date, DateTime scheduleStart)
+    {
+
+        return date.TimeOfDay == TimeSpan.Zero
+            ? date.Date + scheduleStart.TimeOfDay
+            : date;
+    }
+
+    private static DateTime NormalizeUntil(DateTime until)
+    {
+        return until.TimeOfDay == TimeSpan.Zero
+            ? until.Date.AddDays(1).AddTicks(-1)
+            : until;
+    }
 
     public async Task<IReadOnlyList<ScheduleFeedItem>> Handle(GetAllSchedulesForFeed request, CancellationToken ct)
     {
