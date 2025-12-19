@@ -10,6 +10,7 @@ namespace TuitionManagementSystem.Web.Features.Enrollment;
 using Ardalis.Result.AspNetCore;
 using MarkEnrollment;
 using Microsoft.AspNetCore.Authorization;
+using ViewCourseEnrollment;
 
 [ApiController]
 [Route("enrollment")]
@@ -50,11 +51,7 @@ public class EnrollmentController : Controller
             EnrolledAt = result.Value.EnrolledAt
         };
 
-        return Ok(new
-        {
-            message = "Enrollment created successfully",
-            enrollment = response
-        });
+        return Ok(new { message = "Enrollment created successfully", enrollment = response });
     }
 
     [HttpGet("view/{id}")]
@@ -87,18 +84,65 @@ public class EnrollmentController : Controller
             return BadRequest(new { error = "Status is required (Cancelled or Withdrawn)" });
 
         var result = await _mediator.Send(
-            new MarkEnrollmentRequest
-            {
-                EnrollmentId = model.EnrollmentId.Value,
-                Status = model.Status.Value
-            },
+            new MarkEnrollmentRequest { EnrollmentId = model.EnrollmentId.Value, Status = model.Status.Value },
             cancellationToken);
 
         if (!result.IsSuccess)
             return BadRequest(new { errors = result.Errors });
 
+        return Ok(new { message = $"Enrollment {model.Status.Value.ToString().ToLower()} successfully" });
+    }
+
+    [HttpGet("course/{courseId}")]
+    public async Task<IActionResult> ViewCourseEnrollments(int courseId, CancellationToken cancellationToken)
+    {
+        ViewBag.CourseId = courseId;
+        return View("ViewCourseEnrollment");
+    }
+
+    [HttpGet("api/course/{courseId}/enrollments")]
+    public async Task<IActionResult> GetCourseEnrollments(int courseId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new ViewCourseEnrollmentsRequest(courseId),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+            return BadRequest(new { errors = result.Errors });
+
+        if (!result.Value.Any())
+            return Ok(new { enrollments = new List<object>(), courseInfo = new object() });
+
+        var firstEnrollment = result.Value.First();
+        var courseInfo = new
+        {
+            CourseName = firstEnrollment.CourseName,
+            SubjectName = firstEnrollment.SubjectName,
+            CourseId = courseId
+        };
+
+        var enrollments = result.Value.Select(e => new
+        {
+            e.EnrollmentId,
+            e.StudentId,
+            e.StudentName,
+            e.EnrolledAt,
+            DaysSinceEnrolled = (DateTime.UtcNow - e.EnrolledAt).Days,
+            e.AttendancePercentage,
+            e.TotalSessions,
+            e.AttendedSessions,
+            CanCancel = (DateTime.UtcNow - e.EnrolledAt).Days < 14,
+            CanWithdraw = (DateTime.UtcNow - e.EnrolledAt).Days >= 14
+        });
+
         return Ok(new {
-            message = $"Enrollment {model.Status.Value.ToString().ToLower()} successfully"
+            enrollments,
+            courseInfo,
+            statistics = new {
+                totalStudents = enrollments.Count(),
+                averageAttendance = Math.Round(enrollments.Average(e => e.AttendancePercentage), 1),
+                totalSessions = firstEnrollment.TotalSessions
+            }
         });
     }
 }

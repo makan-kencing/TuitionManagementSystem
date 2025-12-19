@@ -2,77 +2,262 @@
 @using TuitionManagementSystem.Web.Services.Auth.Extensions
 
 @{
-    Layout = "_Layout";
+Layout = "_Layout";
 }
 
 @section Styles {
-    <style>
-        .subject-card {
-            cursor: pointer;
-            border-radius: 1rem;
-            min-height: 180px;
-            background: linear-gradient(135deg, #6a11cb, #2575fc, #6a11cb, #6a11cb);
-            background-size: 300% 300%;
-            transition: transform .25s ease, box-shadow .15s ease;
-            box-shadow: 0 .25rem .5rem rgba(0,0,0,.1);
-            color: #fff;
-        }
-        .subject-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 1rem 2rem rgba(0,0,0,.18);
-            animation: gradientMove 3s ease infinite;
-        }
-        .subject-card h5,
-        .subject-card p {
-            transition: color .25s ease;
-        }
-        .subject-card:hover h5,
-        .subject-card:hover p {
-            color: #fff;
-        }
-        @@keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        #enrollModal .modal-dialog {
-            max-width: 1100px;
-            width: 100%;
-        }
-        #enrollModal .modal-content {
-            height: 80vh;
-        }
-        #enrollModal .modal-body {
-            overflow-y: auto;
-        }
-        #enrollModal .modal-header {
-            position: sticky;
-            top: 0;
-            background: #fff;
-            z-index: 10;
-        }
-        .subject-card {
-            cursor: pointer;
-            border-radius: 1rem;
-            min-height: 180px;
-            transition:
-                transform .25s ease,
-                box-shadow .25s ease,
-                background-color .25s ease;
-        }
-        .subject-card .card-body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-    </style>
+<style>
+    .subject-card {
+        cursor: pointer;
+        border-radius: 1rem;
+        min-height: 180px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-size: 200% 200%;
+        transition: all 0.3s ease;
+        box-shadow: 0 .25rem .5rem rgba(0,0,0,.1);
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .subject-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background: rgba(255,255,255,0.1);
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+
+    .subject-card:hover::before {
+        transform: translateY(0);
+    }
+
+    .subject-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 1rem 2rem rgba(0,0,0,.2);
+        animation: gradientMove 3s ease infinite;
+    }
+
+    .subject-card h5,
+    .subject-card p {
+        position: relative;
+        z-index: 1;
+        transition: color .25s ease;
+    }
+
+    .subject-card:hover h5,
+    .subject-card:hover p {
+        color: #fff;
+    }
+
+    @@keyframes gradientMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .subject-stats {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .subject-stat {
+        text-align: center;
+    }
+
+    .subject-stat-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        display: block;
+    }
+
+    .subject-stat-label {
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+
+    .course-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 .25rem .5rem rgba(0,0,0,.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    }
+
+    .course-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .course-card-header {
+        border-bottom: 1px solid #eee;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .course-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin: 0.5rem 0;
+    }
+
+    .course-details {
+        margin: 1rem 0;
+    }
+
+    .course-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        color: #555;
+    }
+
+    .course-detail-item i {
+        width: 1.5rem;
+        color: #667eea;
+    }
+
+    .capacity-progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #e9ecef;
+        margin: 0.5rem 0;
+        overflow: hidden;
+    }
+
+    .capacity-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #4cd964, #5ac8fa);
+        transition: width 0.3s ease;
+        border-radius: 4px;
+    }
+
+    .capacity-text {
+        font-size: 0.85rem;
+        color: #666;
+        text-align: right;
+    }
+
+    .capacity-warning .capacity-progress-bar {
+        background: linear-gradient(90deg, #ff9500, #ff5e3a);
+    }
+
+    .capacity-full .capacity-progress-bar {
+        background: linear-gradient(90deg, #ff2d55, #ff375f);
+    }
+
+    .teacher-badge {
+        background: linear-gradient(135deg, #34e89e, #0f3443);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .schedule-badge {
+        background: linear-gradient(135deg, #5ac8fa, #007aff);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .course-ranking {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255,255,255,0.9);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #667eea;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        font-size: 0.9rem;
+        border: 2px solid #667eea;
+    }
+
+    .course-ranking.top-3 {
+        background: linear-gradient(135deg, #ffd700, #ffa500);
+        color: #fff;
+        border: none;
+    }
+
+    .modal-content {
+        border-radius: 1.5rem;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-bottom: none;
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+        font-weight: 600;
+    }
+
+    .btn-close {
+        filter: invert(1);
+        opacity: 0.8;
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    #enrollModal .modal-dialog {
+        max-width: 1100px;
+        width: 100%;
+    }
+
+    #enrollModal .modal-content {
+        height: 90vh;
+        max-height: 800px;
+    }
+
+    #enrollModal .modal-body {
+        overflow-y: auto;
+    }
+</style>
 }
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Enrollments</h2>
         <button class="btn btn-primary" id="newEnrollmentBtn">
-            <i class="bi bi-plus-circle"></i>&nbsp; New Enrollment
+            <i class="fas fa-plus-circle"></i>&nbsp; New Enrollment
         </button>
     </div>
     <hr/>
@@ -82,23 +267,20 @@
 <div class="modal fade" id="enrollModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header d-flex align-items-center gap-2">
-                <button type="button"
-                        class="btn btn-outline-secondary btn-sm d-none"
-                        id="backToSubjectsBtn">
-                    <i class="bi bi-arrow-left"></i>
-                </button>
-
-                <h2 class="modal-title mb-0" id="enrollModalTitle">
-                    Our Subjects
-                </h2>
-
-                <button type="button"
-                        class="btn-close ms-auto"
-                        data-bs-dismiss="modal"></button>
+            <div class="modal-header">
+                <div class="d-flex align-items-center w-100">
+                    <button type="button"
+                            class="btn btn-outline-light btn-sm me-3 d-none"
+                            id="backToSubjectsBtn">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2 class="modal-title mb-0 flex-grow-1" id="enrollModalTitle">
+                        <i class="fas fa-graduation-cap me-2"></i> Browse Subjects
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
             </div>
-
-            <div class="modal-body enroll-modal-body">
+            <div class="modal-body">
                 <div id="subjectStep" class="row g-4 justify-content-center"></div>
                 <div id="courseStep" class="row g-3 d-none"></div>
             </div>
@@ -107,111 +289,232 @@
 </div>
 
 @section Scripts {
-    <script>
-        $(function () {
-            const studentId = @User.GetUserId();
+<script>
+    $(function () {
+        const studentId = @User.GetUserId();
 
-            function loadEnrollments() {
-                $("#enrollmentsContainer").load("/enrollment/view/" + studentId);
-            }
+        function loadEnrollments() {
+            $("#enrollmentsContainer").load("/enrollment/view/" + studentId);
+        }
 
-            loadEnrollments();
+        loadEnrollments();
 
-            $("#newEnrollmentBtn").click(async function () {
-                const res = await fetch("/subjects/api");
-                const subjects = await res.json();
+        $("#newEnrollmentBtn").click(async function () {
+            const res = await fetch("/subjects/api?withStats=true");
+            const subjects = await res.json();
 
-                $("#backToSubjectsBtn").addClass("d-none");
-                $("#enrollModalTitle").text("Our Subjects");
+            subjects.sort((a, b) => (b.courseCount || 0) - (a.courseCount || 0));
 
-                let html = "";
-                subjects.forEach(s => {
-                    html += `
-                            <div class="col-md-4">
-                                <div class="card subject-card h-100"
-                                     data-id="${s.id}"
-                                     data-name="${s.name}">
-                                    <div class="card-body">
-                                        <h5 class="text-center text-white h4">${s.name}</h5>
-                                        <p class="text-muted">${s.description ?? ""}</p>
+            $("#backToSubjectsBtn").addClass("d-none");
+            $("#enrollModalTitle").html('<i class="fas fa-graduation-cap me-2"></i> Browse Subjects');
+
+            let html = "";
+            subjects.forEach((s, index) => {
+                const gradientIndex = index % 4;
+                const gradients = [
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                    "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+                    "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+                ];
+
+                html += `
+                    <div class="col-md-4">
+                        <div class="card subject-card h-100"
+                             data-id="${s.id}"
+                             data-name="${s.name}"
+                             style="background: ${gradients[gradientIndex]}">
+                            <div class="card-body d-flex flex-column">
+                                <div>
+                                    <h5 class="text-center text-white h4 mb-2">${s.name}</h5>
+                                    <p class="text-center text-white opacity-90 mb-3">${s.description ?? ""}</p>
+                                </div>
+                                <div class="subject-stats mt-auto">
+                                    <div class="subject-stat">
+                                        <span class="subject-stat-value">${s.courseCount || 0}</span>
+                                        <span class="subject-stat-label">Courses</span>
+                                    </div>
+                                    <div class="subject-stat">
+                                        <span class="subject-stat-value">${s.studentCount || 0}</span>
+                                        <span class="subject-stat-label">Students</span>
                                     </div>
                                 </div>
-                            </div>`;
-                });
-
-                $("#subjectStep").html(html).removeClass("d-none");
-                $("#courseStep").addClass("d-none").empty();
-                $("#enrollModal").modal("show");
+                            </div>
+                        </div>
+                    </div>`;
             });
 
-            $("#backToSubjectsBtn").on("click", function () {
-                $("#courseStep").addClass("d-none").empty();
-                $("#subjectStep").removeClass("d-none");
+            $("#subjectStep").html(html).removeClass("d-none");
+            $("#courseStep").addClass("d-none").empty();
+            $("#enrollModal").modal("show");
+        });
 
-                $("#enrollModalTitle").text("Our Subjects");
-                $(this).addClass("d-none");
-            });
+        $("#backToSubjectsBtn").on("click", function () {
+            $("#courseStep").addClass("d-none").empty();
+            $("#subjectStep").removeClass("d-none");
 
-            $(document).on("click", ".subject-card", async function () {
-                const subjectId = $(this).data("id");
-                const subjectName = $(this).data("name");
+            $("#enrollModalTitle").html('<i class="fas fa-graduation-cap me-2"></i> Browse Subjects');
+            $(this).addClass("d-none");
+        });
 
-                $("#enrollModalTitle").text(`Courses Available for ${subjectName}`);
-                $("#backToSubjectsBtn").removeClass("d-none");
+        $(document).on("click", ".subject-card", async function () {
+            const subjectId = $(this).data("id");
+            const subjectName = $(this).data("name");
 
-                const res = await fetch(`/courses/api/by-subject/${subjectId}`);
-                const courses = await res.json();
+            $("#enrollModalTitle").html(`<i class="fas fa-book me-2"></i> ${subjectName} - Available Courses`);
+            $("#backToSubjectsBtn").removeClass("d-none");
 
-                let html = "";
-                courses.forEach(c => {
-                    html += `
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h5>${c.name}</h5>
-                                        <p>${c.description ?? ""}</p>
+            const res = await fetch(`/courses/api/by-subject/${subjectId}?withDetails=true`);
+            const courses = await res.json();
 
-                                        <div class="fw-bold text-primary mb-3">
-                                            RM ${c.price}
+            let html = "";
+            courses.forEach((c, index) => {
+                const capacityPercentage = c.capacityPercentage || 0;
+                const capacityClass = c.isFull ? 'capacity-full' :
+                    capacityPercentage >= 75 ? 'capacity-warning' : '';
+
+                const rankingBadge = index < 3 ?
+                    `<div class="course-ranking top-3">${index + 1}</div>` :
+                    `<div class="course-ranking">${index + 1}</div>`;
+
+                html += `
+                    <div class="col-md-6">
+                        <div class="card course-card h-100 ${capacityClass}">
+                            ${rankingBadge}
+                            <div class="card-body">
+                                <div class="course-card-header">
+                                    <h5 class="mb-2">${c.name}</h5>
+                                    <p class="text-muted mb-3">${c.description ?? ""}</p>
+                                    <div class="course-price">RM ${c.price}</div>
+                                </div>
+
+                                <div class="course-details">
+                                    ${c.teacherName && c.teacherName !== "Not Assigned" ? `
+                                    <div class="course-detail-item">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                        <div>
+                                            <strong>Teacher:</strong>
+                                            <span class="teacher-badge">
+                                                <i class="fas fa-user-tie"></i> ${c.teacherName}
+                                            </span>
                                         </div>
+                                    </div>` : ''}
 
-                                        <button class="btn btn-success enrollCourseBtn"
-                                                data-course-id="${c.id}">
-                                            Enroll
-                                        </button>
+                                    ${c.scheduleTime && c.scheduleTime !== "Schedule not set" ? `
+                                    <div class="course-detail-item">
+                                        <i class="fas fa-clock"></i>
+                                        <div>
+                                            <strong>Class Time:</strong>
+                                            ${c.scheduleDay ? `<span class="badge bg-info me-2">${c.scheduleDay}</span>` : ''}
+                                            <span class="schedule-badge">
+                                                <i class="fas fa-clock"></i> ${c.scheduleTime}
+                                            </span>
+                                        </div>
+                                    </div>` : ''}
+
+                                    ${c.classroomLocation && c.classroomLocation !== "Not assigned" ? `
+                                    <div class="course-detail-item">
+                                        <i class="fas fa-door-open"></i>
+                                        <div>
+                                            <strong>Classroom:</strong> ${c.classroomLocation}
+                                        </div>
+                                    </div>` : ''}
+
+                                    <div class="course-detail-item">
+                                        <i class="fas fa-users"></i>
+                                        <div class="w-100">
+                                            <div class="d-flex justify-content-between">
+                                                <strong>Capacity:</strong>
+                                                <span class="capacity-text">${c.currentCapacity}/${c.maxCapacity} students</span>
+                                            </div>
+                                            <div class="capacity-progress mt-1">
+                                                <div class="capacity-progress-bar" style="width: ${capacityPercentage}%"></div>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1">
+                                                <small class="text-muted">${capacityPercentage}% filled</small>
+                                                ${c.availableSpots > 0 ?
+                                                    `<small class="text-success">${c.availableSpots} spots available</small>` :
+                                                    `<small class="text-danger">Full</small>`}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="course-detail-item">
+                                        <i class="fas fa-user-graduate"></i>
+                                        <div>
+                                            <strong>Currently Enrolled:</strong> ${c.studentCount} students
+                                        </div>
                                     </div>
                                 </div>
-                            </div>`;
-                });
 
-                $("#subjectStep").addClass("d-none");
-                $("#courseStep").html(html).removeClass("d-none");
+                                <button class="btn btn-success w-100 mt-3 enrollCourseBtn"
+                                        data-course-id="${c.id}"
+                                        ${c.isFull ? 'disabled' : ''}>
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    ${c.isFull ? 'Course Full' : 'Enroll Now'}
+                                </button>
+
+                                ${c.isFull ? `
+                                <div class="alert alert-warning mt-2 mb-0">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    This course is currently full. You can join the waitlist.
+                                </div>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
             });
 
-            $(document).on("click", ".enrollCourseBtn", async function () {
-                const courseId = $(this).data("course-id");
+            $("#subjectStep").addClass("d-none");
+            $("#courseStep").html(html).removeClass("d-none");
+        });
 
+        $(document).on("click", ".enrollCourseBtn", async function () {
+            if ($(this).is(":disabled")) return;
 
-                const res = await fetch("/enrollment/make", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({studentId, courseId})
-                });
+            const courseId = $(this).data("course-id");
+            const courseName = $(this).closest('.card').find('h5').text();
 
-                const data = await res.json();
+            const result = await Swal.fire({
+                title: 'Confirm Enrollment',
+                html: `Are you sure you want to enroll in <strong>${courseName}</strong>?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Enroll Now',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#667eea',
+                showLoaderOnConfirm: true,
+                preConfirm: async () => {
+                    try {
+                        const response = await fetch("/enrollment/make", {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({studentId, courseId})
+                        });
 
-                if (res.ok) {
-                    Swal.fire("Success", data.message, "success")
-                        .then(() => location.reload());
-                } else {
-                    const errorMessage =
-                        data?.errors?.length
-                            ? data.errors.join("\n")
-                            : data?.message || "Failed";
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.errors?.join(', ') || errorData.message || 'Enrollment failed');
+                        }
 
-                    Swal.fire("Enrollment Failed", errorMessage, "error");
+                        return response.json();
+                    } catch (error) {
+                        Swal.showValidationMessage(`Enrollment failed: ${error.message}`);
+                    }
                 }
             });
+
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: result.value.message || 'Enrollment created successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#667eea'
+                }).then(() => {
+                    $("#enrollModal").modal("hide");
+                    loadEnrollments();
+                });
+            }
         });
-    </script>
+    });
+</script>
 }

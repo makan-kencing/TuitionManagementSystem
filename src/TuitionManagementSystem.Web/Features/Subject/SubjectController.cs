@@ -6,6 +6,7 @@ using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Models.Class;
 using TuitionManagementSystem.Web.ViewModels.Subject;
 
 
@@ -106,14 +107,44 @@ public class SubjectController(IMediator mediator, ApplicationDbContext db) : Co
     }
 
     [HttpGet("api")]
-    public async Task<IActionResult> GetSubjectsApi()
+    public async Task<IActionResult> GetSubjectsApi([FromQuery] bool withStats = false)
     {
         var subjects = await mediator.Send(new GetSubjects());
-        return Ok(subjects.Select(s => new {
-            s.Id,
-            s.Name,
-            s.Description
-        }));
-    }
 
+        if (!withStats)
+        {
+            return Ok(subjects.Select(s => new {
+                s.Id,
+                s.Name,
+                s.Description
+            }));
+        }
+
+        var subjectsWithStats = new List<object>();
+        foreach (var subject in subjects)
+        {
+            var courseCount = await _db.Courses
+                .CountAsync(c => c.SubjectId == subject.Id);
+
+            var studentCount = await _db.Enrollments
+                .Include(e => e.Course)
+                .Where(e => e.Course.SubjectId == subject.Id && e.Status == Enrollment.EnrollmentStatus.Active)
+                .Select(e => e.StudentId)
+                .Distinct()
+                .CountAsync();
+
+            subjectsWithStats.Add(new
+            {
+                subject.Id,
+                subject.Name,
+                subject.Description,
+                CourseCount = courseCount,
+                StudentCount = studentCount
+            });
+        }
+
+        subjectsWithStats = subjectsWithStats.OrderByDescending(s => ((dynamic)s).CourseCount).ToList();
+
+        return Ok(subjectsWithStats);
+    }
 }
