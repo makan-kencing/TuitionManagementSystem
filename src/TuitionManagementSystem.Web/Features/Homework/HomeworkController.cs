@@ -52,15 +52,15 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
     }
 
     [HttpGet]
-    [Route("~/[controller]/make-submission")]
-    public IActionResult GetMakeSubmissionModal(int assignmentId)
+    [Route("~/[controller]/make-submission/{id:int:required}")]
+    public IActionResult GetMakeSubmissionModal(int id)
     {
         if (!this.Request.IsHtmx())
         {
             return this.NotFound();
         }
 
-        return this.PartialView("_MakeSubmissionModel", new MakeSubmissionViewModel { AssignmentId = assignmentId });
+        return this.PartialView("_MakeSubmissionModel", new MakeSubmissionViewModel { AssignmentId = id });
     }
 
     [HttpPost]
