@@ -13,4 +13,5 @@ public class MakeSubmissionViewModel
 
     [DisplayName("Attachments")]
     public ICollection<int> FileIds { get; set; } = [];
+
 }
