@@ -34,6 +34,7 @@ public sealed class GetStudentHomeworkRequestHandler(ApplicationDbContext db)
             .Where(ct => courseIds.Contains(ct.CourseId))
             .Select(ct => new StudentCoursesInfo
             {
+                CourseId =  ct.CourseId,
                 SubjectName =ct.Course.Subject.Name,
                 CourseName = ct.Course.Name,
                 CourseSections = new List<StudentCourseSection>(),

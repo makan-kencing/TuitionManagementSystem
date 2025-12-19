@@ -13,38 +13,61 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
     public async Task<Result<GetAnnouncementInfoResponse>> Handle(GetAnnouncementInfoRequest request,
         CancellationToken cancellationToken)
     {
-        var announcements = await db.Announcements.OfType<Assignment>()
-            .Where(an => an.CreatedById == request.UserId)
-            .Select(an=> new AnnouncementInfo
-            {
-                Title =  an.Title,
-                Description =  an.Description,
-                CreatedAt = an.CreatedAt,
-                UpdatedAt = an.UpdatedAt,
-                PublishedAt = an.PublishedAt,
-                DueAt = an.DueAt
-            })
-            .ToListAsync(cancellationToken);
-
-        var now = DateTime.UtcNow;
-
-        var teacherName = await db.Accounts
-            .Where(a => a.User.Id == request.UserId)
-            .Select(a => a.DisplayName)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        var courseInfo = await db.Courses
+        var course = await db.Courses
             .Where(c => c.Id == request.CourseId)
-            .Select(c=> new CourseInfo
+            .Include(c => c.Announcements)
+            .ThenInclude(a => a.CreatedBy.Account)
+            .Select(c => new
             {
-                CourseName = c.Name,
-                Subject = c.Subject.Name
+                c.Name,
+                SubjectName = c.Subject.Name,
+                TeacherName = c.TeachersInCharge.First().Teacher.Account.DisplayName,
+                Announcements=c.Announcements.ToList()
             })
             .FirstOrDefaultAsync(cancellationToken);
 
-        var announcementInfomation = new GetAnnouncementInfoResponse
+        if (course is null)
         {
-            AnnouncementInfos = announcements, TeacherName = teacherName ,CourseInfo = courseInfo ,Now = now
+            return Result.NotFound();
+        }
+
+        // GetCourseAnnouncements
+        var courseAnnouncements = new GetAnnouncementInfoResponse
+        {
+            TeacherName = course.TeacherName,
+            CourseInfo = new CourseInfo { CourseName = course.Name, Subject = course.SubjectName },
+            AnnouncementInfos = course.Announcements
+                .Select(announcement => announcement switch
+                {
+                    Assignment assignment => new AssignmentInfo
+                    {
+                        Id = assignment.Id,
+                        Title = assignment.Title,
+                        Description = assignment.Description,
+                        CreatedAt = assignment.CreatedAt,
+                        UpdatedAt = assignment.UpdatedAt,
+                        TeacherName = assignment.CreatedBy.Account.DisplayName,
+                        DueAt = assignment.DueAt
+                    },
+                    Material material => new MaterialInfo
+                    {
+                        Id = material.Id,
+                        Title = material.Title,
+                        Description = material.Description,
+                        CreatedAt = material.CreatedAt,
+                        UpdatedAt = material.UpdatedAt,
+                        TeacherName = material.CreatedBy.Account.DisplayName
+                    },
+                    _ => new AnnouncementInfo
+                    {
+                        Id = announcement.Id,
+                        Title = announcement.Title,
+                        Description = announcement.Description,
+                        CreatedAt = announcement.CreatedAt,
+                        UpdatedAt = announcement.UpdatedAt,
+                        TeacherName = announcement.CreatedBy.Account.DisplayName
+                    }
+                }).ToList()
         };
 
         return Result<GetAnnouncementInfoResponse>.Success(announcementInfomation);

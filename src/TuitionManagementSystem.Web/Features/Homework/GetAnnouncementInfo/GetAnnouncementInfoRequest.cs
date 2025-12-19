@@ -3,5 +3,5 @@
 using Ardalis.Result;
 using MediatR;
 
-public record GetAnnouncementInfoRequest(int UserId,int CourseId)
+public record GetAnnouncementInfoRequest(int CourseId)
     : IRequest<Result<GetAnnouncementInfoResponse>>;

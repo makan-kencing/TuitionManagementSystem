@@ -1,9 +1,15 @@
 ﻿namespace TuitionManagementSystem.Web.Features.Homework;
 
 using Ardalis.Result;
+using GetAnnouncementInfo;
+using Htmx;
 using Infrastructure.Persistence;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
+using Models.User;
+using Services.Auth.Constants;
 using Services.Auth.Extensions;
 using StudentHomework;
 using TeacherHomework;
@@ -42,6 +48,17 @@ public class HomeworkController (IMediator mediator, ApplicationDbContext db) : 
         return this.View(result.Value);
     }
 
+    [HttpGet]
+    [Route("~/[controller]/make-submission")]
+    public IActionResult GetMakeSubmissionModal(int assignmentId)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        return this.PartialView("_MakeSubmissionModel", new MakeSubmissionViewModel { AssignmentId = assignmentId });
+    }
 
 
 }
