@@ -4,7 +4,6 @@ using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol.Plugins;
 
 public sealed class GetStudentHomeworkRequestHandler(ApplicationDbContext db)
     : IRequestHandler<GetStudentHomeworkRequest, Result<GetStudentHomeworkResponse>>
@@ -12,47 +11,36 @@ public sealed class GetStudentHomeworkRequestHandler(ApplicationDbContext db)
     public async Task<Result<GetStudentHomeworkResponse>> Handle(GetStudentHomeworkRequest request,
         CancellationToken cancellationToken)
     {
-
-        var user=await db.Accounts
-            .Where(a=>a.User.Id==request.UserId)
-            .Select(a=>a.DisplayName)
+        var studentHomeworks = await db.Students
+            .Where(s => s.Id == request.UserId)
+            .Select(s => new GetStudentHomeworkResponse
+            {
+                Name = s.Account.DisplayName,
+                CourseInfos = s.Enrollments
+                    .Select(e => new StudentCourseInfo
+                    {
+                        Id = e.Course.Id,
+                        EnrollDate = e.EnrolledAt,
+                        Name = e.Course.Name,
+                        SubjectName = e.Course.Subject.Name,
+                        Teacher = e.Course.TeachersInCharge
+                            .Select(ct => new CourseTeacherInfo
+                            {
+                                Id = ct.Teacher.Id,
+                                Name = ct.Teacher.Account.DisplayName
+                            })
+                            .First()
+                    })
+                    .ToList()
+            })
             .FirstOrDefaultAsync(cancellationToken);
 
-        var enrollInfos = await db.Enrollments
-            .Where(e => e.StudentId == request.UserId)
-            .Select(e => new StudentEnrollInfo
-            {
-
-                CourseId = e.CourseId,
-                EnrollDate = e.EnrolledAt.Date
-            })
-            .ToListAsync(cancellationToken);
-
-        var courseIds = enrollInfos.Select(e => e.CourseId).ToList();
-
-        var coursesWithTeachers = await db.CourseTeachers
-            .Where(ct => courseIds.Contains(ct.CourseId))
-            .Select(ct => new StudentCoursesInfo
-            {
-                CourseId =  ct.CourseId,
-                SubjectName =ct.Course.Subject.Name,
-                CourseName = ct.Course.Name,
-                CourseSections = new List<StudentCourseSection>(),
-                TeacherName = ct.Teacher.Account.Username,
-                TeacherId = ct.TeacherId
-
-            })
-            .ToListAsync(cancellationToken);
-
-
-        var response = new GetStudentHomeworkResponse
+        if (studentHomeworks is null)
         {
-            Name = user,
-            EnrollInfos = enrollInfos,
-            CourseInfos = coursesWithTeachers
-        };
+            return Result.NotFound();
+        }
 
-        return Result<GetStudentHomeworkResponse>.Success(response);
+        return Result.Success(studentHomeworks);
     }
 }
 

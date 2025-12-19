@@ -3,31 +3,26 @@
 public class GetStudentHomeworkResponse
 {
     public string? Name { get; set; }
-    public List<StudentCoursesInfo> CourseInfos { get; set; } = [];
-    public List<StudentEnrollInfo> EnrollInfos { get; set; } = [];
+
+    public List<StudentCourseInfo> CourseInfos { get; set; } = [];
 }
 
-public class StudentEnrollInfo
+public class StudentCourseInfo
 {
-    public int CourseId { get; set; }
+    public int Id { get; set; }
+
     public DateTime EnrollDate { get; set; }
+
+    public string? Name { get; set; }
+
+    public string? SubjectName { get; set; }
+
+    public required CourseTeacherInfo Teacher { get; set; }
 }
 
-public class StudentCoursesInfo
+public class CourseTeacherInfo
 {
-    public string? CourseName { get; set; }
-    public int CourseId { get; set; }
-    public string?SubjectName { get; set; }
-    public int TeacherId { get; set; }
-    public string? TeacherName { get; set; }
-    public List<StudentCourseSection> CourseSections { get; set; } = [];
-}
+    public int Id { get; set; }
 
-
-public class StudentCourseSection
-{
-    public int SessionId { get; set; }
-    public DateTime StratAt { get; set; }
-    public DateTime EndAt { get; set; }
-
+    public string? Name { get; set; }
 }
