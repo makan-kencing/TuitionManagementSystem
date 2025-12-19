@@ -1,0 +1,36 @@
+﻿@using TuitionManagementSystem.Web.Features.Homework.GetAnnouncementInfo
+@model TuitionManagementSystem.Web.Features.Homework.GetAnnouncementInfo.GetAnnouncementInfoResponse
+
+
+@{
+    var now = DateTime.UtcNow;
+}
+
+<div><h1>Submission List</h1></div>
+
+@foreach (var announcement in Model.AnnouncementInfos)
+{
+    <div class="container py-4">
+        <a asp-controller="Homework" asp-action="GetAssignmentDetail" asp-route-assignmentId="@announcement.Id">
+            <div class="bg-light p-4 rounded shadow-sm mb-3">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div>
+                       @if (announcement is AssignmentInfo assignment)
+                        {
+                        if (now < assignment.DueAt)
+                          {
+                            <h3 class="mb-1 ">@Model.CourseInfo.Subject : @Model.CourseInfo.CourseName</h3>
+                            <h4 class="mb-1">@announcement.CreatedAt -@assignment.DueAt</h4>
+                          }
+                        }
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+}
+
+
+
+
+
