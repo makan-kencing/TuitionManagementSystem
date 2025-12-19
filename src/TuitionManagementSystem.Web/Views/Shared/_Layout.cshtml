@@ -1,4 +1,5 @@
-﻿@using TuitionManagementSystem.Web.Services.Auth.Constants
+﻿@using TuitionManagementSystem.Web.Models.User
+@using TuitionManagementSystem.Web.Services.Auth.Constants
 @using TuitionManagementSystem.Web.Services.Auth.Extensions
 
 <!DOCTYPE html>
@@ -26,9 +27,8 @@
 
 <body>
 <header>
-    <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom box-shadow">
         <div class="container-fluid">
-
             <!-- Sidebar toggle (always visible) -->
             <button class="btn btn-outline-secondary me-2"
                     id="sidebarToggle"
@@ -51,24 +51,7 @@
 
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-controller="Course" asp-action="Index">Courses</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-controller="Homework" asp-action="Index">Homeworks</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-controller="Teacher" asp-action="Index">Teachers</a>
-                    </li>
-                    <li>
-                        <a class="nav-link text-dark" asp-controller="Subject" asp-action="Index">Subjects</a>
-                    </li>
-                    <li>
-                        <a class="nav-link text-dark" asp-controller="Classroom" asp-action="Index">Classroom</a>
-                    </li>
-                    <li>
-                        <a class="nav-link text-dark" asp-controller="Schedule" asp-action="Index">Schedule</a>
-                    </li>
+                    @* search bar maybe *@
                 </ul>
             </div>
 
@@ -120,32 +103,25 @@
                             </li>
                             <li>
                                 <a class="dropdown-item"
-                                   asp-controller="Enrollment"
-                                   asp-action="Index">
-                                    Enrollments
+                                   asp-controller="Attendance"
+                                   asp-action="Summary">
+                                    My Attendances
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item"
-                                   asp-controller="Attendance"
-                                   asp-action="Index">
-                                    Attendance
+                                   asp-controller="Invoice"
+                                   asp-action="ListInvoices">
+                                    My Bills
                                 </a>
                             </li>
-
-                            @if (User.IsInRole(nameof(AccessRoles.Administrator)))
-                            {
-                                <li>
-                                    <hr class="dropdown-divider"/>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item"
-                                       asp-controller="Admin"
-                                       asp-action="Index">
-                                        Admin Panel
-                                    </a>
-                                </li>
-                            }
+                            <li>
+                                <a class="dropdown-item"
+                                   asp-controller="Family"
+                                   asp-action="Index">
+                                    My Family
+                                </a>
+                            </li>
 
                             <li>
                                 <hr class="dropdown-divider"/>
@@ -174,29 +150,48 @@
     </nav>
 </header>
 
-<!-- MAIN LAYOUT -->
-<div class="app-layout sidebar-collapsed" id="appLayout">
-
-    <!-- SIDEBAR (always exists) -->
+<main class="app-layout sidebar-collapsed" id="appLayout">
     <aside class="sidebar p-3">
+        <ul class="nav nav-pills flex-column gap-1">
         @if (User.Identity!.IsAuthenticated)
         {
-            <ul class="nav nav-pills flex-column gap-1">
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Home" asp-action="Index">
-                        <i class="fa-solid fa-house me-2"></i> Dashboard
-                    </a>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Homework" asp-action="Index">
+                    <i class="fa-solid fa-file-lines me-2"></i> Homework
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Enrollment" asp-action="MakeEnrollment">
+                    <i class="fa-solid fa-users me-2"></i> Enrollments
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Attendance" asp-action="CourseSessionListing">
+                    <i class="fa-solid fa-calendar-check me-2"></i> Attendance
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Schedule" asp-action="Index">
+                    <i class="fa-solid fa-calendar me-2"></i> Schedule
+                </a>
+            </li>
+
+            if (User.IsInRole(nameof(AccessRoles.Administrator)))
+            {
+                <li>
+                    <hr>
+                </li>
+
+                <li>
+                    <h3>Admin Management</h3>
                 </li>
 
                 <li class="nav-item">
                     <a class="nav-link" asp-controller="Course" asp-action="Index">
                         <i class="fa-solid fa-book me-2"></i> Courses
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Homework" asp-action="Index">
-                        <i class="fa-solid fa-file-lines me-2"></i> Courseworks
                     </a>
                 </li>
 
@@ -207,61 +202,41 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Enrollment" asp-action="Index">
-                        <i class="fa-solid fa-users me-2"></i> Enrollments
+                    <a class="nav-link" asp-controller="Subject" asp-action="Index">
+                        <i class="fa-solid fa-book me-2"></i> Subjects
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Attendance" asp-action="Index">
-                        <i class="fa-solid fa-calendar-check me-2"></i> Attendance
+                    <a class="nav-link" asp-controller="Classroom" asp-action="Index">
+                        <i class="fa-solid fa-house me-2"></i> Classroom
                     </a>
                 </li>
 
-                @if (User.IsInRole(nameof(AccessRoles.Administrator)))
-                {
-                    <li>
-                        <hr/>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-danger"
-                           asp-controller="Admin"
-                           asp-action="Index">
-                            <i class="fa-solid fa-gear me-2"></i> Admin Panel
-                        </a>
-                    </li>
-                }
-            </ul>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Schedule" asp-action="Index">
+                        <i class="fa-solid fa-calendar me-2"></i> Schedule
+                    </a>
+                </li>
+            }
         }
         else
         {
-            <ul class="nav nav-pills flex-column gap-1">
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Home" asp-action="Index">
-                        <i class="fa-solid fa-house me-2"></i> Home
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Course" asp-action="Index">
-                        <i class="fa-solid fa-book me-2"></i> Courses
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                       asp-controller="Authentication"
-                       asp-action="Login">
-                        <i class="fa-solid fa-right-to-bracket me-2"></i> Sign In
-                    </a>
-                </li>
-            </ul>
+            <li class="nav-item">
+                <a class="nav-link"
+                   asp-controller="Authentication"
+                   asp-action="Login">
+                    <i class="fa-solid fa-right-to-bracket me-2"></i> Sign In
+                </a>
+            </li>
         }
+        </ul>
     </aside>
 
-    <!-- CONTENT -->
-    <main class="app-content">
+    <section class="app-content p-3">
         @RenderBody()
-    </main>
-</div>
+    </section>
+</main>
 
 <footer class="border-top footer text-muted">
     <div class="container">
