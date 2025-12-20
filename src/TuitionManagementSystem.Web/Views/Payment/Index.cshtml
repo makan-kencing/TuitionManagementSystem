@@ -1,7 +1,103 @@
+@using Humanizer
+@using TuitionManagementSystem.Web.Features.Payment.GetPaymentDetails
 @model TuitionManagementSystem.Web.Features.Payment.PaymentController.PaymentDetailsViewModel
 
 @{
     ViewData["Title"] = "Payment Details";
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
+
+    var localizedPaidAt = TimeZoneInfo.ConvertTimeFromUtc(Model.Details.PaidAt, timezone);
 }
 
-@* TODO *@
+<a asp-controller="Invoice" asp-action="ListInvoices" class="btn btn-close">
+    <i class="fa-solid fa-angle-left"></i>
+</a>
+
+<br/>
+
+<div>
+    <h1>Payment Summary</h1>
+
+    <div class="container row">
+        <div class="card col">
+            <div class="card-body">
+                <h5 class="card-title">Payment</h5>
+                <time datetime="@Model.Details.PaidAt">
+                    @localizedPaidAt (@localizedPaidAt.Humanize())
+                </time>
+            </div>
+        </div>
+
+        <div class="card col">
+            <div class="card-body">
+                <h5 class="card-title">Payment Info</h5>
+                <div class="card-text">
+                    @switch (Model.Details.Method)
+                    {
+                        case CardMethod card:
+                            @if (card.Brand == "visa")
+                            {
+                                <i class="fa-brands fa-cc-visa"></i>
+                            }
+                            else
+                            {
+                                <i class="fa-brands fa-cc-mastercard"></i>
+                            }
+
+                            <span>Ending in @card.Last4</span>
+                            break;
+                        case BankMethod bank:
+                            <i class="fa-solid fa-building-columns"></i>
+
+                            <span>@bank.Bank</span>
+                            break;
+                        case GenericMethod generic:
+                            <span>@generic.Generic</span>
+                            break;
+                    }
+                </div>
+
+                <div class="fw-bold">Total Amount: @Model.Details.Amount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="list-group card-body">
+                <div class="list-group-item row">
+                    <div class="col-7"></div>
+                    <div class="col">Price</div>
+                </div>
+                @{
+                    var total = 0m;
+                }
+                @foreach (var invoice in Model.Details.Invoices)
+                {
+                    <div class="list-group-item row justify-content-between">
+                        <div class="col-7">
+                            <h5>@invoice.Name</h5>
+                            <small>for @invoice.Student.Name</small>
+
+                            <p>Course: @invoice.Enrollment.CourseName</p>
+                        </div>
+
+                        <div class="col">
+                            <h5>RM @invoice.Amount</h5>
+                        </div>
+
+                        @{
+                            total += invoice.Amount;
+                        }
+                    </div>
+                }
+                <div class="list-group-item row">
+                    <div class="col-7"></div>
+                    <div class="col">
+                        <h5 class="fw-bold">RM @total</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
