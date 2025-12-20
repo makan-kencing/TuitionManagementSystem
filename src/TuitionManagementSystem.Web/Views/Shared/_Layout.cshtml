@@ -40,7 +40,6 @@
             margin: 0;
         }
 
-        /* Header */
         header nav {
             box-shadow: var(--shadow-sm);
             z-index: 1050;
@@ -54,7 +53,7 @@
             display: flex;
             align-items: center;
             font-weight: 700;
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             color: #2c3e50;
             letter-spacing: -0.02em;
         }
@@ -67,7 +66,6 @@
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
 
-        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
@@ -190,7 +188,6 @@
             margin-top: 0.5rem;
         }
 
-        /* Backdrop */
         #sidebar-backdrop {
             position: fixed;
             top: 0;
@@ -261,7 +258,6 @@
             transform: translateY(-1px);
         }
 
-        /* Dropdowns */
         .dropdown-menu {
             border: 1px solid rgba(0,0,0,0.08);
             box-shadow: var(--shadow-lg);
@@ -299,7 +295,6 @@
             opacity: 0.3;
         }
 
-        /* Profile dropdown */
         .dropdown-toggle {
             display: flex;
             align-items: center;
@@ -324,7 +319,6 @@
             transform: translateY(-1px);
         }
 
-        /* Notification */
         #notification-badge {
             position: absolute;
             top: 2px;
@@ -344,7 +338,44 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* Footer - FIXED */
+        .marquee-container {
+            position: relative;
+            z-index: 1040;
+            background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+            flex-shrink: 0;
+        }
+
+        .marquee-content {
+            animation: marquee 30s linear infinite;
+            white-space: nowrap;
+        }
+
+        .marquee-item {
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        @@keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .marquee-container:hover .marquee-content {
+            animation-play-state: paused;
+        }
+
+        @@media (max-width: 768px) {
+            .marquee-item {
+                font-size: 0.8rem;
+            }
+        }
+
         footer {
             background-color: white;
             padding: 1.5rem;
@@ -365,7 +396,6 @@
             padding: 0 1.5rem;
         }
 
-        /* Responsive */
         @@media (min-width: 768px) {
             .app-content {
                 padding: 0 2rem;
@@ -420,56 +450,93 @@
             <div class="d-flex align-items-center gap-2">
                 @if (User.Identity!.IsAuthenticated)
                 {
-                <div class="dropdown">
-                    <a class="btn btn-outline-secondary position-relative"
-                       hx-get hx-controller="Notification"
-                       hx-action="GetNotifications"
-                       hx-target="#notification-drawer"
-                       hx-trigger="load"
-                       data-bs-toggle="dropdown"
-                       aria-label="Notifications">
-                        <i class="fa-solid fa-bell"></i>
-                        <span id="notification-badge"></span>
-                    </a>
-                    <div id="notification-drawer" class="dropdown-menu dropdown-menu-end"></div>
-                </div>
+                    <div class="dropdown">
+                        <a class="btn btn-outline-secondary position-relative"
+                           hx-get hx-controller="Notification"
+                           hx-action="GetNotifications"
+                           hx-target="#notification-drawer"
+                           hx-trigger="load"
+                           data-bs-toggle="dropdown"
+                           aria-label="Notifications">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="notification-badge"></span>
+                        </a>
+                        <div id="notification-drawer" class="dropdown-menu dropdown-menu-end"></div>
+                    </div>
 
-                <div class="dropdown">
-                    <a class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                        @if (User.GetProfileImageUri() != null)
-                        {
-                        <img src="@User.GetProfileImageUri()" class="rounded-circle" width="30" height="30" alt="Profile"/>
-                        }
-                        else
-                        {
-                        <i class="fa-solid fa-user-circle me-1"></i>
-                        }
-                        <span class="ms-1 d-none d-md-inline">@User.GetDisplayName()</span>
-                    </a>
+                    <div class="dropdown">
+                        <a class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                            @if (User.GetProfileImageUri() != null)
+                            {
+                                <img src="@User.GetProfileImageUri()" class="rounded-circle" width="30" height="30" alt="Profile"/>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-user-circle me-1"></i>
+                            }
+                            <span class="ms-1 d-none d-md-inline">@User.GetDisplayName()</span>
+                        </a>
 
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" asp-controller="Account" asp-action="AccountProfile"><i class="fa-solid fa-user-gear me-2"></i>My Account</a></li>
-                        <li><a class="dropdown-item" asp-controller="Attendance" asp-action="Summary"><i class="fa-solid fa-calendar-check me-2"></i>My Attendances</a></li>
-                        <li><a class="dropdown-item" asp-controller="Invoice" asp-action="ListInvoices"><i class="fa-solid fa-file-invoice-dollar me-2"></i>My Bills</a></li>
-                        <li><a class="dropdown-item" asp-controller="Invoice" asp-action="InvoiceHistory"><i class="fa-solid fa-history me-2"></i>Billing History</a></li>
-                        <li><a class="dropdown-item" asp-controller="Family" asp-action="Index"><i class="fa-solid fa-users me-2"></i>My Family</a></li>
-                        <li><hr class="dropdown-divider"/></li>
-                        <li>
-                            <form asp-controller="Authentication" asp-action="Logout">
-                                <button type="submit" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket me-2"></i>Sign Out</button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="AccountProfile"><i class="fa-solid fa-user-gear me-2"></i>My Account</a></li>
+                            <li><a class="dropdown-item" asp-controller="Attendance" asp-action="Summary"><i class="fa-solid fa-calendar-check me-2"></i>My Attendances</a></li>
+                            <li><a class="dropdown-item" asp-controller="Invoice" asp-action="ListInvoices"><i class="fa-solid fa-file-invoice-dollar me-2"></i>My Bills</a></li>
+                            <li><a class="dropdown-item" asp-controller="Invoice" asp-action="InvoiceHistory"><i class="fa-solid fa-history me-2"></i>Billing History</a></li>
+                            <li><a class="dropdown-item" asp-controller="Family" asp-action="Index"><i class="fa-solid fa-users me-2"></i>My Family</a></li>
+                            <li><hr class="dropdown-divider"/></li>
+                            <li>
+                                <form asp-controller="Authentication" asp-action="Logout">
+                                    <button type="submit" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket me-2"></i>Sign Out</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 }
                 else
                 {
-                <a asp-controller="Authentication" asp-action="Login" class="btn btn-primary px-3">Sign In</a>
+                    <a asp-controller="Authentication" asp-action="Login" class="btn btn-primary px-3">Sign In</a>
                 }
             </div>
         </div>
     </nav>
 </header>
+
+<!-- Marquee Section -->
+<div class="marquee-container bg-primary text-white py-2" style="overflow: hidden;">
+    <div class="marquee-content d-flex">
+        <span class="marquee-item px-4">
+            <i class="fas fa-calendar-check me-2"></i>Mid-term exams starting next week!
+        </span>
+        <span class="marquee-item px-4">
+            <i class="fas fa-book me-2"></i>New Math & Science courses now open for enrollment!
+        </span>
+        <span class="marquee-item px-4">
+            <i class="fas fa-star me-2"></i>Student of the Month: Daren Tan - Excellent improvement!
+        </span>
+        <span class="marquee-item px-4">
+            <i class="fas fa-chalkboard-teacher me-2"></i>Parent-Teacher meetings scheduled for Friday!
+        </span>
+        <span class="marquee-item px-4">
+            <i class="fas fa-graduation-cap me-2"></i>Summer program registration opens March 1st!
+        </span>
+        @* Loop 2 *@
+        <span class="marquee-item px-4">
+            <i class="fas fa-calendar-check me-2"></i>Mid-term exams starting next week!
+        </span>
+        <span class="marquee-item px-4">
+            <i class="fas fa-book me-2"></i>New Math & Science courses now open for enrollment!
+        </span>
+        <span class="marquee-item px-4">
+            <i class="fas fa-star me-2"></i>Student of the Month: Daren Tan - Excellent improvement!
+        </span>
+        <span class="marquee-item px-4">
+            <i class="fas fa-chalkboard-teacher me-2"></i>Parent-Teacher meetings scheduled for Friday!
+        </span>
+        <span class="marquee-item px-4">
+            <i class="fas fa-graduation-cap me-2"></i>Summer program registration opens March 1st!
+        </span>
+    </div>
+</div>
 
 <!-- Sidebar -->
 <aside class="sidebar">
@@ -554,6 +621,18 @@
                 closeSidebar();
             }
         });
+
+        const marqueeContent = document.querySelector('.marquee-content');
+        if (marqueeContent) {
+            // Ensure smooth restart when animation completes
+            marqueeContent.addEventListener('animationiteration', () => {
+                // Reset to start position without visible jump
+                marqueeContent.style.animation = 'none';
+                setTimeout(() => {
+                    marqueeContent.style.animation = 'marquee 30s linear infinite';
+                }, 10);
+            });
+        }
     });
 </script>
 
