@@ -1,4 +1,5 @@
-﻿@using TuitionManagementSystem.Web.Services.Auth.Constants
+﻿@using TuitionManagementSystem.Web.Models.User
+@using TuitionManagementSystem.Web.Services.Auth.Constants
 @using TuitionManagementSystem.Web.Services.Auth.Extensions
 <!DOCTYPE html>
 <html lang="en">
@@ -45,16 +46,15 @@
             <div class="d-flex align-items-center gap-2">
                 @if (User.Identity!.IsAuthenticated)
                 {
-                    <a class="btn btn-outline-secondary position-relative"
-                       hx-get="@Url.Action("GetNotifications", "Notification")"
+                    <button class="btn btn-outline-secondary position-relative"
+                       hx-get
+                       hx-controller="Notification" hx-action="GetNotifications"
                        hx-target="#notification-drawer"
-                       hx-trigger="click"
-                       hx-swap="innerHTML"
                        data-bs-toggle="dropdown"
                        aria-label="Notifications">
                         <i class="fa-solid fa-bell"></i>
                         <span id="notification-badge"></span>
-                    </a>
+                    </button>
 
                     <div id="notification-drawer" class="dropdown-menu dropdown-menu-end"></div>
 
@@ -73,10 +73,20 @@
 
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" asp-controller="Account" asp-action="AccountProfile"><i class="fa-solid fa-user-gear me-2"></i>My Account</a></li>
-                            <li><a class="dropdown-item" asp-controller="Attendance" asp-action="Summary"><i class="fa-solid fa-calendar-check me-2"></i>My Attendances</a></li>
-                            <li><a class="dropdown-item" asp-controller="Invoice" asp-action="ListInvoices"><i class="fa-solid fa-file-invoice-dollar me-2"></i>My Bills</a></li>
-                            <li><a class="dropdown-item" asp-controller="Invoice" asp-action="InvoiceHistory"><i class="fa-solid fa-history me-2"></i>Billing History</a></li>
-                            <li><a class="dropdown-item" asp-controller="Family" asp-action="Index"><i class="fa-solid fa-users me-2"></i>My Family</a></li>
+                            @if (User.GetUserType() == nameof(Teacher) || User.GetUserType() == nameof(Student))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Homework" asp-action="Index"><i class="fa-solid fa-book me-2"></i>My Classes</a></li>
+                            }
+                            @if (User.GetUserType() == nameof(Student))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Attendance" asp-action="Index"><i class="fa-solid fa-calendar-check me-2"></i>My Attendances</a></li>
+                                <li><a class="dropdown-item" asp-controller="Invoice" asp-action="ListInvoices"><i class="fa-solid fa-file-invoice-dollar me-2"></i>My Bills</a></li>
+                                <li><a class="dropdown-item" asp-controller="Invoice" asp-action="InvoiceHistory"><i class="fa-solid fa-history me-2"></i>Billing History</a></li>
+                            }
+                            @if (User.GetUserType() == nameof(Student) || User.GetUserType() == nameof(Parent))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Family" asp-action="Index"><i class="fa-solid fa-users me-2"></i>My Family</a></li>
+                            }
                             <li><hr class="dropdown-divider"/></li>
                             <li>
                                 <form asp-controller="Authentication" asp-action="Logout">
@@ -142,26 +152,26 @@
     <ul class="nav nav-pills flex-column gap-1 p-3">
         @if (User.Identity!.IsAuthenticated)
         {
-        <li class="nav-item"><a class="nav-link" asp-controller="Homework" asp-action="Index"><i class="fa-solid fa-file-lines"></i>Homework</a></li>
-        <li class="nav-item"><a class="nav-link" asp-controller="Enrollment" asp-action="ViewEnrollments"><i class="fa-solid fa-users"></i>Enrollments</a></li>
-        <li class="nav-item"><a class="nav-link" asp-controller="Attendance" asp-action="ViewSessionStudentsAttendance"><i class="fa-solid fa-calendar-check"></i>Attendance</a></li>
-        <li class="nav-item"><a class="nav-link" asp-controller="Schedule" asp-action="Index"><i class="fa-solid fa-calendar-days"></i>Schedule</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Homework" asp-action="Index"><i class="fa-solid fa-file-lines"></i>Homework</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Enrollment" asp-action="ViewEnrollments"><i class="fa-solid fa-users"></i>Enrollments</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Attendance" asp-action="Index"><i class="fa-solid fa-calendar-check"></i>Attendance</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Schedule" asp-action="Index"><i class="fa-solid fa-calendar-days"></i>Schedule</a></li>
 
-        @if (User.IsInRole(nameof(AccessRoles.Administrator)))
-        {
-        <li class="nav-item mt-4"><hr/></li>
-        <li class="nav-item text-muted fw-bold"><span class="ps-2">Admin Management</span></li>
-        <li class="nav-item"><a class="nav-link" asp-controller="Course" asp-action="Index"><i class="fa-solid fa-book"></i>Courses</a></li>
-        <li class="nav-item"><a class="nav-link" asp-controller="Teacher" asp-action="Index"><i class="fa-solid fa-chalkboard-user"></i>Teachers</a></li>
-        <li class="nav-item"><a class="nav-link" asp-controller="Parent" asp-action="Index"><i class="fa-solid fa-user-group"></i>Parents</a></li>
-        <li class="nav-item"><a class="nav-link" asp-controller="Student" asp-action="Index"><i class="fa-solid fa-user-graduate"></i>Students</a></li>
-        <li class="nav-item"><a class="nav-link" asp-controller="Subject" asp-action="Index"><i class="fa-solid fa-book-open"></i>Subjects</a></li>
-        <li class="nav-item"><a class="nav-link" asp-controller="Classroom" asp-action="Index"><i class="fa-solid fa-house-chimney"></i>Classrooms</a></li>
-        }
+            if (User.IsInRole(nameof(AccessRoles.Administrator)))
+            {
+                <li class="nav-item mt-4"><hr/></li>
+                <li class="nav-item text-muted fw-bold"><span class="ps-2">Admin Management</span></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Course" asp-action="Index"><i class="fa-solid fa-book"></i>Courses</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Teacher" asp-action="Index"><i class="fa-solid fa-chalkboard-user"></i>Teachers</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Parent" asp-action="Index"><i class="fa-solid fa-user-group"></i>Parents</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Student" asp-action="Index"><i class="fa-solid fa-user-graduate"></i>Students</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Subject" asp-action="Index"><i class="fa-solid fa-book-open"></i>Subjects</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Classroom" asp-action="Index"><i class="fa-solid fa-house-chimney"></i>Classrooms</a></li>
+            }
         }
         else
         {
-        <li class="nav-item"><a class="nav-link" asp-controller="Authentication" asp-action="Login"><i class="fa-solid fa-right-to-bracket"></i>Sign In</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Authentication" asp-action="Login"><i class="fa-solid fa-right-to-bracket"></i>Sign In</a></li>
         }
     </ul>
 </aside>

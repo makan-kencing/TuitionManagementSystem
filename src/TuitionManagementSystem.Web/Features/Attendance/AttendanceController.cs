@@ -20,7 +20,7 @@ public class AttendanceController(IMediator mediator) : Controller
 {
     [HttpGet]
     [Route("~/[controller]s")]
-    public async Task<IActionResult> Summary(CancellationToken cancellationToken)
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetAttendanceSummaryRequest(this.User.GetUserId()), cancellationToken);
         if (result.IsNotFound())
@@ -28,7 +28,7 @@ public class AttendanceController(IMediator mediator) : Controller
             return this.NotFound();
         }
 
-        return this.View(result.Value);
+        return this.View("Summary", result.Value);
     }
 
     [HttpGet]
