@@ -1,38 +1,50 @@
-﻿@model TuitionManagementSystem.Web.Features.File.UploadFiles.UploadFilesResponse
+﻿<div class="container">
+    @foreach (var file in Model)
+    {
+        <div class="row mb-3">
+            <div class="col-12">
+                <a id="file-block-@(file.Id)" href="@file.MappedPath"
+                   class="card d-flex flex-row align-items-center p-2"
+                   target="_blank"
+                   style="text-decoration: none;">
 
-@foreach (var file in Model)
-{
-    <a id="file-block-@(file.Id)" href="@file.MappedPath" class="card d-flex"  target="_blank">
-        <input type="hidden" name="fileIds" value="@file.Id"/>
+                    <input type="hidden" name="fileIds" value="@file.Id"/>
 
-        @if (file.MimeType.StartsWith("image"))
-        {
-            <img src="@file.MappedPath" alt="">
+                    @if (file.MimeType.StartsWith("image"))
+                    {
+                        <img src="@file.MappedPath" alt="Image"
+                             class="img-thumbnail me-3"
+                             style="width: 80px; height: auto;" />
 
-            <div class="card-body">
-                <h5 class="card-title">@file.Filename</h5>
-                <small class="card-subtitle">Image</small>
+                        <div class="card-body p-0">
+                            <h5 class="card-title mb-1">@file.Filename</h5>
+                            <small class="card-subtitle text-muted">Image</small>
+                        </div>
+                    }
+                    else if (file.MimeType.StartsWith("text"))
+                    {
+                        <div class="card-body p-0">
+                            <h5 class="card-title mb-1">@file.Filename</h5>
+                            <small class="card-subtitle text-muted">Text</small>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card-body p-0">
+                            <h5 class="card-title mb-1">@file.Filename</h5>
+                            <small class="card-subtitle text-muted">File</small>
+                        </div>
+                    }
+
+                    <button hx-delete
+                            hx-controller="File"
+                            hx-action="DeleteFile"
+                            hx-route-id="@file.Id"
+                            type="button"
+                            class="btn-close ms-auto"
+                            aria-label="Remove"></button>
+                </a>
             </div>
-        }
-        else if (file.MimeType.StartsWith("text"))
-        {
-            <div class="card-body">
-                <h5 class="card-title">@file.Filename</h5>
-                <small class="card-subtitle">Text</small>
-            </div>
-        }
-        else
-        {
-            <div class="card-body">
-                <h5 class="card-title">@file.Filename</h5>
-                <small class="card-subtitle">File</small>
-            </div>
-        }
-
-        <button hx-delete
-                hx-controller="File"
-                hx-action="DeleteFile"
-                hx-route-id="@file.Id"
-                type="button" class="btn-close" aria-label="Remove"></button>
-    </a>
-}
+        </div>
+    }
+</div>
