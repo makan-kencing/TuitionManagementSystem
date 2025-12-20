@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"] - Horizon Tuition Center</title>
 
+    <script type="importmap"></script>
+
     <!-- CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet"
@@ -602,6 +604,17 @@
         @RenderBody()
     </div>
 </main>
+
+<div id="modal" class="modal modal-blur fade"
+     aria-hidden="false"
+     tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content"></div>
+    </div>
+</div>
+
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3">
+</div>
 
 <footer class="border-top">
     <div class="container">&copy; 2025 - Horizon Tuition Center</div>
