@@ -12,6 +12,10 @@ public class AccountProfileViewModel
     [Remote("CheckUsernameUnique", "AccountsApi", ErrorMessage = "Username is taken")]
     public required string Username { get; set; }
 
+    [DisplayName("Display Name")]
+    [StringLength(50)]
+    public string? DisplayName { get; set; }
+
     [DisplayName("Email")]
     [EmailAddress]
     [Remote("CheckEmailUnique", "AccountsApi", ErrorMessage = "Email is taken")]
