@@ -32,7 +32,7 @@
                     }
                     @foreach (var session in course.Sessions)
                     {
-                        <a href="@Url.Action("CourseSessionListing", "Attendance", new { sessionId = session.Id })">
+                        <a asp-controller="Attendance" asp-action="CourseSessionListing" asp-route-id="@session.Id">
                             <div class="list-group mt-3">
 
                                 <div class="list-group-item d-flex justify-content-between">
