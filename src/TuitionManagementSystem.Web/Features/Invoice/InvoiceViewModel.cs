@@ -7,6 +7,7 @@ namespace TuitionManagementSystem.Web.Models.ViewModels
     {
         public int InvoiceId { get; set; }
         public int StudentId { get; set; }
+        public int? PaymentId { get; set; }
         public string StudentName { get; set; } = string.Empty;
         public int EnrollmentId { get; set; }
         public string CourseName { get; set; } = string.Empty;
@@ -14,7 +15,6 @@ namespace TuitionManagementSystem.Web.Models.ViewModels
         public decimal Amount { get; set; }
         public DateTime InvoicedAt { get; set; }
         public DateTime? DueAt { get; set; }
-
         public DateTime? CancelledAt { get; set; }
         public InvoiceStatus Status { get; set; }
         public bool IsOverdue { get; set; }

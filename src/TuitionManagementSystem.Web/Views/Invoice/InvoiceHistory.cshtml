@@ -119,6 +119,12 @@
                                             <p class="mb-1 small text-muted">Cancelled At</p>
                                             <p class="mb-1 text-secondary">@invoice.CancelledAt.Value.ToString("MMM dd, yyyy")</p>
                                         }
+                                        else if (invoice.Status == InvoiceStatus.Paid)
+                                        {
+                                            <a asp-controller="Payment" asp-action="ViewPaymentDetails" asp-route-paymentId="@invoice.PaymentId" class="btn btn-sm btn-outline-primary">
+                                                View Payment Details
+                                            </a>
+                                        }
                                         else if (invoice.Status != InvoiceStatus.Paid)
                                         {
                                             <p class="mb-1 small text-muted">Due</p>

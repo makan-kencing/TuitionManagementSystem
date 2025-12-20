@@ -161,6 +161,7 @@ public class InvoiceController : Controller
             {
                 InvoiceId = invoice.Id,
                 StudentId = invoice.Student?.Id ?? 0,
+                PaymentId = invoice.PaymentId,
                 StudentName = invoice.Student?.Account?.Username ?? "N/A",
                 EnrollmentId = invoice.Enrollment?.Id ?? 0,
                 SubjectName = invoice.Enrollment?.Course?.Subject?.Name ?? "N/A",
