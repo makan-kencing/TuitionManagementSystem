@@ -11,38 +11,16 @@
                 Summary
             </a>
         </div>
-
     </nav>
-    <form id="take" asp-controller="AttendanceApi" asp-action="TakeAttendanceCode">
+
+    <form hx-post hx-controller="Attendance" hx-action="TakeAttendanceHtmx" hx-target="#modal">
         <div class="mb-3 mt-3">
-            <label for="code" class="form-label">AttendanceCode:</label>
+            <label for="code" class="form-label">Attendance Code:</label>
             <input type="text" class="form-control" id="code" placeholder="Enter Attendance Code" name="code">
         </div>
-        <button type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+
+        <button type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">
             Take Attendance
         </button>
     </form>
 </div>
-
-
-<div class="modal" id="myModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h4 class="modal-title"></h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-                No Enter Code
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-            </div>
-
-        </div>
-    </div>
-</div>
-

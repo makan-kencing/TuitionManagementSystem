@@ -6,9 +6,18 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Models.Class;
 
+public static class TakeAttendanceValidationError
+{
+    public const string NotFound = "Code not found.";
+    public const string NotEnrolled = "Cannot take attendance for class not enrolled.";
+    public const string OutsideOfTime = "Cannot take attendance outside of class time.";
+    public const string Duplicated = "Attendance is already taken";
+}
+
 public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db, IHttpContextAccessor httpContextAccessor)
     : IRequestHandler<TakeAttendanceCodeRequest, Result<TakeAttendanceCodeResponse>>
 {
+
     public async Task<Result<TakeAttendanceCodeResponse>> Handle(TakeAttendanceCodeRequest request,
         CancellationToken cancellationToken)
     {
@@ -19,7 +28,7 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db, IHttpCont
 
         if (attendanceCode?.Session is null)
         {
-            return Result.NotFound("Code not found.");
+            return Result.NotFound(TakeAttendanceValidationError.NotFound);
         }
 
         var session = attendanceCode.Session;
@@ -31,14 +40,14 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db, IHttpCont
 
         if (!isEnrolled)
         {
-            return Result.Forbidden("Cannot take attendance for class not enrolled.");
+            return Result.Forbidden(TakeAttendanceValidationError.NotEnrolled);
         }
 
         var withinTime = DateTime.UtcNow >= session.StartAt && DateTime.UtcNow <= session.EndAt;
 
         if (!withinTime)
         {
-            return Result.Forbidden("Cannot take attendance outside of class time.");
+            return Result.Forbidden(TakeAttendanceValidationError.OutsideOfTime);
         }
 
         var existingAttendance = await db.Attendances
@@ -48,7 +57,7 @@ public class TakeAttendanceCodeRequestHandler(ApplicationDbContext db, IHttpCont
 
         if (existingAttendance)
         {
-            return Result.Conflict("Attendance is already taken");
+            return Result.Conflict(TakeAttendanceValidationError.Duplicated);
         }
 
         var attendance = new Attendance { Session = session, StudentId = request.UserId, TakenOn = DateTime.UtcNow };

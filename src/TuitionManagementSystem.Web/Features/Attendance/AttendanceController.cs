@@ -6,6 +6,7 @@ using AttendanceSummary;
 using DeleteAttendance;
 using GenerateAttendanceCode;
 using GetAttendanceCode;
+using Htmx;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -56,19 +57,11 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
     [HttpGet]
     public IActionResult TakeAttendance() => this.View();
 
-    // public IActionResult GenerateAttendance() => this.View();
-
     [HttpGet]
     [Authorize(Policy = "TeacherOnly")]
     public async Task<IActionResult> GenerateAttendance(CancellationToken cancellationToken)
     {
-        var userId = this.User.GetUserId();
-        if (userId == -1)
-        {
-            return this.Unauthorized();
-        }
-
-        var result = await mediator.Send(new GetTeacherDailySessionListRequest(userId!), cancellationToken);
+        var result = await mediator.Send(new GetTeacherDailySessionListRequest(this.User.GetUserId()), cancellationToken);
         if (result.IsNotFound())
         {
             return this.NotFound();
@@ -115,10 +108,52 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
     }
 
     [HttpPost]
+    [Route("")]
+    public async Task<IActionResult> TakeAttendanceHtmx([FromForm] string code)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        var result = await mediator.Send(new TakeAttendanceCodeRequest(this.User.GetUserId(), code));
+        if (result.IsNotFound())
+        {
+            return this.PartialView("TakeAttendance/_CodeNotFoundModal");
+        }
+
+        if (result.IsForbidden())
+        {
+            foreach (var error in result.ValidationErrors)
+            {
+                switch (error.ErrorMessage)
+                {
+                    case TakeAttendanceValidationError.NotEnrolled:
+                        return this.PartialView("TakeAttendance/_NotEnrolledModal");
+                    case TakeAttendanceValidationError.OutsideOfTime:
+                        return this.PartialView("TakeAttendance/_OutsideClassTimeModal");
+                }
+            }
+        }
+
+        if (result.IsConflict())
+        {
+            return this.PartialView("TakeAttendance/_DuplicateAttendanceModal");
+        }
+
+        return this.PartialView("TakeAttendance/_AttendanceSuccessModal");
+    }
+
+    [HttpPost]
     [Route("~/[controller]/session/{sessionId:int:required}/student{studentId:int:required}")]
     [Authorize(Policy = "TeacherOnly")]
     public async Task<IActionResult> MarkStudentAttended(int sessionId, int studentId, CancellationToken cancellationToken)
     {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
         var code = await mediator.Send(new GetAttendanceCodeQuery(sessionId), cancellationToken);
         if (code.IsError())
         {
@@ -140,6 +175,11 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
     [Authorize(Policy = "TeacherOnly")]
     public async Task<IActionResult> RemoveStudentAttendance(int id, CancellationToken cancellationToken)
     {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
         var deleteAttendance =
             await mediator.Send(new DeleteAttendanceRequest(id), cancellationToken);
         if (deleteAttendance.IsError())
