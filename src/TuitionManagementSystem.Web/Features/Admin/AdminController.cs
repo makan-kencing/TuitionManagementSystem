@@ -42,7 +42,9 @@ public class AdminController(ApplicationDbContext db,  IFileService fileService,
             Username = account.Username,
             DisplayName = account.DisplayName,
             Email = account.Email,
-            ProfileImageUrl = account.ProfileImage?.Uri
+            ProfileImageUrl = account.ProfileImage != null
+                ? account.ProfileImage.Uri
+                : "/assets/uploads/DefaultProfile.png"
         };
 
         return View(model);
