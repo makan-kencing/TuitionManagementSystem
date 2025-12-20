@@ -400,17 +400,16 @@ Layout = "_Layout";
                                         </div>
                                     </div>` : ''}
 
-                                    ${c.scheduleTime && c.scheduleTime !== "Schedule not set" ? `
                                     <div class="course-detail-item">
                                         <i class="fas fa-clock"></i>
                                         <div>
                                             <strong>Class Time:</strong>
                                             ${c.scheduleDay ? `<span class="badge bg-info me-2">${c.scheduleDay}</span>` : ''}
                                             <span class="schedule-badge">
-                                                <i class="fas fa-clock"></i> ${c.scheduleTime}
+                                                <i class="fas fa-clock"></i> ${c.scheduleTime ? c.scheduleTime : 'Schedule Not Set'}
                                             </span>
                                         </div>
-                                    </div>` : ''}
+                                    </div>
 
                                     ${c.classroomLocation && c.classroomLocation !== "Not assigned" ? `
                                     <div class="course-detail-item">

@@ -13,7 +13,7 @@ using TuitionManagementSystem.Web.Features.Subject;
 using TuitionManagementSystem.Web.ViewModels.Course;
 
 [Route("courses")]
-[Authorize (Roles = "Administrator")]
+[Authorize(Roles = "Administrator")]
 public class CourseController(IMediator mediator, ApplicationDbContext db) : Controller
 {
     private readonly ApplicationDbContext _db = db;
@@ -72,8 +72,6 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
 
 
         return RedirectToAction("Details", new { id = created.Id });
-
-
     }
 
     [HttpGet("{id:int}/edit")]
@@ -119,7 +117,6 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
         if (!ok) return NotFound();
 
         return RedirectToAction("Details", new { id = vm.Id });
-
     }
 
     [HttpPost("{id:int}/delete")]
@@ -173,11 +170,63 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
 
     // Optional: keep as API, but fix route + parameter usage
     [HttpGet("api/by-subject/{subjectId:int}")]
-    public async Task<IActionResult> GetCoursesBySubject(int subjectId, CancellationToken ct)
+    [AllowAnonymous]
+    public async Task<IActionResult> GetCoursesBySubject(int subjectId,
+        CancellationToken ct,
+        [FromQuery] bool withDetails = false)
     {
         var courses = await mediator.Send(new GetCourses(), ct);
-        return Ok(courses
-            .Where(c => c.SubjectId == subjectId)
-            .Select(c => new { c.Id, c.Name, c.Description, c.Price }));
+        var filteredCourses = courses.Where(c => c.SubjectId == subjectId).ToList();
+
+        if (!withDetails)
+        {
+            return Ok(filteredCourses
+                .Select(c => new { c.Id, c.Name, c.Description, c.Price }));
+        }
+
+        var coursesWithDetails = new List<object>();
+
+        foreach (var course in filteredCourses)
+        {
+            var teacher = await _db.CourseTeachers
+                .Include(ct => ct.Teacher)
+                .ThenInclude(t => t.Account)
+                .FirstOrDefaultAsync(ct => ct.CourseId == course.Id);
+
+            var schedule = await _db.Schedules
+                .FirstOrDefaultAsync(s => s.CourseId == course.Id);
+
+            var currentCapacity = await _db.Enrollments
+                .CountAsync(e => e.CourseId == course.Id && e.Status == Enrollment.EnrollmentStatus.Active);
+
+            var classroom = await _db.Classrooms
+                .FirstOrDefaultAsync(c => c.Id == course.PreferredClassroomId);
+            var maxCapacity = classroom?.MaxCapacity ?? 0;
+
+            coursesWithDetails.Add(new
+            {
+                course.Id,
+                course.Name,
+                course.Description,
+                course.Price,
+                TeacherName = teacher?.Teacher?.Account?.DisplayName ??
+                              (teacher?.Teacher != null ? $"{teacher.Teacher.Account?.DisplayName}" : "Not Assigned"),
+                ScheduleTime = schedule != null
+                    ? $"{schedule.Start:hh:mm tt} - {schedule.End:hh:mm tt}"
+                    : "Schedule not set",
+                ScheduleDay = schedule?.Start.ToString("ddd") ?? "",
+                ClassroomLocation = classroom?.Location ?? "Not assigned",
+                CurrentCapacity = currentCapacity,
+                MaxCapacity = maxCapacity,
+                StudentCount = currentCapacity,
+                CapacityPercentage = maxCapacity > 0 ? Math.Round((currentCapacity * 100.0) / maxCapacity, 1) : 0,
+                IsFull = maxCapacity > 0 && currentCapacity >= maxCapacity,
+                AvailableSpots = Math.Max(0, maxCapacity - currentCapacity)
+            });
+        }
+
+        coursesWithDetails = coursesWithDetails.OrderByDescending(c => ((dynamic)c).StudentCount).ToList();
+
+        return Ok(coursesWithDetails);
     }
 }

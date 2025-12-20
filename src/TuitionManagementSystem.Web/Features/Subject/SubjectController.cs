@@ -130,6 +130,7 @@ public class SubjectController(IMediator mediator, ApplicationDbContext db) : Co
     }
 
     [HttpGet("api")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetSubjectsApi([FromQuery] bool withStats = false)
     {
         var subjects = await mediator.Send(new GetSubjects());
