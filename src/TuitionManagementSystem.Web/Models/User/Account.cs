@@ -1,6 +1,7 @@
 namespace TuitionManagementSystem.Web.Models.User;
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Services.Auth.Constants;
 
@@ -36,4 +37,6 @@ public class Account
     public User? User { get; set; }
 
     public ICollection<AccountSession> Sessions { get; set; } = [];
+
+    [NotMapped] public string Name => this.DisplayName ?? this.Username;
 }
