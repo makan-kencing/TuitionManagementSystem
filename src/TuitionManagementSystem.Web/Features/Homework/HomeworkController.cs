@@ -8,6 +8,7 @@ using Htmx;
 using Infrastructure.Persistence;
 using MakeAnnouncement;
 using MakeSubmission;
+using MarkHomework;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,7 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
             return this.NotFound();
         }
 
-        return this.View("HomeworkMenu",result.Value);
+        return this.View("HomeworkMenu", result.Value);
     }
 
     public async Task<IActionResult> HomeworkManageMenu(CancellationToken cancellationToken)
@@ -51,7 +52,7 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
             return this.NotFound();
         }
 
-        return this.View("HomeworkManageMenu",result.Value);
+        return this.View("HomeworkManageMenu", result.Value);
     }
 
     [HttpGet]
@@ -86,15 +87,17 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         {
             return this.NotFound();
         }
+
         var userId = this.User.GetUserId();
         if (userId == -1)
         {
             return this.Unauthorized();
         }
-        var response = await mediator.Send(new MakeSubmissionRequest(model.AssignmentId, userId,model.FileIds,model.Content));
+
+        var response =
+            await mediator.Send(new MakeSubmissionRequest(model.AssignmentId, userId, model.FileIds, model.Content));
         return this.PartialView("_SubmissionSuccess", model);
     }
-
 
 
     [HttpPost]
@@ -106,12 +109,15 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         {
             return this.NotFound();
         }
+
         var userId = this.User.GetUserId();
         if (userId == -1)
         {
             return this.Unauthorized();
         }
-        var response = await mediator.Send(new MakeAnnouncementInfoRequest(model.CourseId,userId,model.FileIds,model.Title,model.Description,model.DueAt));
+
+        var response = await mediator.Send(new MakeAnnouncementInfoRequest(model.CourseId, userId, model.FileIds,
+            model.Title, model.Description, model.DueAt));
         return this.PartialView("_MakeAnnouncementSuccess", model);
     }
 
@@ -122,38 +128,66 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         {
             return this.NotFound();
         }
+
         var response = await mediator.Send(new GetSubmissionFileRequest(id), cancellationToken);
-        return this.PartialView("_MarkHomeWorkModel", response.Value);
+        var value = response.Value;
+
+        return this.PartialView("_MarkHomeWorkModel",
+            new MarkHomeworkViewModel
+            {
+                Student = new HomeworkStudentInfo { Name = value.Name },
+                Submission = new HomeworkSubmissionInfo { Id = value.Id, Content = null },
+                SubmissionFiles = value.SubmissionFiles
+            });
+    }
+
+    [HttpPut]
+    [Route("~/[controller]/{id:int:required}/mark")]
+    public async Task<IActionResult> MarkHomework(int id, int grade, CancellationToken cancellationToken)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        await mediator.Send(new MarkHomeworkRequest(id, grade), cancellationToken);
+
+        this.Response.Htmx(h => h.Refresh());
+        return this.Ok();
     }
 
     [Authorize(Policy = "TeacherOnly")]
-    public async Task<IActionResult> TeacherHomeworkDashboard(int courseId,CancellationToken cancellationToken)
+    public async Task<IActionResult> TeacherHomeworkDashboard(int courseId, CancellationToken cancellationToken)
     {
         var userId = this.User.GetUserId();
         if (userId == -1)
         {
             return this.Unauthorized();
         }
-        var response = await mediator.Send(new GetAnnouncementInfoRequest(courseId),cancellationToken);
+
+        var response = await mediator.Send(new GetAnnouncementInfoRequest(courseId), cancellationToken);
         if (response.IsNotFound())
         {
             return this.NotFound();
         }
+
         return this.View(response.Value);
     }
 
-    public async Task<IActionResult> StudentHomeworkDashboard(int courseId,CancellationToken cancellationToken)
+    public async Task<IActionResult> StudentHomeworkDashboard(int courseId, CancellationToken cancellationToken)
     {
         var userId = this.User.GetUserId();
         if (userId == -1)
         {
             return this.Unauthorized();
         }
-        var response = await mediator.Send(new GetAnnouncementInfoRequest(courseId),cancellationToken);
+
+        var response = await mediator.Send(new GetAnnouncementInfoRequest(courseId), cancellationToken);
         if (response.IsNotFound())
         {
             return this.NotFound();
         }
+
         return this.View(response.Value);
     }
 
@@ -180,28 +214,25 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
     [Authorize(Policy = "TeacherOnly")]
     public async Task<IActionResult> SubmissionList(int courseId, CancellationToken cancellationToken)
     {
-        var response = await mediator.Send(new GetAnnouncementInfoRequest(courseId),cancellationToken);
+        var response = await mediator.Send(new GetAnnouncementInfoRequest(courseId), cancellationToken);
         if (response.IsNotFound())
         {
             return this.NotFound();
         }
+
         return this.View(response.Value);
     }
 
     // public IActionResult AssignmentDetail()=>this.View();
     [Authorize(Policy = "TeacherOnly")]
-     public async Task<IActionResult> GetAssignmentDetail(int assignmentId, CancellationToken cancellationToken)
-     {
-         var response = await mediator.Send(new GetAssignmentDetailsQuery(assignmentId),cancellationToken);
-         if (response.IsNotFound())
-         {
-             return this.NotFound();
-         }
-         return this.View(response.Value);
+    public async Task<IActionResult> GetAssignmentDetail(int assignmentId, CancellationToken cancellationToken)
+    {
+        var response = await mediator.Send(new GetAssignmentDetailsQuery(assignmentId), cancellationToken);
+        if (response.IsNotFound())
+        {
+            return this.NotFound();
+        }
+
+        return this.View(response.Value);
     }
-
-
-
-
-
 }
