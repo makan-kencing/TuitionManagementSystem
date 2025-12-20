@@ -1,59 +1,80 @@
 @model IEnumerable<TuitionManagementSystem.Web.Features.Subject.SubjectResponse>
 @{
-    ViewData["Title"] = "Subjects";
+  ViewData["Title"] = "Subjects";
 }
 
 <h2>Subjects</h2>
-<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">Create Subject</button>
+<div class="d-flex align-items-center mb-3 gap-2">
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">Create Subject</button>
+  <form method="get" asp-action="Index" class="d-inline align-items-center">
+    <div class="form-check form-switch">
+      @{
+        var showArchivedOnly = ViewData["ShowArchivedOnly"] as bool? ?? false;
+      }
+      <input class="form-check-input" type="checkbox" id="toggleArchivedOnly" name="showArchivedOnly" value="true" @(showArchivedOnly ? "checked" : "") onchange="this.form.submit()">
+      <label class="form-check-label" for="toggleArchivedOnly">Show archived only</label>
+    </div>
+  </form>
+</div>
 
 <table class="table table-striped mt-3">
     <thead>
         <tr>
             <th>Name</th>
             <th>Description</th>
+      <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-    @foreach (var s in Model)
-    {
-        <tr>
-            <td>@s.Name</td>
-            <td>@s.Description</td>
-            <td>
-                <button class="btn btn-sm btn-outline-secondary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editModal"
-                        data-id="@s.Id"
-                        data-name="@s.Name"
-                        data-description="@s.Description">
-                    Edit
-                </button>
-                <button class="btn btn-sm btn-outline-warning"
-                        data-bs-toggle="modal"
-                        data-bs-target="#archiveModal"
-                        data-id="@s.Id"
-                        data-name="@s.Name">
-                    Archive
-                </button>
-                <button class="btn btn-sm btn-outline-danger"
-                        data-bs-toggle="modal"
-                        data-bs-target="#deleteModal"
-                        data-id="@s.Id"
-                        data-name="@s.Name">
-                    Delete
+    @{
+      var showArchivedOnly = ViewData["ShowArchivedOnly"] as bool? ?? false;
+      var filteredSubjects = showArchivedOnly
+        ? Model.Where(s => s.IsArchived)
+        : Model.Where(s => !s.IsArchived);
+    }
 
-                </button>
-            </td>
-            <td>
-            @if (s.DeletedAt != null) {
-                <form method="post" asp-action="Restore" asp-route-id="@s.Id" class="d-inline">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-sm btn-outline-warning">Restore</button>
-                </form>
-            }
-            </td>
-        </tr>
+    @foreach (var s in filteredSubjects)
+    {
+      <tr class="@(s.IsArchived ? "table-secondary" : "")">
+        <td>@s.Name</td>
+        <td>@s.Description</td>
+        <td>@(s.IsArchived ? "Archived" : "Active")</td>
+        <td>
+          @if (!s.IsArchived)
+          {
+            <button class="btn btn-sm btn-outline-secondary"
+                data-bs-toggle="modal"
+                data-bs-target="#editModal"
+                data-id="@s.Id"
+                data-name="@s.Name"
+                data-description="@s.Description">
+              Edit
+            </button>
+            <button class="btn btn-sm btn-outline-warning"
+                data-bs-toggle="modal"
+                data-bs-target="#archiveModal"
+                data-id="@s.Id"
+                data-name="@s.Name">
+              Archive
+            </button>
+            <button class="btn btn-sm btn-outline-danger"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteModal"
+                data-id="@s.Id"
+                data-name="@s.Name">
+              Delete
+            </button>
+          }
+          else
+          {
+            <form method="post" asp-action="Restore" asp-route-id="@s.Id" asp-route-showArchivedOnly="@showArchivedOnly" class="d-inline">
+              @Html.AntiForgeryToken()
+              <button type="submit" class="btn btn-sm btn-outline-warning">Restore</button>
+            </form>
+          }
+        </td>
+      </tr>
     }
     </tbody>
 </table>
@@ -115,7 +136,8 @@
 <!-- Archive Modal -->
 <div class="modal fade" id="archiveModal" tabindex="-1">
   <div class="modal-dialog">
-    <form method="post" asp-action="Archive">
+    <form method="post">
+      @Html.AntiForgeryToken()
       <div class="modal-content">
         <div class="modal-header"><h5 class="modal-title">Archive Subject</h5></div>
         <div class="modal-body">
@@ -135,12 +157,13 @@
 <!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
   <div class="modal-dialog">
-    <form method="post" asp-action="DeleteConfirmed">
+    <form method="post">
+      @Html.AntiForgeryToken()
       <div class="modal-content">
-        <div class="modal-header"><h5 class="modal-title">Delete Subject</h5></div>
+        <div class="modal-header"><h5 class="modal-title">Delete Subject (Archive)</h5></div>
         <div class="modal-body">
           <input type="hidden" name="Id" />
-          <p>Delete <strong id="deleteName"></strong> permanently?</p>
+          <p>Delete <strong id="deleteName"></strong>? This will archive the subject.</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -154,6 +177,8 @@
 @section Scripts {
 <script>
 (() => {
+  const showArchivedOnly = "@((ViewData["ShowArchivedOnly"] as bool? ?? false) ? "true" : "false")";
+
   const editModal = document.getElementById('editModal');
   editModal.addEventListener('show.bs.modal', e => {
     const btn = e.relatedTarget;
@@ -167,8 +192,10 @@
   const archiveModal = document.getElementById('archiveModal');
   archiveModal.addEventListener('show.bs.modal', e => {
     const btn = e.relatedTarget;
-    archiveModal.querySelector('input[name="Id"]').value = btn.dataset.id;
+    const id = btn.dataset.id;
+    archiveModal.querySelector('input[name="Id"]').value = id;
     archiveModal.querySelector('#archiveName').textContent = btn.dataset.name;
+    archiveModal.querySelector('form').action = `/subjects/${id}/archive?showArchivedOnly=${showArchivedOnly}`;
   });
 
   const deleteModal = document.getElementById('deleteModal');
@@ -177,7 +204,7 @@
     const id = btn.dataset.id;
     deleteModal.querySelector('input[name="Id"]').value = btn.dataset.id;
     deleteModal.querySelector('#deleteName').textContent = btn.dataset.name;
-    deleteModal.querySelector('form').action = `/subjects/${id}/delete`;
+    deleteModal.querySelector('form').action = `/subjects/${id}/delete?showArchivedOnly=${showArchivedOnly}`;
   });
 })();
 </script>

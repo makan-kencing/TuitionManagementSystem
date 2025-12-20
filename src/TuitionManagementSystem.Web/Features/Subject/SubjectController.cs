@@ -4,6 +4,7 @@ namespace TuitionManagementSystem.Web.Features.Subject;
 
 using Infrastructure.Persistence;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Class;
@@ -11,14 +12,16 @@ using TuitionManagementSystem.Web.ViewModels.Subject;
 
 
 [Route("subjects")]
+[Authorize(Roles = "Administrator")]
 public class SubjectController(IMediator mediator, ApplicationDbContext db) : Controller
 {
     private readonly ApplicationDbContext _db = db;
     // GET ALL SUBJECTS
     [HttpGet("")]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index([FromQuery] bool showArchivedOnly = false)
     {
-        var subjects = await mediator.Send(new GetSubjects());
+        ViewData["ShowArchivedOnly"] = showArchivedOnly;
+        var subjects = await mediator.Send(new GetSubjects(IncludeArchived: true)); // get all, filter in view
         return View("SubjectIndex", subjects);
     }
 
@@ -41,16 +44,23 @@ public class SubjectController(IMediator mediator, ApplicationDbContext db) : Co
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(SubjectFormVm subject)
     {
-        // check for archived duplicate
-        var archived = await db.Subjects
+        subject.Name = subject.Name?.Trim() ?? string.Empty;
+
+        var existing = await db.Subjects
+            .IgnoreQueryFilters()
             .AsNoTracking()
-            .FirstOrDefaultAsync(s => s.Name == subject.Name && s.DeletedAt != null);
+            .FirstOrDefaultAsync(s => s.Name == subject.Name);
 
-
-        if (archived != null)
+        if (existing is not null && existing.DeletedAt != null)
         {
-            return View("SubjectArchive", archived);
+            return View("SubjectRestore", existing);
         }
+
+        if (existing is not null)
+        {
+            ModelState.AddModelError(nameof(subject.Name), "A subject with this name already exists.");
+        }
+
         if (!ModelState.IsValid) return View("SubjectCreate", subject);
 
         var created = await mediator.Send(new CreateSubject(subject.Name, subject.Description));
@@ -87,23 +97,36 @@ public class SubjectController(IMediator mediator, ApplicationDbContext db) : Co
     // ARCHIVE (soft delete)
     [HttpPost("{id:int}/archive")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Archive(int id)
+    public async Task<IActionResult> Archive(int id, [FromQuery] bool showArchivedOnly = false)
     {
         var ok = await mediator.Send(new ArchiveSubject(id));
         if (!ok) return NotFound();
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index), new { showArchivedOnly });
     }
 
     // RESTORE (soft delete)
     [HttpPost("{id:int}/restore")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Restore(int id)
+    public async Task<IActionResult> Restore(int id, [FromQuery] bool showArchivedOnly = false)
     {
-        var subject = await _db.Subjects.FirstOrDefaultAsync(s => s.Id == id);
-        if (subject is null) return NotFound();
-        subject.DeletedAt = null;
+        var ok = await mediator.Send(new RestoreSubject(id));
+        if (!ok) return NotFound();
+        return RedirectToAction(nameof(Index), new { showArchivedOnly });
+    }
+
+    [HttpPost("{id:int}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id, [FromQuery] bool showArchivedOnly = false)
+    {
+        var entity = await _db.Subjects
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (entity is null) return NotFound();
+
+        _db.Subjects.Remove(entity);
         await _db.SaveChangesAsync();
-        return RedirectToAction(nameof(GetSubject), new { id });
+        return RedirectToAction(nameof(Index), new { showArchivedOnly });
     }
 
     [HttpGet("api")]

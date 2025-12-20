@@ -6,8 +6,7 @@ var userType = User.FindFirst(TuitionManagementSystem.Web.Services.Auth.Constant
 var userIdRaw = User.FindFirst(TuitionManagementSystem.Web.Services.Auth.Constants.InternalClaimTypes.UserId)?.Value;
 var hasUserId = int.TryParse(userIdRaw, out var currentUserId);
 
-// Defaults come from the controller (e.g., calendar/course/{id}).
-// For Teacher/Student, enforce "self" if we can resolve the ID from claims.
+
 var effectiveCourseId = Model.CourseId;
 int? effectiveTeacherId = Model.TeacherId;
 int? effectiveStudentId = Model.StudentId;

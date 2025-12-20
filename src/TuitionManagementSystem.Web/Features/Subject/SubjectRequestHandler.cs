@@ -43,8 +43,9 @@ public class SubjectRequestHandler(ApplicationDbContext db) :
 
     public async Task<bool> Handle(RestoreSubject request, CancellationToken ct)
     {
-        var entity = await db.Subjects.FirstOrDefaultAsync(x => x.Id == request.Id, ct);
-        if (entity is null) return false;
+        var entity = await db.Subjects
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(x => x.Id == request.Id, ct);        if (entity is null) return false;
         entity.DeletedAt = null;
         await db.SaveChangesAsync(ct);
         return true;
@@ -52,9 +53,13 @@ public class SubjectRequestHandler(ApplicationDbContext db) :
 
     public async Task<IEnumerable<SubjectResponse>> Handle(GetSubjects request, CancellationToken ct)
     {
-        var entities = await db.Subjects
-            .AsNoTracking()
-            .ToListAsync(ct);
+        var query = db.Subjects.AsNoTracking();
+
+        if (request.IncludeArchived)
+        {
+            query = query.IgnoreQueryFilters();
+        }
+        var entities = await query.ToListAsync(ct);
 
         return entities.Select(SubjectResponse.FromEntity);
     }

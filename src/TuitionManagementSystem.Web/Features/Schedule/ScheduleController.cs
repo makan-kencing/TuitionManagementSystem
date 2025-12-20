@@ -3,19 +3,18 @@ namespace TuitionManagementSystem.Web.Features.Schedule;
 using System.Globalization;
 using Course;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using TuitionManagementSystem.Web.Features.Course;
 using TuitionManagementSystem.Web.ViewModels.Schedule;
-using ViewModels.Schedule;
 
 
 [Route("schedules")]
 public sealed class ScheduleController(IMediator mediator) : Controller
 {
     [HttpGet("")]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> Index(int? year, int? month, int? CourseId)
     {
         var now = DateTime.Now;
@@ -41,6 +40,7 @@ public sealed class ScheduleController(IMediator mediator) : Controller
     }
 
     [HttpGet("create")]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> Create()
     {
         await LoadCourses(null);
@@ -49,6 +49,7 @@ public sealed class ScheduleController(IMediator mediator) : Controller
     }
 
     [HttpPost("create")]
+    [Authorize(Roles = "Administrator")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ScheduleFormVm vm)
     {
@@ -102,6 +103,7 @@ public sealed class ScheduleController(IMediator mediator) : Controller
     }
 
     [HttpGet("{id:int}/edit")]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> Edit(int id)
     {
         var s = await mediator.Send(new GetScheduleById(id));
@@ -135,6 +137,7 @@ public sealed class ScheduleController(IMediator mediator) : Controller
     }
 
     [HttpPost("{id:int}/edit")]
+    [Authorize(Roles = "Administrator")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, ScheduleFormVm vm)
     {
@@ -179,6 +182,7 @@ public sealed class ScheduleController(IMediator mediator) : Controller
     }
 
     [HttpPost("{id:int}/delete")]
+    [Authorize(Roles = "Administrator")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {

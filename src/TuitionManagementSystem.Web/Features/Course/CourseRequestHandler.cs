@@ -39,7 +39,6 @@ public class CourseRequestHandler(ApplicationDbContext db) :
         await db.Courses.AddAsync(entity, ct);
         await db.SaveChangesAsync(ct);
 
-        // Reload needed navs (EF may already have them tracked)
         await db.Entry(entity).Reference(e => e.Subject).LoadAsync(ct);
         await db.Entry(entity).Reference(e => e.PreferredClassroom).LoadAsync(ct);
 
@@ -105,7 +104,6 @@ public class CourseRequestHandler(ApplicationDbContext db) :
 
     public async Task<IReadOnlyList<CourseIndexRowResponse>> Handle(GetCourseIndexRows request, CancellationToken ct)
     {
-        // 1) Base course data (fast)
         var courses = await db.Courses
             .AsNoTracking()
             .Include(c => c.Subject)
@@ -124,8 +122,6 @@ public class CourseRequestHandler(ApplicationDbContext db) :
 
         var courseIds = courses.Select(c => c.Id).ToList();
 
-        // 2) Teacher assignments (validated via discriminator)
-        // Only pull assignments where the user row is actually Teacher + active account
         var teacherRows = await (
             from ctRow in db.CourseTeachers.AsNoTracking()
             join teacher in db.Users.OfType<Teacher>().AsNoTracking() on ctRow.TeacherId equals teacher.Id
@@ -147,14 +143,13 @@ public class CourseRequestHandler(ApplicationDbContext db) :
                 g => g.OrderBy(x => x.TeacherName).ToList()
             );
 
-        // 3) Combine
         return courses.Select(c =>
         {
             teachersByCourse.TryGetValue(c.Id, out var tlist);
             tlist ??= [];
 
             var teacherNames = tlist.Count == 0 ? "-" : string.Join(", ", tlist.Select(x => x.TeacherName));
-            int? teacherId = tlist.Count == 0 ? null : tlist[0].TeacherId; // single dropdown selected value
+            int? teacherId = tlist.Count == 0 ? null : tlist[0].TeacherId;
 
             return new CourseIndexRowResponse(
                 c.Id,
@@ -197,7 +192,6 @@ public class CourseRequestHandler(ApplicationDbContext db) :
         var courseExists = await db.Courses.AnyAsync(c => c.Id == request.CourseId, ct);
         if (!courseExists) return false;
 
-        // Remove all current assignments first (dropdown means single teacher)
         var existing = await db.CourseTeachers
             .Where(x => x.CourseId == request.CourseId)
             .ToListAsync(ct);
@@ -205,14 +199,12 @@ public class CourseRequestHandler(ApplicationDbContext db) :
         if (existing.Count > 0)
             db.CourseTeachers.RemoveRange(existing);
 
-        // If TeacherId is null => cleared
         if (request.TeacherId is null)
         {
             await db.SaveChangesAsync(ct);
             return true;
         }
 
-        // Validate TeacherId really is Teacher discriminator + active account
         var teacherExists = await (
             from t in db.Users.OfType<Teacher>()
             join a in db.Accounts on t.AccountId equals a.Id

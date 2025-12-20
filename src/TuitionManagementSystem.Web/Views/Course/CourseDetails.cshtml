@@ -10,16 +10,7 @@
     <dt class="col-sm-3">Subject</dt><dd class="col-sm-9">@Model.SubjectName</dd>
     <dt class="col-sm-3">Preferred Classroom</dt><dd class="col-sm-9">@Model.PreferredClassroomLocation</dd>
 </dl>
-<div>
-    <li>
-        <a asp-controller="CourseTeacher"
-           asp-action="Index"
-           asp-route-courseId="@Model.Id"
-           class="btn btn-secondary">
-            Assign / Manage Teachers
-        </a>
-    </li>
-</div>
+
 <p>
     <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
     <a asp-action="Index" class="btn btn-secondary">Back</a>

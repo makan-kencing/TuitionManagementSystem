@@ -6,5 +6,5 @@ public record CreateSubject(string Name, string? Description) : IRequest<Subject
 public record UpdateSubject(int Id, string Name, string? Description) : IRequest<bool>;
 public record ArchiveSubject(int Id) : IRequest<bool>;
 public record RestoreSubject(int Id) : IRequest<bool>;
-public record GetSubjects() : IRequest<IEnumerable<SubjectResponse>>;
+public record GetSubjects(bool IncludeArchived = false) : IRequest<IEnumerable<SubjectResponse>>;
 public record GetSubjectById(int Id) : IRequest<SubjectResponse?>;

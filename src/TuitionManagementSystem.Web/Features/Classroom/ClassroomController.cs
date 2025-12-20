@@ -1,9 +1,11 @@
 namespace TuitionManagementSystem.Web.Features.Classroom;
 
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [Route("classrooms")]
+[Authorize(Roles = "Administrator")]
 public class ClassroomController(IMediator mediator) : Controller
 {
     [HttpGet("")]
@@ -47,7 +49,7 @@ public class ClassroomController(IMediator mediator) : Controller
     {
         if (id != vm.Id) return BadRequest();
         if (!ModelState.IsValid) return View("ClassroomEdit", vm);
-        
+
         var ok = await mediator.Send(new UpdateClassroom(vm.Id, vm.Location, vm.MaxCapacity));
         if (!ok) return NotFound();
         return RedirectToAction(nameof(Details), new { id = vm.Id });
