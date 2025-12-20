@@ -1,0 +1,164 @@
+﻿@model TuitionManagementSystem.Web.Features.User.UserProfileViewModel
+
+@{
+ViewData["Title"] = "Edit User";
+}
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="card shadow border-0 rounded-4" style="max-width: 520px; width: 100%;">
+        <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+            <div class="d-flex flex-column align-items-center mb-2">
+                <img id="profilePreview"
+                     src="@Model.ProfileImageUrl"
+                     alt="Profile Image"
+                     class="rounded-circle shadow-sm"
+                     style="width:88px;height:88px;object-fit:cover;border:3px solid rgba(255,255,255,0.7);cursor:pointer;" />
+                <input type="file" name="ProfileImage" id="profileImage" accept="image/*" hidden />
+            </div>
+            <h5 class="mb-1 fw-semibold">@Model.Username</h5>
+            <small class="text-light">Account settings</small>
+        </div>
+
+        <div class="card-body p-4">
+            <form asp-controller="Admin" asp-action="EditUser" method="post" enctype="multipart/form-data" id="profileForm">
+                <input type="hidden" asp-for="UserId" />
+
+                <div class="mb-2">
+                    <label asp-for="Username" class="form-label small fw-semibold"></label>
+                    <input asp-for="Username" id="username" class="form-control form-control-sm" readonly />
+                </div>
+
+                <div class="mb-2">
+                    <label asp-for="DisplayName" class="form-label small fw-semibold"></label>
+                    <input asp-for="DisplayName" id="displayName" class="form-control form-control-sm" readonly />
+                </div>
+
+                <div class="mb-2">
+                    <label asp-for="Email" class="form-label small fw-semibold"></label>
+                    <input asp-for="Email" id="email" class="form-control form-control-sm" readonly />
+                </div>
+
+                <div class="d-flex flex-column gap-2 mt-3">
+                    <button type="button" id="editProfileBtn" class="btn btn-primary w-100">Edit Profile</button>
+                    <button type="submit" id="saveBtn" class="btn btn-success w-100 mt-2" style="display:none;">Save Changes</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger w-100 mt-2" style="display:none;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control[readonly] {
+        opacity: 0.7;
+        background-color: #f8f9fa;
+    }
+</style>
+
+@section Scripts {
+<script>
+    $(function () {
+        let editMode = false;
+        const originalValues = {};
+        const originalProfileSrc = $("#profilePreview").attr("src");
+
+        $("#editProfileBtn").click(function () {
+            const $inputs = $("#profileForm input").not("[type=hidden]");
+            $inputs.each(function () {
+                originalValues[this.id] = $(this).val();
+                $(this).prop("readonly", false);
+            });
+            $("#editProfileBtn").hide();
+            $("#saveBtn, #cancelBtn").show();
+            editMode = true;
+        });
+
+        $("#cancelBtn").click(function () {
+            const $inputs = $("#profileForm input").not("[type=hidden]");
+            $inputs.each(function () {
+                $(this).val(originalValues[this.id]);
+                $(this).prop("readonly", true);
+            });
+            $("#profilePreview").attr("src", originalProfileSrc);
+            $("#editProfileBtn").show();
+            $("#saveBtn, #cancelBtn").hide();
+            editMode = false;
+        });
+
+        $("#profilePreview").click(function () {
+            if (editMode) $("#profileImage").click();
+        });
+
+        // Preview and validate profile image
+        $("#profileImage").on("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+                Swal.fire("Error", "Only image files allowed.", "error");
+                this.value = null;
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                Swal.fire("Error", "Image must be under 2MB.", "error");
+                this.value = null;
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = e => $("#profilePreview").attr("src", e.target.result);
+            reader.readAsDataURL(file);
+        });
+
+        $("#profileForm").submit(function (e) {
+            e.preventDefault();
+
+            const $inputs = $("#profileForm input").not("[type=hidden]");
+            $inputs.prop("readonly", false);
+
+            const formData = new FormData();
+            formData.append("UserId", $("input[name='UserId']").val());
+            formData.append("Username", $("#username").val());
+            formData.append("DisplayName", $("#displayName").val());
+            formData.append("Email", $("#email").val());
+
+            const fileInput = document.getElementById("profileImage");
+            if (fileInput.files.length > 0) {
+                formData.append("ProfileImage", fileInput.files[0]);
+            }
+
+            $.ajax({
+                url: $(this).attr("action"),
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    if (res.success) {
+                        Swal.fire("Success", res.message, "success").then(() => {
+                            if (res.newProfileImageUrl) {
+                                $("#profilePreview").attr(
+                                    "src",
+                                    res.newProfileImageUrl + "?t=" + new Date().getTime()
+                                );
+                            }
+                            $inputs.prop("readonly", true);
+                            $("#editProfileBtn").show();
+                            $("#saveBtn, #cancelBtn").hide();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Validation Error",
+                            html: res.errors.join("<br/>")
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire("Error", "Unexpected error occurred.", "error");
+                }
+            });
+        });
+    });
+</script>
+}
