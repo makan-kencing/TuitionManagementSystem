@@ -4,156 +4,110 @@
 
 <div class="container py-4">
 
-  <!-- Course Title -->
-  <div class="mb-4">
-    <h3>@Model.Title</h3>
-    <p class="text-muted">@Model.Description</p>
-  </div>
+    <!-- Course Title -->
+    <div class="mb-4">
+        <h3>@Model.Title</h3>
+        <p class="text-muted">@Model.Description</p>
+    </div>
 
-  <div class="row text-center mb-4">
-    <div class="col-md-4">
-      <div class="bg-light p-3 rounded shadow-sm">
-        <h5 class="mb-1">@Model.TotalStudents</h5>
-        <small class="text-muted">Total Students</small>
-      </div>
+    <div class="row text-center mb-4">
+        <div class="col-md-4">
+            <div class="bg-light p-3 rounded shadow-sm">
+                <h5 class="mb-1">@Model.TotalStudents</h5>
+                <small class="text-muted">Total Students</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bg-light p-3 rounded shadow-sm">
+                <h5 class="mb-1">@Math.Round(Model.AverageSubmissionRate) %</h5>
+                <small class="text-muted">Average Attendance</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bg-light p-3 rounded shadow-sm">
+                <h5 class="mb-1">@Model.SubmittedCount</h5>
+                <small class="text-muted">Total Submitted</small>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4">
-      <div class="bg-light p-3 rounded shadow-sm">
-        <h5 class="mb-1">@Math.Round(Model.AverageSubmissionRate) %</h5>
-        <small class="text-muted">Average Attendance</small>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="bg-light p-3 rounded shadow-sm">
-        <h5 class="mb-1">@Model.SubmittedCount</h5>
-        <small class="text-muted">Total Submitted</small>
-      </div>
-    </div>
-  </div>
 
-  <h5>Submission Students Detail</h5>
-  <table class="table table-striped table-bordered align-middle">
-    <thead class="table-light">
-      <tr>
-        <th>Student Name</th>
-        <th>Content</th>
-        <th>Grade</th>
-        <th>SubmittedAt</th>
-        <th>status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-    @foreach (var detail in Model.Assigned)
-    {
-    <tr>
-        <td>@detail.StudentName</td>
-        <td>@detail.Submission?.Content</td>
-        <td>@detail.Submission?.Grade</td>
-        <td>@detail.Submission?.SubmittedAt</td>
-       @if (detail.Submission == null)
-       {
-           <td>
+    <h5>Submission Students Detail</h5>
+    <table class="table table-striped table-bordered align-middle">
+        <thead class="table-light">
+        <tr>
+            <th>Student Name</th>
+            <th>Content</th>
+            <th>Grade</th>
+            <th>SubmittedAt</th>
+            <th>status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var detail in Model.Assigned)
+        {
+            <tr>
+                <td>@detail.StudentName</td>
+                <td>@detail.Submission?.Content</td>
+                <td>@detail.Submission?.Grade</td>
+                <td>@detail.Submission?.SubmittedAt</td>
+                @if (detail.Submission == null)
+                {
+                    <td>
                <span class="badge bg-danger px-3 py-2">
                    Pending
                </span>
 
-           </td>
-       }
-       else
-       {
-           <td>
+                    </td>
+                }
+                else
+                {
+                    <td>
                <span class="badge bg-success px-3 py-2">
                    Submitted
                </span>
 
-           </td>
-       }
-        <td>
-            @if (detail.Submission?.Grade == null)
-            {
-                <button
-                    @* hx-controller="Homework" *@
-                    @* hx-action="" *@
-                    @* hx-route-id="" *@
-                    hx-target="#modal"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modal"
-                    class="btn btn-sm btn-outline-secondary">>
-                    Marking
-                </button>
-
-            }
-            else
-            {
-                <span class="badge bg-success px-3 py-2">
+                    </td>
+                }
+                <td>
+                    @if (detail.Submission != null)
+                    {
+                        if (detail.Submission.Grade == null)
+                        {
+                            <button
+                                hx-get
+                                hx-controller="Homework"
+                                hx-action="GetSubmissionFile"
+                                hx-route-id="@detail.Submission.Id"
+                                hx-target="#modal"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal"
+                                class="btn btn-sm btn-outline-secondary">>
+                                Marking
+                            </button>
+                        }
+                    }
+                    else if (detail.Submission == null)
+                    {
+                        <span class="badge  bg-danger px-3 py-2">
+                   No Submission
+                </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success px-3 py-2">
                     Mark
                 </span>
-            }
-        </td>
-    </tr>
-    }
-    </tbody>
-  </table>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
 </div>
 
 <div id="modal" class="modal fade" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-             <div class="modal-header">
-        <h5 class="modal-title">批改作业 - Student Name</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
-      </div>
-
-      <!-- 模态主体 -->
-      <div class="modal-body">
-
-        <!-- 分数输入 -->
-        <div class="mb-3">
-          <label for="gradeInput" class="form-label">分数（0–100）</label>
-          <input type="number" class="form-control" id="gradeInput" name="grade"
-                 min="0" max="100" placeholder="请输入分数">
-        </div>
-
-        <!-- 图片轮播 -->
-        <div id="submissionCarousel" class="carousel slide" data-bs-ride="carousel">
-          <div class="carousel-inner">
-            <div class="carousel-item active">
-              <img src="image1.jpg" class="d-block w-100" alt="作业图片1">
-            </div>
-            <div class="carousel-item">
-              <img src="image2.jpg" class="d-block w-100" alt="作业图片2">
-            </div>
-            <div class="carousel-item">
-              <img src="image3.jpg" class="d-block w-100" alt="作业图片3">
-            </div>
-          </div>
-
-          <!-- 左右箭头 -->
-          <button class="carousel-control-prev" type="button" data-bs-target="#submissionCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#submissionCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-          </button>
-
-          <!-- 分页点 -->
-          <div class="carousel-indicators">
-            <button type="button" data-bs-target="#submissionCarousel" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#submissionCarousel" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#submissionCarousel" data-bs-slide-to="2"></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 模态底部 -->
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-        <button type="submit" class="btn btn-primary">提交评分</button>
-      </div>
-        </div>
+        <div class="modal-content"></div>
     </div>
-</div>
-
-<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3">
 </div>
