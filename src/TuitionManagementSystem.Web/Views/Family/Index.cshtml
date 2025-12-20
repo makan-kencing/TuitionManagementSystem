@@ -22,33 +22,67 @@
                               .OrderByDescending(fm => fm.User.Type == nameof(Parent))
                               .ThenBy(fm => fm.User.Id == User.GetUserId()))
             {
-                <div id="member-@(member.User.Id)" class="list-group-item list-group-item-action d-flex">
-                    <div>
-                        <a href="@member.User.AccountProfileImageUri" alt=""
-                           class="rounded-circle" width="30" height="30"></a>
-                    </div>
+                if (member.User.Type == nameof(Student))
+                {
+                    <a id="member-@(member.User.Id)" class="list-group-item list-group-item-action d-flex"
+                       asp-controller="Child" asp-action="Index" asp-route-id="@member.User.Id">
+                        <div>
+                            <a href="@member.User.AccountProfileImageUri" alt=""
+                               class="rounded-circle" width="30" height="30"></a>
+                        </div>
 
-                    <div>
-                        <h5>@member.User.AccountDisplayName @(member.User.Id == User.GetUserId() ? "(You)" : "")</h5>
-                        <small>@member.User.Type</small>
-                    </div>
+                        <div>
+                            <h5>@member.User.AccountDisplayName @(member.User.Id == User.GetUserId() ? "(You)" : "")</h5>
+                            <small>@member.User.Type</small>
+                        </div>
 
-                    <div class="ms-auto d-flex">
-                        @if (member.User.Id != User.GetUserId())
-                        {
-                            <button hx-get
-                                    hx-controller="Family"
-                                    hx-action="GetRemoveMember"
-                                    hx-route-id="@member.User.Id"
-                                    hx-target="#modal"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modal"
-                                    class="btn" title="Remove Member">
-                                <i class="fa-solid fa-delete-left"></i>
-                            </button>
-                        }
+                        <div class="ms-auto d-flex">
+                            @if (member.User.Id != User.GetUserId())
+                            {
+                                <button hx-get
+                                        hx-controller="Family"
+                                        hx-action="GetRemoveMember"
+                                        hx-route-id="@member.User.Id"
+                                        hx-target="#modal"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modal"
+                                        class="btn" title="Remove Member">
+                                    <i class="fa-solid fa-delete-left"></i>
+                                </button>
+                            }
+                        </div>
+                    </a>
+                }
+                else
+                {
+                    <div id="member-@(member.User.Id)" class="list-group-item d-flex">
+                        <div>
+                            <a href="@member.User.AccountProfileImageUri" alt=""
+                               class="rounded-circle" width="30" height="30"></a>
+                        </div>
+
+                        <div>
+                            <h5>@member.User.AccountDisplayName @(member.User.Id == User.GetUserId() ? "(You)" : "")</h5>
+                            <small>@member.User.Type</small>
+                        </div>
+
+                        <div class="ms-auto d-flex">
+                            @if (member.User.Id != User.GetUserId())
+                            {
+                                <button hx-get
+                                        hx-controller="Family"
+                                        hx-action="GetRemoveMember"
+                                        hx-route-id="@member.User.Id"
+                                        hx-target="#modal"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modal"
+                                        class="btn" title="Remove Member">
+                                    <i class="fa-solid fa-delete-left"></i>
+                                </button>
+                            }
+                        </div>
                     </div>
-                </div>
+                }
             }
         </div>
 
@@ -95,16 +129,5 @@
             </button>
         }
     </div>
-</div>
-
-<div id="modal" class="modal modal-blur fade"
-     aria-hidden="false"
-     tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content"></div>
-    </div>
-</div>
-
-<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3">
 </div>
 
