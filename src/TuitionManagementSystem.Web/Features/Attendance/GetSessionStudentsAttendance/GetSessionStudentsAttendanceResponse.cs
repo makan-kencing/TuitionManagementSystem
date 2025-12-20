@@ -1,6 +1,6 @@
-﻿namespace TuitionManagementSystem.Web.Features.Attendance.SessionStudentList;
+﻿namespace TuitionManagementSystem.Web.Features.Attendance.GetSessionStudentsAttendance;
 
-public class GetSessionStudentListResponse
+public class GetSessionStudentsAttendanceResponse
 {
     public List<StudentInfo> StudentList { get; set; } = [];
     public  int SessionId { get; set; }

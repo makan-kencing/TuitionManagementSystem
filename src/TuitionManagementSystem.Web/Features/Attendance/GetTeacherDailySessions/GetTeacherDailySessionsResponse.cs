@@ -1,6 +1,6 @@
-﻿namespace TuitionManagementSystem.Web.Features.Attendance.TeacherDailySessionList;
+﻿namespace TuitionManagementSystem.Web.Features.Attendance.GetTeacherDailySessions;
 
-public class GetTeacherDailySessionListResponse
+public class GetTeacherDailySessionsResponse
 {
     public ICollection<CourseDaily> Courses { get; set; } = [];
 }

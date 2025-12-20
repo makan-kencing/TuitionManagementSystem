@@ -1,4 +1,4 @@
-﻿@model TuitionManagementSystem.Web.Features.Attendance.TeacherDailySessionList.GetTeacherDailySessionListResponse
+﻿@model TuitionManagementSystem.Web.Features.Attendance.GetTeacherDailySessions.GetTeacherDailySessionsResponse
 
 @{
     ViewData["Title"] = "Generate Attendance";
@@ -17,7 +17,6 @@
                 <h5>@course.SubjectName : @course.Name</h5>
 
                 <button class="btn btn-primary btn-sm"
-
                         data-bs-toggle="collapse"
                         data-bs-target="#sessions@(i)" aria-expanded="false" aria-controls="sessions@(i)">
                     Toggle Sessions
@@ -32,7 +31,7 @@
                     }
                     @foreach (var session in course.Sessions)
                     {
-                        <a asp-controller="Attendance" asp-action="CourseSessionListing" asp-route-id="@session.Id">
+                        <a asp-controller="Session" asp-action="ViewStudentsAttendance" asp-route-id="@session.Id">
                             <div class="list-group mt-3">
 
                                 <div class="list-group-item d-flex justify-content-between">
@@ -42,13 +41,13 @@
                                     <div class="btn-group btn-group-sm">
                                         <button
                                             hx-post
-                                            hx-controller="Attendance"
-                                            hx-action="Generate"
+                                            hx-controller="Session"
+                                            hx-action="GenerateAttendanceCodeHtmx"
                                             hx-route-id="@session.Id"
-                                            hx-target="#code-modal"
+                                            hx-target="#modal"
                                             type="submit"
                                             class="btn btn-secondary"
-                                            data-bs-toggle="modal" data-bs-target="#code-modal">
+                                            data-bs-toggle="modal" data-bs-target="#modal">
                                             <span id="code-button@(session.Id)">
                                                 @(session.Code ?? "Generate")
                                             </span>
@@ -64,13 +63,6 @@
     }
 </div>
 
-<div id="code-modal" class="modal"
-     aria-hidden="false"
-     tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content"></div>
-    </div>
-</div>
 
 
 

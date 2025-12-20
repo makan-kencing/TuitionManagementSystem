@@ -1,14 +1,14 @@
-﻿namespace TuitionManagementSystem.Web.Features.Attendance.TeacherDailySessionList;
+﻿namespace TuitionManagementSystem.Web.Features.Attendance.GetTeacherDailySessions;
 
 using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-public sealed class GetTeacherDailySessionListRequestHandler(ApplicationDbContext db)
-    : IRequestHandler<GetTeacherDailySessionListRequest, Result<GetTeacherDailySessionListResponse>>
+public sealed class GetTeacherDailySessionsRequestHandler(ApplicationDbContext db)
+    : IRequestHandler<GetTeacherDailySessionsRequest, Result<GetTeacherDailySessionsResponse>>
 {
-    public async Task<Result<GetTeacherDailySessionListResponse>> Handle(GetTeacherDailySessionListRequest request,
+    public async Task<Result<GetTeacherDailySessionsResponse>> Handle(GetTeacherDailySessionsRequest request,
         CancellationToken cancellationToken)
     {
         var hour0 = DateTime.UtcNow.Date.Subtract(
@@ -36,6 +36,6 @@ public sealed class GetTeacherDailySessionListRequestHandler(ApplicationDbContex
             })
             .ToListAsync(cancellationToken);
 
-        return Result.Success(new GetTeacherDailySessionListResponse { Courses = courses });
+        return Result.Success(new GetTeacherDailySessionsResponse { Courses = courses });
     }
 }

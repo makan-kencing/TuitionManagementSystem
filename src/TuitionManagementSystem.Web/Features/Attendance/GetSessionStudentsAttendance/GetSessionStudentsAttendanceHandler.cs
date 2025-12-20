@@ -1,20 +1,20 @@
-﻿namespace TuitionManagementSystem.Web.Features.Attendance.SessionStudentList;
+﻿namespace TuitionManagementSystem.Web.Features.Attendance.GetSessionStudentsAttendance;
 
 using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-public sealed class GetSessionStudentListRequestHandler(ApplicationDbContext db)
-    : IRequestHandler<GetSessionStudentListRequest, Result<GetSessionStudentListResponse>>
+public sealed class GetSessionStudentsAttendanceHandler(ApplicationDbContext db)
+    : IRequestHandler<GetSessionStudentsAttendanceRequest, Result<GetSessionStudentsAttendanceResponse>>
 {
-    public async Task<Result<GetSessionStudentListResponse>> Handle(
-        GetSessionStudentListRequest request,
+    public async Task<Result<GetSessionStudentsAttendanceResponse>> Handle(
+        GetSessionStudentsAttendanceRequest request,
         CancellationToken cancellationToken)
     {
         var session = await db.Sessions
             .Where(s => s.Id == request.SessionId)
-            .Select(s => new GetSessionStudentListResponse
+            .Select(s => new GetSessionStudentsAttendanceResponse
             {
                 SessionId = s.Id,
                 IsCodeGenerated = s.AttendanceCode != null,

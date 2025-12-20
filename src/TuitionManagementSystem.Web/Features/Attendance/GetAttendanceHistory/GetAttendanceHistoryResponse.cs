@@ -1,4 +1,4 @@
-﻿namespace TuitionManagementSystem.Web.Features.Attendance.AttendanceHistory;
+﻿namespace TuitionManagementSystem.Web.Features.Attendance.GetAttendanceHistory;
 
 public class GetAttendanceHistoryResponse
 {

@@ -1,4 +1,4 @@
-﻿@model TuitionManagementSystem.Web.Features.Attendance.SessionStudentList.GetSessionStudentListResponse
+﻿@model TuitionManagementSystem.Web.Features.Attendance.GetSessionStudentsAttendance.GetSessionStudentsAttendanceResponse
 
 @{
     ViewData["Title"] = "Student Management";
@@ -55,9 +55,10 @@
                         <button
                             id="attendance-action-@student.StudentId"
                             hx-delete
-                            hx-controller="Attendance"
-                            hx-action="RemoveStudentAttendance"
-                            hx-route-id="@student.AttendanceId"
+                            hx-controller="Session"
+                            hx-action="RemoveStudentAttendanceHtmx"
+                            hx-route-id="@Model.SessionId"
+                            hx-route-attendanceId="@student.AttendanceId"
                             hx-target="#modal"
                             type="submit"
                             class="btn btn-danger"
@@ -71,8 +72,8 @@
                             id="attendance-action-@student.StudentId"
                             hx-post
                             hx-controller="Attendance"
-                            hx-action="MarkStudentAttended"
-                            hx-route-sessionId="@Model.SessionId"
+                            hx-action="MarkStudentAttendedHtmx"
+                            hx-route-id="@Model.SessionId"
                             hx-route-studentId="@student.StudentId"
                             hx-target="#modal"
                             type="submit"

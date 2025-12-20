@@ -26,8 +26,8 @@
     id="attendance-action-@Model.StudentId"
     hx-post
     hx-controller="Attendance"
-    hx-action="MarkStudentAttended"
-    hx-route-sessionId="@Model.SessionId"
+    hx-action="MarkStudentAttendedHtmx"
+    hx-route-id="@Model.SessionId"
     hx-route-studentId="@Model.StudentId"
     hx-target="#modal"
     type="submit"

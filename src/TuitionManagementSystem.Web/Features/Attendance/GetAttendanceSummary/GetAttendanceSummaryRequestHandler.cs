@@ -1,4 +1,4 @@
-﻿namespace TuitionManagementSystem.Web.Features.Attendance.AttendanceSummary;
+﻿namespace TuitionManagementSystem.Web.Features.Attendance.GetAttendanceSummary;
 
 using Ardalis.Result;
 using Infrastructure.Persistence;
