@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Models.User;
 using Services;
 using Services.Auth.Constants;
@@ -155,6 +156,13 @@ public class Startup(IConfiguration configuration)
         app
             .UseHttpsRedirection()
             .UseStaticFiles()
+            .UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.ContentRootPath, "assets")
+                ),
+                RequestPath = "/assets"
+            })
             .UseSwagger()
             .UseSwaggerUI()
             .UseRouting()
