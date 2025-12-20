@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Features.Family.GetChild;
+namespace TuitionManagementSystem.Web.Features.Child.GetChild;
 
 using Ardalis.Result;
 using MediatR;

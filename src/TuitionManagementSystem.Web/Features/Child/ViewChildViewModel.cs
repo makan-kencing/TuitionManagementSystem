@@ -1,4 +1,4 @@
-namespace TuitionManagementSystem.Web.Features.Family;
+namespace TuitionManagementSystem.Web.Features.Child;
 
 using GetChild;
 
