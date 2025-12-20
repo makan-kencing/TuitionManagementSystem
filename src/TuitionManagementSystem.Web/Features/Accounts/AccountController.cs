@@ -1,5 +1,8 @@
 ﻿namespace TuitionManagementSystem.Web.Features.Accounts;
 
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +24,7 @@ public class AccountController(ApplicationDbContext db) : Controller
            {
                Username = a.Username,
                Email = a.Email,
+               DisplayName = a.DisplayName,
 
                ProfileImageUrl = a.ProfileImage != null
                    ? a.ProfileImage.Uri
