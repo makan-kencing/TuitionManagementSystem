@@ -1,0 +1,33 @@
+﻿@model IEnumerable<TuitionManagementSystem.Web.Features.User.UserListViewModel>
+
+@foreach (var u in Model)
+{
+    <tr class="align-middle">
+        <td>@u.Id</td>
+        <td class="fw-medium">@u.Username</td>
+        <td>@(u.DisplayName ?? "-")</td>
+        <td>@u.Email</td>
+        <td class="text-end">
+            <a class="btn btn-sm btn-outline-primary me-1"
+               asp-controller="Admin"
+               asp-action="EditUser"
+               asp-route-userId="@u.Id"
+               title="Edit User">
+                <i class="fa-solid fa-pen"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    onclick="confirmDelete(@u.Id)"
+                    title="Delete User">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+
+            <form id="delete-form-@u.Id"
+                  asp-action="Delete"
+                  asp-route-id="@u.Id"
+                  method="post"
+                  class="d-none">
+            </form>
+        </td>
+    </tr>
+}

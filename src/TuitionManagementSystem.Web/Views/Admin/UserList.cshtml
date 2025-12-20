@@ -1,30 +1,78 @@
-﻿@model IEnumerable<TuitionManagementSystem.Web.Features.User.UserListViewModel>
+﻿@using Microsoft.AspNetCore.Html
+@model IEnumerable<TuitionManagementSystem.Web.Features.User.UserListViewModel>
 
 @{
     ViewData["Title"] = "Manage Users";
+    var currentSortColumn = ViewData["SortColumn"]?.ToString() ?? "Id";
+    var currentSortOrder = ViewData["SortOrder"]?.ToString() ?? "asc";
+    Func<string, string> getSortOrder = column =>
+        currentSortColumn == column && currentSortOrder == "asc" ? "desc" : "asc";
+    Func<string, IHtmlContent> getSortArrow = column =>
+        currentSortColumn == column
+            ? (currentSortOrder == "asc" ? new HtmlString(" &#9650;") : new HtmlString(" &#9660;"))
+            : HtmlString.Empty;
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between mb-3">
         <h2>@ViewData["Title"]</h2>
 
-        <a class="btn btn-primary"
-           asp-action="Create">
-            + Add
-        </a>
+        <div class="d-flex">
+            <input type="text" id="searchInput" class="form-control me-2" placeholder="Search users..." />
+        </div>
+
+        <a class="btn btn-primary" asp-action="Create">+ Add</a>
     </div>
+
 
     <table class="table table-striped table-hover">
         <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th class="text-end">Actions</th>
-        </tr>
+            <tr>
+                <th>
+                    <a asp-controller="Admin"
+                       asp-action="UserList"
+                       asp-route-sortColumn="Id"
+                       asp-route-sortOrder="@getSortOrder("Id")"
+                       class="text-white text-decoration-none">
+                        ID
+                        @getSortArrow("Id")
+                    </a>
+                </th>
+                <th>
+                    <a asp-controller="Admin"
+                       asp-action="UserList"
+                       asp-route-sortColumn="Username"
+                       asp-route-sortOrder="@getSortOrder("Username")"
+                       class="text-white text-decoration-none">
+                        Username
+                        @getSortArrow("Username")
+                    </a>
+                </th>
+                <th>
+                    <a asp-controller="Admin"
+                       asp-action="UserList"
+                       asp-route-sortColumn="Name"
+                       asp-route-sortOrder="@getSortOrder("Name")"
+                       class="text-white text-decoration-none">
+                        Name
+                        @getSortArrow("Name")
+                    </a>
+                </th>
+                <th>
+                    <a asp-controller="Admin"
+                       asp-action="UserList"
+                       asp-route-sortColumn="Email"
+                       asp-route-sortOrder="@getSortOrder("Email")"
+                       class="text-white text-decoration-none">
+                        Email
+                        @getSortArrow("Email")
+                    </a>
+                </th>
+                <th class="text-end">Actions</th>
+            </tr>
         </thead>
-        <tbody>
+
+        <tbody id="userTableBody">
         @foreach (var u in Model)
         {
             <tr>
@@ -55,40 +103,54 @@
             </tr>
         }
         </tbody>
+
     </table>
 </div>
 
 @section Scripts {
+<script>
+    const searchInput = document.getElementById('searchInput');
 
-    <script>
-        function confirmDelete(id) {
-            Swal.fire({
-                title: 'Are you sure?',
-                html: 'This user will be <b>permanently deleted</b>.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById(`delete-form-${id}`).submit();
-                }
-            });
-        }
+    searchInput.addEventListener('keyup', function() {
+        const query = searchInput.value;
 
-        @* Display SweetAlert after delete action if TempData is set *@
-        @if (TempData["Message"] != null)
-        {
-            <text>
-            Swal.fire({
-                icon: '@TempData["Status"]',
-                html: '@TempData["Message"]',
-                confirmButtonText: 'OK'
+        fetch(`@Url.Action("UserList", "Admin")?search=${encodeURIComponent(query)}`)
+            .then(response => response.text())
+            .then(html => {
+                // Extract just the table rows from returned HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newTbody = doc.querySelector('#userTableBody');
+                document.querySelector('#userTableBody').innerHTML = newTbody.innerHTML;
             });
-            </text>
-        }
-    </script>
+    });
+
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            html: 'This user will be <b>permanently deleted</b>.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(`delete-form-${id}`).submit();
+            }
+        });
+    }
+
+    @if (TempData["Message"] != null)
+    {
+        <text>
+        Swal.fire({
+            icon: '@TempData["Status"]',
+            html: '@TempData["Message"]',
+            confirmButtonText: 'OK'
+        });
+        </text>
+    }
+</script>
 }
-

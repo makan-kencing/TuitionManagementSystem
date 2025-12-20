@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
+using Models.User;
 using Services.Auth.Constants;
 using Services.File;
 using User;
@@ -126,5 +127,63 @@ public class AdminController(ApplicationDbContext db,  IFileService fileService,
 
         return Json(new { success = true, message = "Profile updated successfully.", newProfileImageUrl });
     }
+
+    //Sorting
+    public async Task<IActionResult> UserList(
+        string? sortColumn,
+        string? sortOrder,
+        string? search)
+    {
+        sortColumn ??= "Id";
+        sortOrder ??= "asc";
+
+        IQueryable<User> query = db.Users
+            .Include(u => u.Account)
+            .Where(u => u.Account.DeletedAt == null);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(u =>
+                u.Account.Username.Contains(search) ||
+                u.Account.DisplayName.Contains(search) ||
+                u.Account.Email.Contains(search));
+        }
+
+        query = (sortColumn, sortOrder.ToLower()) switch
+        {
+            ("Username", "asc") => query.OrderBy(u => u.Account.Username),
+            ("Username", "desc") => query.OrderByDescending(u => u.Account.Username),
+            ("Name", "asc") => query.OrderBy(u => u.Account.DisplayName),
+            ("Name", "desc") => query.OrderByDescending(u => u.Account.DisplayName),
+            ("Email", "asc") => query.OrderBy(u => u.Account.Email),
+            ("Email", "desc") => query.OrderByDescending(u => u.Account.Email),
+            _ => query.OrderBy(u => u.Id)
+        };
+
+        var users = await query
+            .Select(u => new UserListViewModel
+            {
+                Id = u.Id,
+                Username = u.Account.Username,
+                DisplayName = u.Account.DisplayName,
+                Email = u.Account.Email!
+            })
+            .ToListAsync();
+
+        ViewData["SortColumn"] = sortColumn;
+        ViewData["SortOrder"] = sortOrder;
+        ViewData["Search"] = search;
+
+        // Return partial
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return PartialView("_UserListTableRows", users);
+        }
+
+        return View("~/Views/Admin/UserList.cshtml", users);
+    }
+
+
+
 }
 
