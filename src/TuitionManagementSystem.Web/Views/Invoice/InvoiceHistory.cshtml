@@ -125,7 +125,7 @@
                                             <p class="mb-1">@invoice.DueAt?.ToString("MMM dd, yyyy") ?? "N/A"</p>
                                         }
 
-                                        <h6 class="text-primary mt-1">RM@(invoice.Amount)</h6>
+                                        <h5 class="text-primary mt-1">RM@(invoice.Amount.ToString("0.00"))</h5>
                                     </div>
                                 </div>
                             </div>

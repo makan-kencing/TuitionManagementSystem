@@ -5,9 +5,11 @@ using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Abstractions;
 using Infrastructure.Persistence;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.EntityFrameworkCore;
 using Models.Payment;
 using Options;
+using Services;
 using Stripe;
 using Stripe.Checkout;
 using PaymentMethod = Models.Payment.PaymentMethod;
@@ -17,66 +19,85 @@ public class CheckoutController : WebController
     private readonly StripeOptions options;
     private readonly StripeClient client;
     private readonly ApplicationDbContext db;
+    private readonly IInvoiceService _invoiceService;
 
-    public CheckoutController(IConfiguration configuration, ApplicationDbContext db)
+    public CheckoutController(IConfiguration configuration, ApplicationDbContext db, IInvoiceService invoiceService)
     {
         this.options = configuration.GetSection("Stripe")
                            .Get<StripeOptions>()
                        ?? throw new ConfigurationErrorsException("Stripe configurations not found.");
         this.client = new StripeClient(this.options.SecretKey);
         this.db = db;
+        this._invoiceService = invoiceService;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Index(ICollection<int> invoiceIds)
+    public async Task<IActionResult> Index([FromForm] List<int> invoiceIds)
     {
-        var items = await this.db.Invoices
+        if (invoiceIds == null || invoiceIds.Count == 0)
+            return BadRequest("No invoices selected.");
+
+        var invoices = await this.db.Invoices
             .Where(i => invoiceIds.Contains(i.Id))
-            .Select(i => new SessionLineItemOptions
+            .Select(i => new { i.Id, i.Amount, CourseName = i.Enrollment.Course.Name })
+            .ToListAsync();
+
+        var items = invoices.Select(i => new SessionLineItemOptions
+        {
+            PriceData = new SessionLineItemPriceDataOptions
             {
-                PriceData = new SessionLineItemPriceDataOptions
+                UnitAmountDecimal = (long)Math.Round(i.Amount * 100),
+                Currency = "myr",
+                ProductData = new SessionLineItemPriceDataProductDataOptions
                 {
-                    UnitAmountDecimal = i.Amount,
-                    Currency = "myr",
-                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    Name = $"Enrollment fee for {i.CourseName}",
+                    Metadata = new Dictionary<string, string>
                     {
-                        Name = $"Enrollment fee for {i.Enrollment.Course.Name}",
-                        Metadata = { { "id", i.Id.ToString(CultureInfo.InvariantCulture) } }
+                        ["invoice_id"] = i.Id.ToString(CultureInfo.InvariantCulture)
                     }
-                },
-                Quantity = 1
-            }).ToListAsync();
+                }
+            },
+            Quantity = 1
+        }).ToList();
+
+        var subtotal = items.Sum(i => i.PriceData.UnitAmountDecimal);
+
         items.Add(new SessionLineItemOptions
         {
             PriceData = new SessionLineItemPriceDataOptions
             {
-                UnitAmountDecimal = items.Sum(i => i.PriceData.UnitAmountDecimal) * 0.02m,
+                UnitAmountDecimal = (long)Math.Round((decimal)(subtotal * 0.02m)!),
                 Currency = "myr",
                 ProductData = new SessionLineItemPriceDataProductDataOptions { Name = "Processing Fee (2%)" }
-            }
+            },
+            Quantity = 1
         });
 
         var sessionOptions = new SessionCreateOptions
         {
             LineItems = items,
             Mode = "payment",
-            SuccessUrl = this.Url.Action("Complete", "Checkout", null, protocol: this.Request.Scheme)
-                         + "?session_id={CHECKOUT_SESSION_ID}"
+            SuccessUrl = Url.Action("Complete", "Checkout", null, Request.Scheme)
+                         + "?session_id={CHECKOUT_SESSION_ID}",
+            Metadata = new Dictionary<string, string>
+            {
+                ["invoice_ids"] = string.Join(",", invoiceIds)
+            }
         };
 
         var session = await this.client.V1.Checkout.Sessions.CreateAsync(sessionOptions);
-
         return this.SeeOther(session.Url);
     }
 
     [HttpGet]
-    public async Task<IActionResult> Complete([FromQuery] string sessionId)
+    public async Task<IActionResult> Complete([FromQuery(Name = "session_id")] string sessionId)
     {
         var sessionOptions = new SessionGetOptions
         {
             Expand =
             [
                 "line_items",
+                "line_items.data.price.product",
                 "payment_intent",
                 "payment_intent.payment_method"
             ]
@@ -93,27 +114,64 @@ public class CheckoutController : WebController
                 var method => new GenericPaymentMethod { Generic = method }
             };
 
-            var invoiceIds = session.LineItems
-                .Select(li => li.Product.Metadata.TryGetValue("id", out var value) ? value : null)
-                .OfType<string>()
-                .Select(s => int.Parse(s, CultureInfo.InvariantCulture))
-                .ToList();
+            List<int> invoiceIds = new List<int>();
+
+            if (session.Metadata != null && session.Metadata.ContainsKey("invoice_ids"))
+            {
+                invoiceIds = session.Metadata["invoice_ids"]
+                    .Split(',')
+                    .Select(id => int.Parse(id, CultureInfo.InvariantCulture))
+                    .ToList();
+            }
+            else
+            {
+                var invoiceIdStrings = session.LineItems.Data
+                    .Where(li => li.Price?.Product != null &&
+                                 li.Price.Product.Metadata != null)
+                    .SelectMany(li => li.Price.Product.Metadata
+                        .Where(kvp => kvp.Key == "invoice_id")
+                        .Select(kvp => kvp.Value))
+                    .Distinct()
+                    .ToList();
+
+                invoiceIds = invoiceIdStrings
+                    .Select(id => int.Parse(id, CultureInfo.InvariantCulture))
+                    .ToList();
+            }
+
+            if (!invoiceIds.Any())
+            {
+                return BadRequest("No invoice IDs found in payment session");
+            }
 
             var invoices = await this.db.Invoices
                 .Where(i => invoiceIds.Contains(i.Id))
                 .ToListAsync();
 
+            if (!invoices.Any())
+            {
+                return BadRequest($"No invoices found for IDs: {string.Join(", ", invoiceIds)}");
+            }
+
             var payment = new Payment
             {
-                Amount = session.PaymentIntent.Amount,
+                Amount = (decimal)session.PaymentIntent.Amount / 100,
                 Method = paymentMethod,
                 Invoices = invoices
             };
 
-            invoices.ForEach(i => i.Status = InvoiceStatus.Paid);
-
             this.db.Payments.Add(payment);
             await this.db.SaveChangesAsync();
+
+            var result = await _invoiceService.MarkInvoicesAsPaidAsync(
+                invoiceIds,
+                payment.Id,
+                this.HttpContext.RequestAborted);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Errors);
+            }
         }
 
         return this.RedirectToAction("InvoiceHistory", "Invoice");

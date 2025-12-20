@@ -1,8 +1,15 @@
 @using TuitionManagementSystem.Web.Models.Payment
 @model TuitionManagementSystem.Web.Features.Invoice.ListInvoice.ListInvoiceViewModel
+
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Pending Fees";
+}
+
+@{
+    var displayInvoices = Model.Invoices
+        .Where(i => i.Status == InvoiceStatus.Pending || i.Status == InvoiceStatus.Overdue)
+        .ToList();
 }
 
 @section Styles {
@@ -159,7 +166,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light">
                     <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>Tuition Fees (@Model.Invoices.Count)
+                        <i class="fas fa-list me-2"></i>Tuition Fees (@displayInvoices.Count)
                     </h5>
                     @if (Model.Invoices.Any(i => i.Status == InvoiceStatus.Pending || i.Status == InvoiceStatus.Overdue))
                     {
@@ -172,12 +179,6 @@
                     }
                 </div>
                 <div class="card-body p-0">
-                    @{
-                        var displayInvoices = Model.Invoices
-                            .Where(i => i.Status == InvoiceStatus.Pending || i.Status == InvoiceStatus.Overdue)
-                            .ToList();
-                    }
-
                     @if (!displayInvoices.Any())
                     {
                         <div class="text-center py-5">
@@ -213,7 +214,6 @@
                                                     }
                                                 </div>
 
-                                                <!-- Invoice Info -->
                                                 <div class="col">
                                                     <div class="row">
                                                         <div class="col-md-6">
@@ -355,6 +355,13 @@
                 $('#totalAmount').text('RM' + totalAmount.toFixed(2));
 
                 $('#checkoutBtn').prop('disabled', selectedCount === 0);
+
+                return {
+                    selectedCount: selectedCount,
+                    subtotal: total,
+                    processingFee: processingFee,
+                    totalAmount: totalAmount
+                };
             }
 
             $('#selectAllInvoices').change(function () {
@@ -380,13 +387,37 @@
                 updatePaymentSummary();
             });
 
+            function createCheckoutForm(invoiceIds) {
+                $('#checkoutForm').remove();
+
+                const form = $('<form>')
+                    .attr({
+                        id: 'checkoutForm',
+                        method: 'post',
+                        action: '@Url.Action("Index", "Checkout")'
+                    });
+
+                invoiceIds.forEach(function (invoiceId, index) {
+                    $('<input>')
+                        .attr({
+                            type: 'hidden',
+                            name: 'invoiceIds[' + index + ']',
+                            value: invoiceId
+                        })
+                        .appendTo(form);
+                });
+
+                $('body').append(form);
+                return form;
+            }
+
             $('#checkoutBtn').click(function () {
                 const selectedInvoices = [];
-                let totalAmount = 0;
+                let subtotal = 0;
 
                 $('.invoice-checkbox:checked').each(function () {
                     selectedInvoices.push(parseInt($(this).val()));
-                    totalAmount += parseFloat($(this).data('amount'));
+                    subtotal += parseFloat($(this).data('amount'));
                 });
 
                 if (selectedInvoices.length === 0) {
@@ -398,124 +429,72 @@
                     return;
                 }
 
+                const processingFee = subtotal * 0.02;
+                const totalAmount = subtotal + processingFee;
+
                 Swal.fire({
                     title: `Proceed to pay ${selectedInvoices.length} invoice(s)?`,
-                    text: `Total Amount: RM${totalAmount.toFixed(2)}`,
+                    html: `
+                        <div class="text-start">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Subtotal:</span>
+                                <span>RM${subtotal.toFixed(2)}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Processing Fee (2%):</span>
+                                <span>RM${processingFee.toFixed(2)}</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Total Amount:</span>
+                                <span class="text-primary">RM${totalAmount.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    `,
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, pay now',
+                    confirmButtonText: 'Yes, proceed to checkout',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        $.ajax({
-                            url: '@Url.Action("PaySelectedInvoices", "Invoice")',
-                            type: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({
-                                InvoiceIds: selectedInvoices,
-                            }),
-                            success: function (response) {
-                                if (response.success) {
-                                    selectedInvoices.forEach(id => {
-                                        const card = $('#invoice-' + id).closest('.invoice-card');
-                                        card.removeClass('pending overdue').addClass('paid');
-                                        card.find('.status-badge')
-                                            .removeClass('bg-warning bg-danger')
-                                            .addClass('bg-success')
-                                            .text('Paid');
-                                        card.find('.pay-single').remove();
-                                        $('#invoice-' + id).prop('disabled', true).prop('checked', false);
-                                    });
-
-                                    updatePaymentSummary();
-
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Payment initiated!',
-                                        text: 'Your payment has been processed successfully.',
-                                        showConfirmButton: false,
-                                        timer: 1500
-                                    }).then(() => {
-                                        location.reload();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: response.message
-                                    });
-                                }
-                            },
-                            error: function () {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Oops!',
-                                    text: 'An error occurred. Please try again.'
-                                });
-                            }
-                        });
+                        createCheckoutForm(selectedInvoices).submit();
                     }
                 });
             });
 
             $(document).on('click', '.pay-single', function () {
-                const invoiceId = $(this).data('invoice-id');
-                const amount = $(this).data('amount');
+                const invoiceId = parseInt($(this).data('invoice-id'));
+                const amount = parseFloat($(this).data('amount'));
+
+                const processingFee = amount * 0.02;
+                const totalAmount = amount + processingFee;
 
                 Swal.fire({
-                    title: `Pay invoice #${invoiceId}?`,
-                    text: `Amount: RM${amount.toFixed(2)}`,
+                    title: `Pay invoice?`,
+                    html: `
+                        <div class="text-start">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Invoice Amount:</span>
+                                <span>RM${amount.toFixed(2)}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Processing Fee (2%):</span>
+                                <span>RM${processingFee.toFixed(2)}</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Total Amount:</span>
+                                <span class="text-primary">RM${totalAmount.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    `,
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, pay now',
+                    confirmButtonText: 'Yes, proceed to checkout',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        $.ajax({
-                            url: '@Url.Action("PaySelectedInvoices", "Invoice")',
-                            type: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({
-                                InvoiceIds: [invoiceId],
-                            }),
-                            success: function (response) {
-                                if (response.success) {
-                                    const card = $('#invoice-' + invoiceId).closest('.invoice-card');
-                                    card.removeClass('pending overdue').addClass('paid');
-                                    card.find('.status-badge')
-                                        .removeClass('bg-warning bg-danger')
-                                        .addClass('bg-success')
-                                        .text('Paid');
-                                    $(this).remove();
-                                    $('#invoice-' + invoiceId).prop('disabled', true).prop('checked', false);
-
-                                    updatePaymentSummary();
-
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Payment initiated!',
-                                        text: 'Your payment has been processed successfully.',
-                                        showConfirmButton: false,
-                                        timer: 1500
-                                    }).then(() => {
-                                        location.reload();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: response.message
-                                    });
-                                }
-                            },
-                            error: function () {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Oops!',
-                                    text: 'An error occurred. Please try again.'
-                                });
-                            }
-                        });
+                        createCheckoutForm([invoiceId]).submit();
                     }
                 });
             });

@@ -12,9 +12,9 @@ namespace TuitionManagementSystem.Web.Services
     {
         Task<Result<Invoice>> UpdateInvoiceStatusAsync(int invoiceId, InvoiceStatus newStatus,
             CancellationToken cancellationToken);
-
         Task CheckAndCreateOverdueInvoicesAsync(IMediator mediator, CancellationToken cancellationToken);
         Task GenerateMonthlyInvoicesAsync(IMediator mediator, CancellationToken cancellationToken);
+        Task<Result> MarkInvoicesAsPaidAsync(IReadOnlyCollection<int> invoiceIds, int paymentId, CancellationToken cancellationToken);
     }
 
     public class InvoiceService : IInvoiceService
@@ -245,6 +245,33 @@ namespace TuitionManagementSystem.Web.Services
             _logger.LogInformation(
                 "Monthly invoice generation completed. Created: {Created}, Skipped: {Skipped}, Errors: {Errors}",
                 createdCount, skippedCount, errorCount);
+        }
+
+        public async Task<Result> MarkInvoicesAsPaidAsync(
+            IReadOnlyCollection<int> invoiceIds,
+            int paymentId,
+            CancellationToken cancellationToken)
+        {
+            var invoices = await _db.Invoices
+                .Where(i => invoiceIds.Contains(i.Id))
+                .ToListAsync(cancellationToken);
+
+            if (!invoices.Any())
+                return Result.NotFound("No invoices found");
+
+            foreach (var invoice in invoices)
+            {
+                invoice.Status = InvoiceStatus.Paid;
+                invoice.PaymentId = paymentId;
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "Marked {Count} invoices as paid with PaymentId {PaymentId}",
+                invoices.Count, paymentId);
+
+            return Result.Success();
         }
 
         private InvoiceStatus GetCurrentStatus(Invoice invoice)
