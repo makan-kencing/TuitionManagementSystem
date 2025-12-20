@@ -32,12 +32,14 @@
             </div>
         </div>
 
-        @foreach (var announcement in Model.AnnouncementInfos)
-        {
-            <div class="col-md-8">
-                <div class="row gy-4">
-                    <div class="col-12">
-                        <div class="card shadow-sm">
+
+        <div class="col-md-8">
+            <div class="row gy-4">
+                <div class="col-12">
+
+                    @foreach (var announcement in Model.AnnouncementInfos)
+                    {
+                        <div class="card shadow-sm mt-3">
                             <div class="card-body">
                                 <h5 class="card-title mb-2">@announcement.Title</h5>
                                 <p class="card-text">@announcement.Description</p>
@@ -51,17 +53,19 @@
                                                 hx-route-id="@assignment.Id"
                                                 hx-target="#modal"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#modal">
+                                                data-bs-target="#modal"
+                                                class="btn btn-primary">
                                             Submit Homework
                                         </button>
                                     </div>
                                 }
                             </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
-        }
+        </div>
+
     </div>
 </div>
 

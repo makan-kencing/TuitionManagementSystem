@@ -156,6 +156,11 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         return this.Ok();
     }
 
+    public class MarkHomeworkSuccessViewModel
+    {
+        public required int SubmissionId { get; set; }
+    }
+
     [Authorize(Policy = "TeacherOnly")]
     public async Task<IActionResult> TeacherHomeworkDashboard(int courseId, CancellationToken cancellationToken)
     {
