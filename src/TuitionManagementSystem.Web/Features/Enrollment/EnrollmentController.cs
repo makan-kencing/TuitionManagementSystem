@@ -24,7 +24,7 @@ public class EnrollmentController : Controller
     }
 
     [HttpGet]
-    public IActionResult MakeEnrollment() => this.View();
+    public IActionResult ViewEnrollments() => this.View();
 
     [HttpPost("make")]
     public async Task<IActionResult> MakeEnrollment(
