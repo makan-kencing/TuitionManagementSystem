@@ -4,21 +4,11 @@ using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Services.Auth.Extensions;
 
-public class DeleteFileCommandHandler(
-    ApplicationDbContext db,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<DeleteFileCommand, Result>
+public class DeleteFileCommandHandler(ApplicationDbContext db) : IRequestHandler<DeleteFileCommand, Result>
 {
     public async Task<Result> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
     {
-        var userId = httpContextAccessor.HttpContext?.User.GetUserId() ?? -1;
-
-        if (userId == -1)
-        {
-            return Result.Unauthorized();
-        }
-
         var file = await db.Files
             .Where(f => f.Id == request.FileId)
             .FirstOrDefaultAsync(cancellationToken);
@@ -28,7 +18,7 @@ public class DeleteFileCommandHandler(
             case null:
                 return Result.NotFound();
             case { CreatedBy: null }:
-            case { CreatedBy: not null } when file.CreatedBy.Id != userId:
+            case { CreatedBy: not null } when file.CreatedBy.Id != request.UserId:
                 return Result.Forbidden();
         }
 

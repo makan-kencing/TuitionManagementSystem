@@ -2,7 +2,7 @@
 
 @foreach (var file in Model)
 {
-    <a href="@file.MappedPath" class="card d-flex"  target="_blank">
+    <a id="file-block-@(file.Id)" href="@file.MappedPath" class="card d-flex"  target="_blank">
         <input type="hidden" name="fileIds" value="@file.Id"/>
 
         @if (file.MimeType.StartsWith("image"))
@@ -30,6 +30,9 @@
         }
 
         <button hx-delete
+                hx-controller="File"
+                hx-action="DeleteFile"
+                hx-route-id="@file.Id"
                 type="button" class="btn-close" aria-label="Remove"></button>
     </a>
 }
