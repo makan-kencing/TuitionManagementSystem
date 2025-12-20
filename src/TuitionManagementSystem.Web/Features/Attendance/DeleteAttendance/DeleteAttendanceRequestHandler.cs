@@ -11,38 +11,28 @@ public sealed class DeleteAttendanceRequestHandler(ApplicationDbContext db) :
     public async Task<Result<DeleteAttendanceResponse>> Handle(
         DeleteAttendanceRequest request, CancellationToken cancellationToken)
     {
-
-
-        var checkAttendance = await db.Attendances
-            .Where(ad => ad.Id == request.AttendanceId)
+        var attendance = await db.Attendances
+            .Include(a => a.Session)
+            .Where(a => a.Id == request.AttendanceId)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (checkAttendance==null)
+        if (attendance is null)
         {
-            return Result.Invalid();
+            return Result.NotFound();
         }
 
-        var sessionTime=await db.Sessions
-            .Where(s => s.Id == request.SessionId)
-            .Select(s => new SessionTime
-            {
-                StartAt = s.StartAt,
-                EndAt = s.EndAt,
-            })
-            .FirstOrDefaultAsync(cancellationToken);
-
-        var now = DateTime.UtcNow;
-
-        var response = new DeleteAttendanceResponse
-        {
-            SessionId = request.SessionId, UserId = request.UserId, SessionTime = sessionTime,CurrentAt = now
-        };
-
-        db.Attendances.Remove(checkAttendance);
+        db.Attendances.Remove(attendance);
         await db.SaveChangesAsync(cancellationToken);
 
-        return Result<DeleteAttendanceResponse>.Success(response);
-
-
+        return Result.Success(new DeleteAttendanceResponse
+        {
+            StudentId = attendance.StudentId,
+            SessionId = attendance.SessionId,
+            SessionTime = new SessionTime
+            {
+                StartAt = attendance.Session.StartAt,
+                EndAt = attendance.Session.EndAt
+            }
+        });
     }
 }

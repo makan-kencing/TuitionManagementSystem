@@ -24,15 +24,16 @@
     Attend
 </span>
 
-<td id="action-@Model.UserId" hx-swap-oob="true">
-    <button
-        hx-delete="/attendance/delete"
-        hx-vals='{"id":"@Model.AttendanceId", "userId": "@Model.UserId","sessionid": "@Model.SessionId"}'
-        hx-target="#code-modal"
-        type="submit"
-        class=""
-        data-bs-toggle="modal" data-bs-target="#code-modal">
-        <i class="fa-solid fa-delete-left"></i>
-    </button>
-
-</td>
+<button
+    id="attendance-action-@Model.UserId"
+    hx-delete
+    hx-controller="Attendance"
+    hx-action="RemoveStudentAttendance"
+    hx-route-id="@Model.AttendanceId"
+    hx-target="#modal"
+    type="submit"
+    class="btn btn-danger"
+    data-bs-toggle="modal" data-bs-target="#modal"
+    hx-swap-oob="true">
+    <i class="fa-solid fa-delete-left"></i>
+</button>

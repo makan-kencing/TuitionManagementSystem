@@ -102,8 +102,6 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
             new AttendanceCodeViewModel { SessionId = id, Code = generatedCode.Value.Code });
     }
 
-
-    // public IActionResult CourseSessionListing() => this.View();
     [HttpGet]
     public async Task<IActionResult> CourseSessionListing(int id, CancellationToken cancellationToken)
     {
@@ -117,31 +115,33 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
     }
 
     [HttpPost]
+    [Route("~/[controller]/session/{sessionId:int:required}/student{studentId:int:required}")]
     [Authorize(Policy = "TeacherOnly")]
-    public async Task<IActionResult> Take(int id, int userId, CancellationToken cancellationToken)
+    public async Task<IActionResult> MarkStudentAttended(int sessionId, int studentId, CancellationToken cancellationToken)
     {
-        var code = await mediator.Send(new GetAttendanceCodeQuery(id), cancellationToken);
+        var code = await mediator.Send(new GetAttendanceCodeQuery(sessionId), cancellationToken);
         if (code.IsError())
         {
             return this.NotFound("Helping take attendance code not function");
         }
 
         var takeAttendance =
-            await mediator.Send(new TakeAttendanceCodeRequest(userId, code.Value.Code), cancellationToken);
+            await mediator.Send(new TakeAttendanceCodeRequest(studentId, code.Value.Code), cancellationToken);
         if (takeAttendance.IsNotFound())
         {
             return this.NotFound("Helping take attendance code not function");
         }
 
-        return this.PartialView("_AttendanceManagerModal", takeAttendance.Value);
+        return this.PartialView("_MarkedStudentAttendanceModal", takeAttendance.Value);
     }
 
     [HttpDelete]
+    [Route("~/[controller]/{id:int:required}")]
     [Authorize(Policy = "TeacherOnly")]
-    public async Task<IActionResult> Delete(int id, int userId, int sessionId, CancellationToken cancellationToken)
+    public async Task<IActionResult> RemoveStudentAttendance(int id, CancellationToken cancellationToken)
     {
         var deleteAttendance =
-            await mediator.Send(new DeleteAttendanceRequest(id, userId, sessionId), cancellationToken);
+            await mediator.Send(new DeleteAttendanceRequest(id), cancellationToken);
         if (deleteAttendance.IsError())
         {
             return this.BadRequest("Unable to delete attendance record.");

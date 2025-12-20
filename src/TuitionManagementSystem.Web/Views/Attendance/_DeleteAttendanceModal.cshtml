@@ -1,5 +1,9 @@
 ﻿@model TuitionManagementSystem.Web.Features.Attendance.DeleteAttendance.DeleteAttendanceResponse
 
+@{
+    var now = DateTime.UtcNow;
+}
+
 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
         <div class="modal-header">
@@ -17,15 +21,31 @@
     </div>
 </div>
 
-@if (Model.CurrentAt < Model.SessionTime.EndAt)
+
+<button
+    id="attendance-action-@Model.StudentId"
+    hx-post
+    hx-controller="Attendance"
+    hx-action="MarkStudentAttended"
+    hx-route-sessionId="@Model.SessionId"
+    hx-route-studentId="@Model.StudentId"
+    hx-target="#modal"
+    type="submit"
+    class="btn btn-primary"
+    data-bs-toggle="modal" data-bs-target="#modal"
+    hx-swap-oob="true">
+    <i class="fa-solid fa-handshake-angle"></i>
+</button>
+
+@if (now < Model.SessionTime.EndAt)
 {
-    <span id="status-@Model.UserId" hx-swap-oob="true" class="badge bg-warning text-dark">
+    <span id="status-@Model.StudentId" hx-swap-oob="true" class="badge bg-warning text-dark">
         NotTaken
-</span>
+    </span>
 }
 else
 {
-    <span id="status-@Model.UserId" hx-swap-oob="true" class="badge bg-danger">
+    <span id="status-@Model.StudentId" hx-swap-oob="true" class="badge bg-danger">
         Absent
     </span>
 }

@@ -47,30 +47,37 @@
                     }
                 </div>
             </td>
-            <td id="action-@student.StudentId">
+            <td>
                 @if (Model.CanTakeAttendance)
                 {
                     if (attend)
                     {
                         <button
-                            hx-delete="/attendance/delete"
-                            hx-vals='{"id":"@student.AttendanceId", "userId": "@student.StudentId","sessionid": "@Model.SessionId"}'
-                            hx-target="#code-modal"
+                            id="attendance-action-@student.StudentId"
+                            hx-delete
+                            hx-controller="Attendance"
+                            hx-action="RemoveStudentAttendance"
+                            hx-route-id="@student.AttendanceId"
+                            hx-target="#modal"
                             type="submit"
-                            class=""
-                            data-bs-toggle="modal" data-bs-target="#code-modal">
+                            class="btn btn-danger"
+                            data-bs-toggle="modal" data-bs-target="#modal">
                             <i class="fa-solid fa-delete-left"></i>
                         </button>
                     }
                     else
                     {
                         <button
-                            hx-post="/attendance/take"
-                            hx-vals='{"id": "@Model.SessionId", "userId": "@student.StudentId"}'
-                            hx-target="#takecode-modal"
+                            id="attendance-action-@student.StudentId"
+                            hx-post
+                            hx-controller="Attendance"
+                            hx-action="MarkStudentAttended"
+                            hx-route-sessionId="@Model.SessionId"
+                            hx-route-studentId="@student.StudentId"
+                            hx-target="#modal"
                             type="submit"
-                            class=""
-                            data-bs-toggle="modal" data-bs-target="#takecode-modal">
+                            class="btn btn-primary"
+                            data-bs-toggle="modal" data-bs-target="#modal">
                             <i class="fa-solid fa-handshake-angle"></i>
                         </button>
                     }
@@ -92,25 +99,3 @@
     }
     </tbody>
 </table>
-
-<div id="takecode-modal" class="modal"
-     aria-hidden="false"
-     tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content"></div>
-    </div>
-</div>
-
-<div id="code-modal" class="modal"
-     aria-hidden="false"
-     tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content"></div>
-    </div>
-</div>
-
-
-
-
-
-

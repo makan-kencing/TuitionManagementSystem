@@ -2,17 +2,16 @@
 
 public class DeleteAttendanceResponse
 {
-    public int UserId{ get; set; }
-    public int SessionId{ get; set; }
+    public required int StudentId { get; init; }
 
-    public required DateTime CurrentAt{ get; set; }
+    public required int SessionId { get; init; }
 
-    public SessionTime? SessionTime { get; set; }
+    public required SessionTime SessionTime { get; init; }
 }
 
 public class SessionTime
 {
-    public required DateTime StartAt{ get; set; }
-    public required DateTime EndAt{ get; set; }
+    public required DateTime StartAt { get; init; }
 
+    public required DateTime EndAt { get; init; }
 }
