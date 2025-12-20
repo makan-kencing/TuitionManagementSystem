@@ -47,11 +47,11 @@
                                             hx-route-id="@session.Id"
                                             hx-target="#code-modal"
                                             type="submit"
-                                            class=""
+                                            class="btn btn-secondary"
                                             data-bs-toggle="modal" data-bs-target="#code-modal">
-                                        <span id="code-button@(session.Id)">
-                                            @(session.Code ?? "Generate")
-                                        </span>
+                                            <span id="code-button@(session.Id)">
+                                                @(session.Code ?? "Generate")
+                                            </span>
                                         </button>
                                     </div>
                                 </div>
