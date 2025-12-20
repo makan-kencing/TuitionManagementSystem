@@ -319,23 +319,47 @@
             transform: translateY(-1px);
         }
 
-        #notification-badge {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
-            color: white;
-            border-radius: 10px;
-            padding: 2px 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            min-width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        /*#notification-badge {*/
+        /*    position: absolute;*/
+        /*    top: 2px;*/
+        /*    right: 2px;*/
+        /*    background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);*/
+        /*    color: white;*/
+        /*    border-radius: 10px;*/
+        /*    padding: 2px 6px;*/
+        /*    font-size: 0.7rem;*/
+        /*    font-weight: 600;*/
+        /*    min-width: 18px;*/
+        /*    height: 18px;*/
+        /*    display: flex;*/
+        /*    align-items: center;*/
+        /*    justify-content: center;*/
+        /*    border: 2px solid white;*/
+        /*    box-shadow: 0 2px 4px rgba(0,0,0,0.1);*/
+        /*}*/
+
+        #notification-drawer {
+            width: 350px;
+            min-width: 300px;
+            max-width: 400px;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 0.5rem;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            padding: 0.5rem;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .notification-item button {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .notification-item a.btn {
+            font-size: 0.1rem;
+            padding: 0.25rem 0.5rem;
         }
 
         .marquee-container {
@@ -450,19 +474,18 @@
             <div class="d-flex align-items-center gap-2">
                 @if (User.Identity!.IsAuthenticated)
                 {
-                    <div class="dropdown">
-                        <a class="btn btn-outline-secondary position-relative"
-                           hx-get hx-controller="Notification"
-                           hx-action="GetNotifications"
-                           hx-target="#notification-drawer"
-                           hx-trigger="load"
-                           data-bs-toggle="dropdown"
-                           aria-label="Notifications">
-                            <i class="fa-solid fa-bell"></i>
-                            <span id="notification-badge"></span>
-                        </a>
-                        <div id="notification-drawer" class="dropdown-menu dropdown-menu-end"></div>
-                    </div>
+                    <a class="btn btn-outline-secondary position-relative"
+                       hx-get="@Url.Action("GetNotifications", "Notification")"
+                       hx-target="#notification-drawer"
+                       hx-trigger="click"
+                       hx-swap="innerHTML"
+                       data-bs-toggle="dropdown"
+                       aria-label="Notifications">
+                        <i class="fa-solid fa-bell"></i>
+                        <span id="notification-badge"></span>
+                    </a>
+
+                    <div id="notification-drawer" class="dropdown-menu dropdown-menu-end"></div>
 
                     <div class="dropdown">
                         <a class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown" aria-expanded="false">
