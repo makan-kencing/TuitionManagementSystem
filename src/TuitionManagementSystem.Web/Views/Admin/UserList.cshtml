@@ -1,0 +1,94 @@
+﻿@model IEnumerable<TuitionManagementSystem.Web.Features.User.UserListViewModel>
+
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <h2>@ViewData["Title"]</h2>
+
+        <a class="btn btn-primary"
+           asp-action="Create">
+            + Add
+        </a>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th class="text-end">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.Id</td>
+                <td>@u.Username</td>
+                <td>@(u.DisplayName ?? "-")</td>
+                <td>@u.Email</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary"
+                       asp-controller="Admin"
+                       asp-action="EditUser"
+                       asp-route-userId="@u.Id">
+                        Edit
+                    </a>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="confirmDelete(@u.Id)">
+                        Delete
+                    </button>
+
+                    <form id="delete-form-@u.Id"
+                          asp-action="Delete"
+                          asp-route-id="@u.Id"
+                          method="post"
+                          class="d-none">
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                html: 'This user will be <b>permanently deleted</b>.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`delete-form-${id}`).submit();
+                }
+            });
+        }
+
+        @* Display SweetAlert after delete action if TempData is set *@
+        @if (TempData["Message"] != null)
+        {
+            <text>
+            Swal.fire({
+                icon: '@TempData["Status"]',
+                html: '@TempData["Message"]',
+                confirmButtonText: 'OK'
+            });
+            </text>
+        }
+    </script>
+}
+
