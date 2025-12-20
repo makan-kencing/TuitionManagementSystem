@@ -18,6 +18,7 @@ public class GetSubmissionFileRequestHandler(ApplicationDbContext db)
             .Select(s=> new GetSubmissionFileResponse
             {
                Name = s.Student.Account.Name,
+               Id =  s.Id,
                SubmissionFiles =new UploadFilesResponse(s.Attachments.Select(
                    sf=> new UploadedFile
                        (

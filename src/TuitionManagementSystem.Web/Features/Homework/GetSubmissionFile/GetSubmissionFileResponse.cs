@@ -5,6 +5,8 @@ using File.UploadFiles;
 public class GetSubmissionFileResponse
 {
     public string? Name { get; set; }
+
+    public int Id { get; set; }
     public UploadFilesResponse SubmissionFiles { get; set; }
 }
 
