@@ -93,6 +93,11 @@ public class AttendanceController(IMediator mediator, ApplicationDbContext db) :
             new GenerateAttendanceCodeRequest(id),
             cancellationToken);
 
+        if (generatedCode.IsForbidden())
+        {
+            return this.PartialView("_CannotGenerateAttendanceCode");
+        }
+
         return this.PartialView("_AttendanceCodeModal",
             new AttendanceCodeViewModel { SessionId = id, Code = generatedCode.Value.Code });
     }
