@@ -19,7 +19,7 @@ public class CheckoutController : WebController
     private readonly StripeOptions options;
     private readonly StripeClient client;
     private readonly ApplicationDbContext db;
-    private readonly IInvoiceService _invoiceService;
+    private readonly IInvoiceService invoiceService;
 
     public CheckoutController(IConfiguration configuration, ApplicationDbContext db, IInvoiceService invoiceService)
     {
@@ -28,14 +28,16 @@ public class CheckoutController : WebController
                        ?? throw new ConfigurationErrorsException("Stripe configurations not found.");
         this.client = new StripeClient(this.options.SecretKey);
         this.db = db;
-        this._invoiceService = invoiceService;
+        this.invoiceService = invoiceService;
     }
 
     [HttpPost]
     public async Task<IActionResult> Index([FromForm] List<int> invoiceIds)
     {
-        if (invoiceIds == null || invoiceIds.Count == 0)
-            return BadRequest("No invoices selected.");
+        if (invoiceIds.Count == 0)
+        {
+            return this.BadRequest("No invoices selected.");
+        }
 
         var invoices = await this.db.Invoices
             .Where(i => invoiceIds.Contains(i.Id))
@@ -77,12 +79,9 @@ public class CheckoutController : WebController
         {
             LineItems = items,
             Mode = "payment",
-            SuccessUrl = Url.Action("Complete", "Checkout", null, Request.Scheme)
+            SuccessUrl = this.Url.Action("Complete", "Checkout", null, this.Request.Scheme)
                          + "?session_id={CHECKOUT_SESSION_ID}",
-            Metadata = new Dictionary<string, string>
-            {
-                ["invoice_ids"] = string.Join(",", invoiceIds)
-            }
+            Metadata = new Dictionary<string, string> { ["invoice_ids"] = string.Join(",", invoiceIds) }
         };
 
         var session = await this.client.V1.Checkout.Sessions.CreateAsync(sessionOptions);
@@ -114,7 +113,7 @@ public class CheckoutController : WebController
                 var method => new GenericPaymentMethod { Generic = method }
             };
 
-            List<int> invoiceIds = new List<int>();
+            List<int> invoiceIds;
 
             if (session.Metadata != null && session.Metadata.ContainsKey("invoice_ids"))
             {
@@ -139,42 +138,42 @@ public class CheckoutController : WebController
                     .ToList();
             }
 
-            if (!invoiceIds.Any())
+            if (invoiceIds.Count == 0)
             {
-                return BadRequest("No invoice IDs found in payment session");
+                return this.BadRequest("No invoice IDs found in payment session");
             }
 
             var invoices = await this.db.Invoices
                 .Where(i => invoiceIds.Contains(i.Id))
                 .ToListAsync();
 
-            if (!invoices.Any())
+            if (invoices.Count == 0)
             {
-                return BadRequest($"No invoices found for IDs: {string.Join(", ", invoiceIds)}");
+                return this.BadRequest($"No invoices found for IDs: {string.Join(", ", invoiceIds)}");
             }
 
             var payment = new Payment
             {
-                Amount = (decimal)session.PaymentIntent.Amount / 100,
-                Method = paymentMethod,
-                Invoices = invoices
+                Amount = (decimal)session.PaymentIntent.Amount / 100, Method = paymentMethod, Invoices = invoices
             };
 
             this.db.Payments.Add(payment);
             await this.db.SaveChangesAsync();
 
-            var result = await _invoiceService.MarkInvoicesAsPaidAsync(
+            var result = await this.invoiceService.MarkInvoicesAsPaidAsync(
                 invoiceIds,
                 payment.Id,
                 this.HttpContext.RequestAborted);
 
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Errors);
+                return this.BadRequest(result.Errors);
             }
+
+            return this.RedirectToAction("Index", "Payment", new { id = payment.Id });
         }
 
-        return this.RedirectToAction("InvoiceHistory", "Invoice");
+        return this.RedirectToAction("ListInvoices", "Invoice");
     }
 }
 
