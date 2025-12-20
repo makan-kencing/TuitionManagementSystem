@@ -22,13 +22,17 @@ public class GetAssignmentDetailsQueryHandler(ApplicationDbContext db)
                 UpdatedAt = a.UpdatedAt,
                 DueAt = a.DueAt,
                 Assigned = a.Course.Enrollments
-                    .Join(
+                    .GroupJoin(
                         a.Submissions.DefaultIfEmpty(),
                         e => e.Student.Id,
                         s => s!.Student.Id,
-                        (e, s) => new { Enrollment = e, Submission = s }
+                        (e, s) => new { Enrollment = e, Submissions = s }
                     )
-                    .Select(g => new StudentHomework
+                    .SelectMany(
+                        g => g.Submissions.DefaultIfEmpty(),
+                        (g, s) => new { g.Enrollment, Submission = s}
+                        ).Select(
+                        g => new StudentHomework
                     {
                         StudentName = g.Enrollment.Student.Account.DisplayName,
                         Submission = g.Submission == null
@@ -49,9 +53,9 @@ public class GetAssignmentDetailsQueryHandler(ApplicationDbContext db)
                             }
                     })
                     .ToList(),
-                TotalStudents = a.Course.Enrollments.Count(),
-                SubmittedCount = a.Submissions.Count(),
-                AverageSubmissionRate = (double)a.Submissions.Count() / a.Course.Enrollments.Count() *100
+                TotalStudents = a.Course.Enrollments.Count,
+                SubmittedCount = a.Submissions.Count,
+                AverageSubmissionRate = (double)a.Submissions.Count / a.Course.Enrollments.Count * 100
             })
             .FirstOrDefaultAsync(cancellationToken);
 

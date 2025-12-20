@@ -1,6 +1,8 @@
 namespace TuitionManagementSystem.Web.Features.File.UploadFiles;
 
-public class UploadFilesResponse : List<UploadedFile>;
+using System.Collections.ObjectModel;
+
+public class UploadFilesResponse(List<UploadedFile> l) : ReadOnlyCollection<UploadedFile>(l);
 
 public record UploadedFile(
     int Id,

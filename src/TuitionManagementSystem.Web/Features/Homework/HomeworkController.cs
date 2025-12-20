@@ -3,6 +3,7 @@
 using Ardalis.Result;
 using GetAnnouncementInfo;
 using GetAssignmentDetail;
+using GetSubmissionFile;
 using Htmx;
 using Infrastructure.Persistence;
 using MakeAnnouncement;
@@ -97,6 +98,7 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
 
 
     [HttpPost]
+    [Authorize(Policy = "TeacherOnly")]
     [Route("~/[controller]/announcement")]
     public async Task<IActionResult> MakeAnnouncement(MakeAnnouncementViewModel model)
     {
@@ -113,7 +115,18 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         return this.PartialView("_MakeAnnouncementSuccess", model);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetSubmissionFile(int id, CancellationToken cancellationToken)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+        var response = await mediator.Send(new GetSubmissionFileRequest(id), cancellationToken);
+        return this.PartialView("_MarkHomeWorkModel", response.Value);
+    }
 
+    [Authorize(Policy = "TeacherOnly")]
     public async Task<IActionResult> TeacherHomeworkDashboard(int courseId,CancellationToken cancellationToken)
     {
         var userId = this.User.GetUserId();
@@ -164,6 +177,7 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         }
     }
 
+    [Authorize(Policy = "TeacherOnly")]
     public async Task<IActionResult> SubmissionList(int courseId, CancellationToken cancellationToken)
     {
         var response = await mediator.Send(new GetAnnouncementInfoRequest(courseId),cancellationToken);
@@ -175,6 +189,7 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
     }
 
     // public IActionResult AssignmentDetail()=>this.View();
+    [Authorize(Policy = "TeacherOnly")]
      public async Task<IActionResult> GetAssignmentDetail(int assignmentId, CancellationToken cancellationToken)
      {
          var response = await mediator.Send(new GetAssignmentDetailsQuery(assignmentId),cancellationToken);
@@ -184,6 +199,8 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
          }
          return this.View(response.Value);
     }
+
+
 
 
 

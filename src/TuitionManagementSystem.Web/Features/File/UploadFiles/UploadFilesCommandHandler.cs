@@ -69,9 +69,8 @@ public class UploadFilesCommandHandler(ApplicationDbContext db, IFileService fil
         await db.AddRangeAsync(files, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
-        var response = new UploadFilesResponse();
-        response.AddRange(files.Select(f => new UploadedFile(f.Id, f.FileName, f.MimeType, f.Uri)));
-
-        return Result.Success(response);
+        return Result.Success(
+            new UploadFilesResponse(files
+                .Select(f => new UploadedFile(f.Id, f.FileName, f.MimeType, f.Uri)).ToList()));
     }
 }

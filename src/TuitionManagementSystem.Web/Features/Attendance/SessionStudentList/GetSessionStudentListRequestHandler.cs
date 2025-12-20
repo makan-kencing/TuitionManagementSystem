@@ -21,17 +21,23 @@ public sealed class GetSessionStudentListRequestHandler(ApplicationDbContext db)
                 StartDate = s.StartAt,
                 EndDate = s.EndAt,
                 CreatedOn = DateTime.UtcNow,
-                StudentList = s.Course.Enrollments.Join(
-                    s.Attendances.DefaultIfEmpty(),
-                    e => e.Student.Id,
-                    a => a!.Student.Id,
-                    (e, a) => new StudentInfo
-                    {
-                        StudentId = e.Student.Id,
-                        DisplayName = e.Student.Account.DisplayName,
-                        AttendanceId = a == null ? null : a.Id
-                    }
-                ).ToList()
+                StudentList = s.Course.Enrollments
+                    .GroupJoin(
+                        s.Attendances,
+                        e => e.Student.Id,
+                        a => a.Student.Id,
+                        (e, a) => new { Enrollment = e, Attendances = a }
+                    ).SelectMany(
+                        g => g.Attendances.DefaultIfEmpty(),
+                        (g, a) => new { g.Enrollment, Attendance = a }
+                    )
+                    .Select(g => new StudentInfo
+                        {
+                            StudentId = g.Enrollment.Student.Id,
+                            DisplayName = g.Enrollment.Student.Account.DisplayName,
+                            AttendanceId = g.Attendance == null ? null : g.Attendance.Id
+                        }
+                    ).ToList()
             })
             .FirstOrDefaultAsync(cancellationToken);
 

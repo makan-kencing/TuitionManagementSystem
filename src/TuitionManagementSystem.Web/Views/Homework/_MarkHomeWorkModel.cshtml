@@ -1,0 +1,48 @@
+﻿
+@using TuitionManagementSystem.Web.Features.File.UploadFiles
+@model TuitionManagementSystem.Web.Features.Homework.GetSubmissionFile.GetSubmissionFileResponse
+
+
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Marking Homework - @Model.Name</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="mb-3">
+          <label for="gradeInput" class="form-label">Mark（0–100）</label>
+          <input type="number" class="form-control" id="gradeInput" name="grade"
+                 min="0" max="100" placeholder="Please Key in the total mark">
+        </div>
+
+        <div id="submissionCarousel" class="carousel slide">
+
+            <partial name="../File/_File" model="Model.SubmissionFiles"/>
+
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#submissionCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#submissionCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#submissionCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#submissionCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#submissionCarousel" data-bs-slide-to="2"></button>
+            </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submitted</button>
+      </div>
+    </div>
+  </div>
