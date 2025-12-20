@@ -1,0 +1,47 @@
+﻿@model TuitionManagementSystem.Web.Features.Admin.AdminCreateUserViewModel
+
+@{
+    ViewData["Title"] ??= "Add User";
+}
+
+<div class="container mt-5" style="max-width: 420px;">
+    <div class="card shadow border-0 rounded-4 p-4">
+        <h4 class="text-center fw-bold text-primary mb-3">@ViewData["Title"]</h4>
+
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input asp-for="Username" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input asp-for="Password" type="password" class="form-control" minlength="6"/>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                ➕ Create
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    const message = '@Html.Raw(TempData["Message"])';
+    const status = '@TempData["Status"]';
+
+    if (message) {
+        Swal.fire({
+            icon: status === "success" ? "success" : "error",
+            title: status === "success" ? "Success" : "Error",
+            html: message
+        });
+    }
+</script>
+}
