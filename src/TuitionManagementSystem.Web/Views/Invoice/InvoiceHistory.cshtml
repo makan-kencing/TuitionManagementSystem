@@ -121,7 +121,8 @@
                                         }
                                         else if (invoice.Status == InvoiceStatus.Paid)
                                         {
-                                            <a asp-controller="Payment" asp-action="ViewPaymentDetails" asp-route-paymentId="@invoice.PaymentId" class="btn btn-sm btn-outline-primary">
+                                            <a asp-controller="Payment" asp-action="Index" asp-route-id="@invoice.PaymentId"
+                                               class="btn btn-sm btn-outline-primary">
                                                 View Payment Details
                                             </a>
                                         }

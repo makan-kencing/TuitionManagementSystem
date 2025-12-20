@@ -24,6 +24,7 @@ public class GetPaymentDetailsQueryHandler(ApplicationDbContext db)
                     {
                         Name = i.Name,
                         Amount = i.Amount,
+                        InvoicedAt = i.InvoicedAt,
                         Student = new InvoiceStudentDetails { Id = i.Student.Id, Name = i.Student.Account.Name },
                         Enrollment = new InvoiceEnrollmentDetails { CourseName = i.Enrollment.Course.Name }
                     }).ToList()

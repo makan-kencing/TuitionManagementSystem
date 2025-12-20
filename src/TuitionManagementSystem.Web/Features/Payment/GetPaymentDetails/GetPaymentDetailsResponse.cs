@@ -36,6 +36,8 @@ public class PaidInvoice
 
     public required decimal Amount { get; init; }
 
+    public required DateTime InvoicedAt { get; init; }
+
     public required InvoiceStudentDetails Student { get; init; }
 
     public required InvoiceEnrollmentDetails Enrollment { get; init; }
