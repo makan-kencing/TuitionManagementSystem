@@ -1,9 +1,14 @@
 namespace TuitionManagementSystem.Web.Features.Accounts;
 
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Abstractions;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +18,7 @@ using Services.Auth.Extensions;
 using Services.File;
 
 [AllowAnonymous]
-public sealed class AccountsApiController(ApplicationDbContext db, IMediator mediator,  IFileService fileService) : ApiController
+public sealed class AccountsApiController(ApplicationDbContext db, IMediator mediator, IFileService fileService) : ApiController
 {
     private static readonly PasswordHasher<Account> Hasher = new();
 
@@ -44,9 +49,12 @@ public async Task<object> UpdateProfile([FromForm] AccountProfileViewModel model
         return new { success = false, message = "User not found." };
 
     // Verify current password
-    var pwdCheck = Hasher.VerifyHashedPassword(user, user.HashedPassword, model.ConfirmPassword);
-    if (pwdCheck == PasswordVerificationResult.Failed)
-        return new { success = false, message = "Current password is incorrect." };
+    if (model.ConfirmPassword != null)
+    {
+        var pwdCheck = Hasher.VerifyHashedPassword(user, user.HashedPassword, model.ConfirmPassword);
+        if (pwdCheck == PasswordVerificationResult.Failed)
+            return new { success = false, message = "Current password is incorrect." };
+    }
 
     // Update username if changed
     if (!string.Equals(user.Username, model.Username, StringComparison.OrdinalIgnoreCase))
@@ -56,6 +64,12 @@ public async Task<object> UpdateProfile([FromForm] AccountProfileViewModel model
             return new { success = false, message = "Username is already taken." };
 
         user.Username = model.Username;
+    }
+
+    // Update displayname if changed
+    if (!string.Equals(user.DisplayName, model.DisplayName, StringComparison.OrdinalIgnoreCase))
+    {
+        user.DisplayName = model.DisplayName;
     }
 
     // Update email if changed
@@ -82,6 +96,7 @@ public async Task<object> UpdateProfile([FromForm] AccountProfileViewModel model
             CanonicalPath = savedFile.CanonicalPath
         };
 
+        db.Files.Add(newFile);
         await db.SaveChangesAsync();
 
         user.ProfileImageId = newFile.Id;
