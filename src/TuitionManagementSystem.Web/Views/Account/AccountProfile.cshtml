@@ -45,6 +45,11 @@ ViewData["Title"] = "Account Profile";
                 </div>
 
                 <div class="mb-2">
+                    <label asp-for="DisplayName" class="form-label small fw-semibold"></label>
+                    <input asp-for="DisplayName" id="displayName" class="form-control form-control-sm" disabled />
+                </div>
+
+                <div class="mb-2">
                     <label asp-for="Email" class="form-label small fw-semibold"></label>
                     <input asp-for="Email" id="email" class="form-control form-control-sm" disabled />
                 </div>
@@ -151,6 +156,7 @@ ViewData["Title"] = "Account Profile";
 
             const formData = new FormData();
             formData.append("Username", $("#username").val());
+            formData.append("DisplayName", $("#displayName").val());
             formData.append("Email", $("#email").val());
             formData.append("ConfirmPassword", confirmPwd);
 
