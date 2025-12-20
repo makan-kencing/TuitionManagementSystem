@@ -3,6 +3,7 @@
 using Ardalis.Result;
 using GetAnnouncementInfo;
 using GetAssignmentDetail;
+using GetSubmissionFile;
 using Htmx;
 using Infrastructure.Persistence;
 using MakeAnnouncement;
@@ -114,6 +115,17 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         return this.PartialView("_MakeAnnouncementSuccess", model);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetSubmissionFile(int id, CancellationToken cancellationToken)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+        var response = await mediator.Send(new GetSubmissionFileRequest(id), cancellationToken);
+        return this.PartialView("_MarkHomeWorkModel", response.Value);
+    }
+
     [Authorize(Policy = "TeacherOnly")]
     public async Task<IActionResult> TeacherHomeworkDashboard(int courseId,CancellationToken cancellationToken)
     {
@@ -187,6 +199,8 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
          }
          return this.View(response.Value);
     }
+
+
 
 
 
