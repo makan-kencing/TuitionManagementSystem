@@ -6,4 +6,6 @@ public class MakeEnrollmentResponse
     public int StudentId { get; set; }
     public int CourseId { get; set; }
     public DateTime EnrolledAt { get; set; }
+    public string? StudentEmail { get; set; } // optional
 }
+
