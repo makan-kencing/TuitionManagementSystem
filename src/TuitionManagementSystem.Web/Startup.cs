@@ -144,8 +144,6 @@ public class Startup(IConfiguration configuration)
         {
             app
                 .UseDeveloperExceptionPage()
-                .UseExceptionHandler("/500")
-                .UseStatusCodePagesWithReExecute("/404")
                 .UseForwardedHeaders();
         }
         else
