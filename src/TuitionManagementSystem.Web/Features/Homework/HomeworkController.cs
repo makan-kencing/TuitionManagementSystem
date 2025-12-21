@@ -90,14 +90,11 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         }
 
         var userId = this.User.GetUserId();
-        if (userId == -1)
-        {
-            return this.Unauthorized();
-        }
 
         var response =
             await mediator.Send(new MakeSubmissionRequest(model.AssignmentId, userId, model.FileIds, model.Content));
-        return this.PartialView("_SubmissionSuccess", model);
+        this.Response.Htmx(h => h.Refresh());
+        return this.Ok();
     }
 
 
@@ -124,8 +121,6 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
 
         var response = await mediator.Send(new MakeAnnouncementInfoRequest(model.CourseId, userId, model.FileIds,
             model.Title, model.Description, model.DueAt));
-
-
 
         return this.PartialView("_MakeAnnouncementSuccess", model);
     }
