@@ -4,49 +4,75 @@
     var now = DateTime.UtcNow;
 }
 
-<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h4 class="modal-title"></h4>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal-dialog modal-md modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow">
+
+        <div class="modal-header bg-success text-white">
+            <h5 class="modal-title d-flex align-items-center gap-2">
+                <i class="fa-solid fa-circle-check"></i>
+                Attendance Updated
+            </h5>
+            <button type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal"></button>
         </div>
 
-        <div class="modal-body">
-            <div class="alert alert-success">Attendance Remove successfully</div>
+        <div class="modal-body text-center py-4">
+            <span class="badge rounded-circle bg-success p-3 mb-3">
+                <i class="fa-solid fa-check fa-2x text-white"></i>
+            </span>
+
+            <p class="fw-semibold mb-0">
+                Attendance removed successfully
+            </p>
         </div>
 
-        <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        <div class="modal-footer justify-content-center border-0">
+            <button type="button"
+                    class="btn btn-outline-success px-4"
+                    data-bs-dismiss="modal">
+                OK
+            </button>
         </div>
+
     </div>
 </div>
 
 
-<button
-    id="attendance-action-@Model.StudentId"
-    hx-post
-    hx-controller="Session"
-    hx-action="MarkStudentAttendedHtmx"
-    hx-route-id="@Model.SessionId"
-    hx-route-studentId="@Model.StudentId"
-    hx-target="#modal"
-    type="submit"
-    class="btn btn-primary"
-    data-bs-toggle="modal" data-bs-target="#modal"
-    hx-swap-oob="true">
-    <i class="fa-solid fa-handshake-angle"></i>
-</button>
+<div class="d-flex align-items-center gap-2">
 
-@if (now < Model.SessionTime.EndAt)
-{
-    <span id="status-@Model.StudentId" hx-swap-oob="true" class="badge bg-warning text-dark">
-        NotTaken
-    </span>
-}
-else
-{
-    <span id="status-@Model.StudentId" hx-swap-oob="true" class="badge bg-danger">
-        Absent
-    </span>
-}
+    <button
+        id="attendance-action-@Model.StudentId"
+        hx-post
+        hx-controller="Session"
+        hx-action="MarkStudentAttendedHtmx"
+        hx-route-id="@Model.SessionId"
+        hx-route-studentId="@Model.StudentId"
+        hx-target="#modal"
+        type="submit"
+        class="btn btn-sm btn-outline-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#modal"
+        hx-swap-oob="true">
 
+        <i class="fa-solid fa-handshake-angle"></i>
+    </button>
+
+    @if (now < Model.SessionTime.EndAt)
+    {
+        <span id="status-@Model.StudentId"
+              hx-swap-oob="true"
+              class="badge bg-warning text-dark px-3 py-2">
+            Not Taken
+        </span>
+    }
+    else
+    {
+        <span id="status-@Model.StudentId"
+              hx-swap-oob="true"
+              class="badge bg-danger px-3 py-2">
+            Absent
+        </span>
+    }
+
+</div>

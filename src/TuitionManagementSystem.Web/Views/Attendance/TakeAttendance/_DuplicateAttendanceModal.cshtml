@@ -1,16 +1,41 @@
-<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h4 class="modal-title"></h4>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal-dialog modal-md modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow">
+
+        <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title d-flex align-items-center gap-2">
+                <i class="fas fa-exclamation-triangle"></i>
+                Attendance Already Taken
+            </h5>
+            <button type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"></button>
         </div>
 
-        <div class="modal-body p-2">
-            <div class="alert alert-danger mb-0">Attendance has already been taken for this session.</div>
+        <div class="modal-body text-center py-4">
+            <div class="mb-3">
+                <span class="badge rounded-circle bg-danger p-3">
+                    <i class="fas fa-times fa-2x text-white"></i>
+                </span>
+            </div>
+
+            <h5 class="fw-semibold mb-2">
+                Action Not Allowed
+            </h5>
+
+            <p class="text-muted mb-0">
+                Attendance has already been taken for this session.<br>
+                You cannot submit it again.
+            </p>
         </div>
 
-        <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        <div class="modal-footer justify-content-center border-0">
+            <button type="button"
+                    class="btn btn-outline-danger px-4"
+                    data-bs-dismiss="modal">
+                OK
+            </button>
         </div>
+
     </div>
 </div>
