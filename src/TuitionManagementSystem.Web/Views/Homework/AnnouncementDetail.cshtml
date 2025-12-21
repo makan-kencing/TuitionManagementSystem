@@ -1,0 +1,147 @@
+﻿@model TuitionManagementSystem.Web.Features.Homework.GetAnnouncementDetail.GetAnnouncementDetailResponse
+
+@{
+    var now = DateTime.UtcNow;
+}
+<div class="container my-5">
+
+    <div class="row g-4">
+        <button type="button"
+                class="btn btn-outline-secondary"
+                onclick="window.history.back();">
+            <i class="fas fa-arrow-left me-1"></i>
+            Back
+        </button>
+        <div class="col-md-8">
+            <div class="bg-white p-4 rounded shadow-sm">
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        <span class="badge rounded-circle bg-warning p-3">
+                            <i class="fa-solid fa-book"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="mb-1">@Model.Title</h3>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+
+                    <span class="fw-semibold">@Model.Assigned.Submission.Grade points</span>
+
+                    <span class="text-danger fw-semibold">@Model.DueAt</span>
+                </div>
+
+                <hr>
+                <ol class="mb-3">
+                    <li>
+                        <p>@Model.Description</p>
+                    </li>
+
+                </ol>
+                <div id="submissionCarousel" class="carousel slide">
+                    <partial name="../File/_File" model="@Model.AnnouncementFiles"/>
+                </div>
+                <hr>
+
+
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="bg-white p-4 rounded shadow-sm">
+
+                <h6 class="fw-semibold mb-3">Your work</h6>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-success">Assigned</span>
+                </div>
+
+
+                @if (Model.Assigned.Submission.Id == null)
+                {
+                    <div id="make-submission-@(Model.Id)">
+                        <button hx-get
+                                hx-controller="Homework"
+                                hx-action="GetMakeSubmissionModal"
+                                hx-route-id="@Model.Id"
+                                hx-target="#modal"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal"
+                                class="btn  btn-outline-primary w-100 mb-3">
+                            Submit Homework
+                        </button>
+                    </div>
+                }
+                else if (Model.Assigned.Submission.Id == null && now > Model.DueAt)
+                {
+                    <div id="make-submission-@(Model.Id)">
+                        <button
+                            class="btn  btn-outline-danger w-100 mb-3">
+                            Unsubmitted
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="container">
+                    @foreach (var path in Model.Assigned.Submission.Files)
+                    {
+                        <div class="row mb-3">
+                            <div class="col -5">
+                                <a id="file-block-@(path.Id)" href="@path.MappedPath"
+                                   class="card d-flex flex-row align-items-center p-2"
+                                   target="_blank"
+                                   style="text-decoration: none;">
+
+                                    <input type="hidden" name="fileIds" value="@path.Id"/>
+
+                                    @if (path.MimeType.StartsWith("image"))
+                                    {
+                                        <img src="@path.MappedPath" alt="Image"
+                                             class="img-thumbnail me-3"
+                                             style="width: 80px; height: auto;"/>
+
+                                        <div class="card-body p-0">
+                                            <h5 class="card-title mb-1">@path.FileName</h5>
+                                            <small class="card-subtitle text-muted">Image</small>
+                                        </div>
+                                    }
+                                    else if (path.MimeType.StartsWith("text"))
+                                    {
+                                        <div class="card-body p-0">
+                                            <h5 class="card-title mb-1">@path.FileName</h5>
+                                            <small class="card-subtitle text-muted">Text</small>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="card-body p-0">
+                                            <h5 class="card-title mb-1">@path.FileName</h5>
+                                            <small class="card-subtitle text-muted">File</small>
+                                        </div>
+                                    }
+
+                                </a>
+                            </div>
+                        </div>
+                        }
+                        </div>
+
+                    <div id="make-submission-@(Model.Id)">
+
+                        <button
+                            class="btn  btn-outline-success w-100 mb-3">
+                            Submitted
+                        </button>
+                    </div>
+                }
+
+                <hr>
+
+            </div>
+        </div>
+
+    </div>
+</div>
