@@ -10,7 +10,9 @@ namespace TuitionManagementSystem.Web.Features.Enrollment;
 using Ardalis.Result.AspNetCore;
 using MarkEnrollment;
 using Microsoft.AspNetCore.Authorization;
+using Services.Auth.Extensions;
 using ViewCourseEnrollment;
+using ViewTeacherCourses;
 
 [ApiController]
 [Route("enrollment")]
@@ -92,6 +94,22 @@ public class EnrollmentController : Controller
 
         return Ok(new { message = $"Enrollment {model.Status.Value.ToString().ToLower()} successfully" });
     }
+
+    [HttpGet("course")]
+    public async Task<IActionResult> ViewTeacherCourses(CancellationToken cancellationToken)
+    {
+        var teacherId = User.GetUserId();
+
+        var result = await _mediator.Send(
+            new ViewTeacherCoursesRequest(teacherId),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+            return View("TeacherCourses", new List<ViewTeacherCoursesResponse>());
+
+        return View("TeacherCourses", result.Value);
+    }
+
 
     [HttpGet("course/{courseId}")]
     public async Task<IActionResult> ViewCourseEnrollments(int courseId, CancellationToken cancellationToken)
