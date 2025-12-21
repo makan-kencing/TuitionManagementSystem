@@ -32,6 +32,8 @@ public class StudentController(ApplicationDbContext db) : Controller
             .ToListAsync();
 
         ViewData["Title"] = "Manage Students";
+        ViewData["UserType"] = "Student";
+        ViewData["CreateUrl"] = Url.Action(nameof(Create), "Student");
 
         return View("~/Views/Admin/UserList.cshtml", students);
     }
