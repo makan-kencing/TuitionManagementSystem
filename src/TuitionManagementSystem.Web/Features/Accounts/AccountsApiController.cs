@@ -37,91 +37,103 @@ public sealed class AccountsApiController(ApplicationDbContext db, IMediator med
             .AnyAsync(cancellationToken);
 
     [HttpPost]
-[Route("profile")]
-public async Task<object> UpdateProfile([FromForm] AccountProfileViewModel model)
-{
-    var userId = this.User.GetAccountId();
-    var user = await db.Accounts
-        .Include(a => a.ProfileImage)
-        .FirstOrDefaultAsync(a => a.Id == userId);
-
-    if (user == null)
-        return new { success = false, message = "User not found." };
-
-    // Verify current password
-    if (model.ConfirmPassword != null)
+    [Route("profile")]
+    public async Task<object> UpdateProfile([FromForm] AccountProfileViewModel model)
     {
-        var pwdCheck = Hasher.VerifyHashedPassword(user, user.HashedPassword, model.ConfirmPassword);
-        if (pwdCheck == PasswordVerificationResult.Failed)
-            return new { success = false, message = "Current password is incorrect." };
-    }
+        var userId = this.User.GetAccountId();
+        var user = await db.Accounts
+            .Include(a => a.ProfileImage)
+            .FirstOrDefaultAsync(a => a.Id == userId);
 
-    // Update username if changed
-    if (!string.Equals(user.Username, model.Username, StringComparison.OrdinalIgnoreCase))
-    {
-        var exists = await db.Accounts.AnyAsync(a => a.Username == model.Username && a.Id != user.Id);
-        if (exists)
-            return new { success = false, message = "Username is already taken." };
+        if (user == null)
+            return new { success = false, message = "User not found." };
 
-        user.Username = model.Username;
-    }
-
-    // Update displayname if changed
-    if (!string.Equals(user.DisplayName, model.DisplayName, StringComparison.OrdinalIgnoreCase))
-    {
-        user.DisplayName = model.DisplayName;
-    }
-
-    // Update email if changed
-    if (!string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
-    {
-        var emailExists = await db.Accounts.AnyAsync(a => a.Email == model.Email && a.Id != user.Id);
-        if (emailExists)
-            return new { success = false, message = "Email is already in use." };
-
-        user.Email = model.Email;
-    }
-
-    if (model.ProfileImage != null && model.ProfileImage.Length > 0)
-    {
-        var oldImage = user.ProfileImage;
-
-        var savedFile = await fileService.UploadFileAsync(model.ProfileImage);
-
-        var newFile = new File
+        // Verify current password
+        if (model.ConfirmPassword != null)
         {
-            FileName = model.ProfileImage.FileName,
-            MimeType = model.ProfileImage.ContentType,
-            Uri = savedFile.MappedPath,
-            CanonicalPath = savedFile.CanonicalPath
-        };
-
-        db.Files.Add(newFile);
-        await db.SaveChangesAsync();
-
-        user.ProfileImageId = newFile.Id;
-
-        await db.SaveChangesAsync();
-
-        if (oldImage != null)
-        {
-            if (!string.IsNullOrWhiteSpace(oldImage.CanonicalPath))
-            {
-                await fileService.DeleteFileAsync(oldImage.CanonicalPath);
-            }
-
-            db.Files.Remove(oldImage);
-            await db.SaveChangesAsync();
+            var pwdCheck = Hasher.VerifyHashedPassword(user, user.HashedPassword, model.ConfirmPassword);
+            if (pwdCheck == PasswordVerificationResult.Failed)
+                return new { success = false, message = "Current password is incorrect." };
         }
+
+        // Update username if changed
+        if (!string.Equals(user.Username, model.Username, StringComparison.OrdinalIgnoreCase))
+        {
+            var exists = await db.Accounts.AnyAsync(a => a.Username == model.Username && a.Id != user.Id);
+            if (exists)
+                return new { success = false, message = "Username is already taken." };
+
+            user.Username = model.Username;
+        }
+
+        // Update displayname if changed
+        if (!string.Equals(user.DisplayName, model.DisplayName, StringComparison.OrdinalIgnoreCase))
+        {
+            user.DisplayName = model.DisplayName;
+        }
+
+        // Update email if changed
+        if (!string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            var emailExists = await db.Accounts.AnyAsync(a => a.Email == model.Email && a.Id != user.Id);
+            if (emailExists)
+                return new { success = false, message = "Email is already in use." };
+
+            user.Email = model.Email;
+        }
+
+        if (user.IsTwoFactorEnabled != model.IsTwoFactorEnabled)
+        {
+            user.IsTwoFactorEnabled = model.IsTwoFactorEnabled;
+
+            // Clear any existing token when disabling
+            if (!model.IsTwoFactorEnabled)
+            {
+                user.TwoFactorToken = null;
+                user.TwoFactorTokenExpiry = null;
+            }
+        }
+
+        if (model.ProfileImage != null && model.ProfileImage.Length > 0)
+        {
+            var oldImage = user.ProfileImage;
+
+            var savedFile = await fileService.UploadFileAsync(model.ProfileImage);
+
+            var newFile = new File
+            {
+                FileName = model.ProfileImage.FileName,
+                MimeType = model.ProfileImage.ContentType,
+                Uri = savedFile.MappedPath,
+                CanonicalPath = savedFile.CanonicalPath
+            };
+
+            db.Files.Add(newFile);
+            await db.SaveChangesAsync();
+
+            user.ProfileImageId = newFile.Id;
+
+            await db.SaveChangesAsync();
+
+            if (oldImage != null)
+            {
+                if (!string.IsNullOrWhiteSpace(oldImage.CanonicalPath))
+                {
+                    await fileService.DeleteFileAsync(oldImage.CanonicalPath);
+                }
+
+                db.Files.Remove(oldImage);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        user.LastChanged = DateTime.UtcNow;
+
+        db.Accounts.Update(user);
+        await db.SaveChangesAsync();
+
+        return new { success = true, message = "Profile updated successfully." };
     }
-
-    user.LastChanged = DateTime.UtcNow;
-
-    db.Accounts.Update(user);
-    await db.SaveChangesAsync();
-
-    return new { success = true, message = "Profile updated successfully." };
-}
 
     [HttpPost]
     [Route("password")]
