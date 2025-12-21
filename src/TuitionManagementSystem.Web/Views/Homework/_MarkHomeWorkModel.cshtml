@@ -17,7 +17,15 @@
                 hx-route-id="@Model.Submission.Id">
                 <div class="mb-3">
                     <label asp-for="@Model.Grade" class="form-label">Mark（0–100）</label>
-                    <input class="form-control" asp-for="@Model.Grade" placeholder="Please key in the total mark">
+                    <input class="form-control"
+                           asp-for="Grade"
+                           type="number"
+                           min="0"
+                           max="100"
+                           step="1"
+                           required
+                           title="Grade must be between 0 and 100"
+                           placeholder="Please key in the total mark (0–100)">
                 </div>
             </form>
 
@@ -31,9 +39,7 @@
             <button
                 type="submit"
                 class="btn btn-primary"
-                data-bs-dismiss="modal"
-                form="mark-homework"
-                >
+                form="mark-homework">
                 Submit
             </button>
         </div>

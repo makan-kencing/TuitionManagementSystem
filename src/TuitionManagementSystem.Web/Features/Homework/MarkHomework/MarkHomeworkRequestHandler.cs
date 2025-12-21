@@ -11,6 +11,12 @@ public sealed class MarkHomeworkRequestHandler(ApplicationDbContext db)
     public async Task<Result<MarkHomeworkResponse>> Handle(MarkHomeworkRequest request,
         CancellationToken cancellationToken)
     {
+        if (request.Grade < 0 || request.Grade > 100)
+        {
+            return Result.Invalid(new ValidationError { ErrorMessage = "Grade must be between 0 and 100" });
+        }
+
+
         await db.Submissions
             .Where(s => s.Id == request.SubmissionId)
             .ExecuteUpdateAsync(setters =>
