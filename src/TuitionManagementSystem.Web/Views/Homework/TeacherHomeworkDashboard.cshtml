@@ -16,7 +16,8 @@
         </div>
     </div>
 
-    <div class="d-flex gap-2" id="make-announcement-@(Model.CourseInfo.CourseId)">
+    <div class="d-flex gap-2"
+         id="announcement-actions-@(Model.CourseInfo.CourseId)">
         <button hx-get
                 hx-controller="Homework"
                 hx-action="GetMakeAnnouncementModal"
@@ -24,14 +25,17 @@
                 hx-target="#modal"
                 data-bs-toggle="modal"
                 data-bs-target="#modal"
-                class=" btn btn-sm  btn-primary btn-outline-secondary">
+                class="btn btn-sm btn-primary">
             New Announcement
         </button>
 
-        <a  asp-controller="Homework" asp-action="SubmissionList" asp-route-courseId="@Model.CourseInfo.CourseId">
-            <span>View Submission Status</span>
+        <a asp-controller="Homework"
+           asp-action="SubmissionList"
+           asp-route-courseId="@Model.CourseInfo.CourseId">
+            View Submission Status
         </a>
     </div>
+
 
 
     <div class="row">
