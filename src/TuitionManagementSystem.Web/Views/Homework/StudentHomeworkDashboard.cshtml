@@ -6,6 +6,15 @@
 }
 
 <div class="container py-4">
+    <div class="mb-3">
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+                onclick="window.history.back();">
+            <i class="fas fa-arrow-left"></i>
+            Back
+        </button>
+    </div>
+
     <div class="bg-light p-4 rounded shadow-sm mb-3">
         <div class="d-flex flex-wrap align-items-center justify-content-between">
             <div>
@@ -38,7 +47,7 @@
                 <div class="col-12">
 
                     @foreach (var announcement in Model.AnnouncementInfos
-                                      .OrderByDescending(a => a.CreatedAt))
+                                  .OrderByDescending(a => a.CreatedAt))
                     {
                         if (announcement is AssignmentInfo assignment)
                         {
