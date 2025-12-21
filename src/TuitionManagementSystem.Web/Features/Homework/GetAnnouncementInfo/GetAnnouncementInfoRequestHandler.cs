@@ -49,7 +49,16 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                         CreatedAt = assignment.CreatedAt,
                         UpdatedAt = assignment.UpdatedAt,
                         TeacherName = assignment.CreatedBy.Account.DisplayName,
-                        DueAt = assignment.DueAt
+                        DueAt = assignment.DueAt,
+                        Files = assignment.Attachments
+                            .Select(sf => new AnnouncementFile
+                            {
+                                Id =  sf.Id,
+                                FileName = sf.File.FileName,
+                                MimeType = sf.File.MimeType,
+                                MappedPath = sf.File.Uri
+                            })
+                            .ToList()
                     },
                     Material material => new MaterialInfo
                     {
@@ -58,7 +67,16 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                         Description = material.Description,
                         CreatedAt = material.CreatedAt,
                         UpdatedAt = material.UpdatedAt,
-                        TeacherName = material.CreatedBy.Account.DisplayName
+                        TeacherName = material.CreatedBy.Account.DisplayName,
+                        Files = material.Attachments
+                            .Select(sf => new AnnouncementFile
+                            {
+                                Id =  sf.Id,
+                                FileName = sf.File.FileName,
+                                MimeType = sf.File.MimeType,
+                                MappedPath = sf.File.Uri
+                            })
+                            .ToList()
                     },
                     _ => new AnnouncementInfo
                     {
@@ -67,7 +85,16 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                         Description = announcement.Description,
                         CreatedAt = announcement.CreatedAt,
                         UpdatedAt = announcement.UpdatedAt,
-                        TeacherName = announcement.CreatedBy.Account.DisplayName
+                        TeacherName = announcement.CreatedBy.Account.DisplayName,
+                        Files = announcement.Attachments
+                            .Select(sf => new AnnouncementFile
+                            {
+                                Id =  sf.Id,
+                                FileName = sf.File.FileName,
+                                MimeType = sf.File.MimeType,
+                                MappedPath = sf.File.Uri
+                            })
+                            .ToList()
                     }
                 }).ToList()
         };

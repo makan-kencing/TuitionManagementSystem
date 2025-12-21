@@ -7,6 +7,7 @@ public class GetAnnouncementInfoResponse
     public required CourseInfo CourseInfo { get; set; }
 
     public required List<AnnouncementInfo> AnnouncementInfos { get; set; }
+
 }
 
 public class AnnouncementInfo
@@ -22,6 +23,8 @@ public class AnnouncementInfo
     public DateTime? UpdatedAt { get; set; }
 
     public string? TeacherName { get; set; }
+
+    public required ICollection<AnnouncementFile>  Files { get; set; }
 }
 
 public class AssignmentInfo : AnnouncementInfo
@@ -37,4 +40,14 @@ public class CourseInfo
     public required string CourseName { get; set; }
 
     public required string Subject { get; set; }
+}
+
+public class AnnouncementFile
+{
+    public required int Id { get; set; }
+    public required string FileName { get; set; }
+
+    public required string MimeType { get; set; }
+
+    public required string MappedPath { get; set; }
 }
