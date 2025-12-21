@@ -40,7 +40,7 @@ public sealed class AccountsApiController(ApplicationDbContext db, IMediator med
 [Route("profile")]
 public async Task<object> UpdateProfile([FromForm] AccountProfileViewModel model)
 {
-    var userId = this.User.GetUserId();
+    var userId = this.User.GetAccountId();
     var user = await db.Accounts
         .Include(a => a.ProfileImage)
         .FirstOrDefaultAsync(a => a.Id == userId);
