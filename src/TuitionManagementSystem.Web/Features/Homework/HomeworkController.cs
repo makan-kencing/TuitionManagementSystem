@@ -254,10 +254,7 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
     {
 
         var userId = this.User.GetUserId();
-        if (userId == -1)
-        {
-            return this.Unauthorized();
-        }
+
         var response = await mediator.Send(new GetAnnouncementDetailRequest(announcementId, userId), cancellationToken);
         return this.View(response.Value);
     }

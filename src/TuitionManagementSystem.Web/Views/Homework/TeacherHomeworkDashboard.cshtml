@@ -67,18 +67,62 @@
                         {
                             @if (assignment.DueAt > now)
                             {
-                                    <div class="card shadow-sm mt-3">
-                                        <div class="card-body">
-                                            <h5 class="card-title mb-2">@announcement.Title</h5>
-                                            <p class="card-text">@announcement.Description</p>
-                                            <small class="text-muted">
-                                                @assignment.DueAt
-                                            </small>
-                                            <div id="submissionCarousel" class="carousel slide">
-                                                <partial name="../File/_File" model="assignment.SubmissionFiles"/>
-                                            </div>
+                                <div class="card shadow-sm mt-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-2">@announcement.Title</h5>
+                                        <p class="card-text">@announcement.Description</p>
+                                        <small class="text-muted">
+                                            @assignment.DueAt
+                                        </small>
+                                        <div class="container">
+                                            @foreach (var path in assignment.AttechmentFiles)
+                                            {
+                                                <div class="row mb-3">
+                                                    <div class="col -5">
+                                                        <a id="file-block-@(path.Id)" href="@path.MappedPath"
+                                                           class="card d-flex flex-row align-items-center p-2"
+                                                           target="_blank"
+                                                           style="text-decoration: none;">
+
+                                                            <input type="hidden" name="fileIds" value="@path.Id"/>
+
+                                                            @if (path.MimeType.StartsWith("image"))
+                                                            {
+                                                                <img src="@path.MappedPath" alt="Image"
+                                                                     class="img-thumbnail me-3"
+                                                                     style="width: 80px; height: auto;"/>
+
+                                                                <div class="card-body p-0">
+                                                                    <h5 class="card-title mb-1">@path.FileName</h5>
+                                                                    <small
+                                                                        class="card-subtitle text-muted">Image</small>
+                                                                </div>
+                                                            }
+                                                            else if (path.MimeType.StartsWith("text"))
+                                                            {
+                                                                <div class="card-body p-0">
+                                                                    <h5 class="card-title mb-1">@path.FileName</h5>
+                                                                    <small
+                                                                        class="card-subtitle text-muted">Text</small>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="card-body p-0">
+                                                                    <h5 class="card-title mb-1">@path.FileName</h5>
+                                                                    <small
+                                                                        class="card-subtitle text-muted">File</small>
+                                                                </div>
+                                                            }
+
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            }
                                         </div>
+
                                     </div>
+                                </div>
                             }
                             else
                             {
@@ -86,12 +130,55 @@
                                     <div class="card-body">
                                         <h5 class="card-title mb-2">@announcement.Title</h5>
                                         <p class="card-text">@announcement.Description</p>
-                                    </div>
-                                    <div id="submissionCarousel" class="carousel slide">
-                                        <partial name="../File/_File" model="assignment.SubmissionFiles"/>
-                                    </div>
-                                </div>
+                                        <div class="container">
+                                            @foreach (var path in assignment.AttechmentFiles)
+                                            {
+                                                <div class="row mb-3">
+                                                    <div class="col -5">
+                                                        <a id="file-block-@(path.Id)" href="@path.MappedPath"
+                                                           class="card d-flex flex-row align-items-center p-2"
+                                                           target="_blank"
+                                                           style="text-decoration: none;">
 
+                                                            <input type="hidden" name="fileIds" value="@path.Id"/>
+
+                                                            @if (path.MimeType.StartsWith("image"))
+                                                            {
+                                                                <img src="@path.MappedPath" alt="Image"
+                                                                     class="img-thumbnail me-3"
+                                                                     style="width: 80px; height: auto;"/>
+
+                                                                <div class="card-body p-0">
+                                                                    <h5 class="card-title mb-1">@path.FileName</h5>
+                                                                    <small
+                                                                        class="card-subtitle text-muted">Image</small>
+                                                                </div>
+                                                            }
+                                                            else if (path.MimeType.StartsWith("text"))
+                                                            {
+                                                                <div class="card-body p-0">
+                                                                    <h5 class="card-title mb-1">@path.FileName</h5>
+                                                                    <small
+                                                                        class="card-subtitle text-muted">Text</small>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="card-body p-0">
+                                                                    <h5 class="card-title mb-1">@path.FileName</h5>
+                                                                    <small
+                                                                        class="card-subtitle text-muted">File</small>
+                                                                </div>
+                                                            }
+
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </div>
                             }
                         }
                     }

@@ -27,8 +27,11 @@
                 </div>
 
                 <div class="d-flex justify-content-between mb-3">
+                    @if (Model.Submission!=null)
+                    {
+                        <span class="fw-semibold">@Model.Submission.Grade points</span>
+                    }
 
-                    <span class="fw-semibold">@Model.Assigned.Submission.Grade points</span>
 
                     <span class="text-danger fw-semibold">@Model.DueAt</span>
                 </div>
@@ -59,7 +62,7 @@
                 </div>
 
 
-                @if (Model.Assigned.Submission.Id == null)
+                @if (Model.Submission == null)
                 {
                     <div id="make-submission-@(Model.Id)">
                         <button hx-get
@@ -74,7 +77,7 @@
                         </button>
                     </div>
                 }
-                else if (Model.Assigned.Submission.Id == null && now > Model.DueAt)
+                else if (Model.Submission == null && now > Model.DueAt)
                 {
                     <div id="make-submission-@(Model.Id)">
                         <button
@@ -86,7 +89,7 @@
                 else
                 {
                     <div class="container">
-                    @foreach (var path in Model.Assigned.Submission.Files)
+                    @foreach (var path in Model.Submission!.Files)
                     {
                         <div class="row mb-3">
                             <div class="col -5">
