@@ -35,6 +35,11 @@ public class GetFamilyQueryHandler(ApplicationDbContext db)
 
         if (response is null)
         {
+            return Result.Unauthorized();
+        }
+
+        if (response.Members.Count == 0)
+        {
             return Result.NotFound();
         }
 
