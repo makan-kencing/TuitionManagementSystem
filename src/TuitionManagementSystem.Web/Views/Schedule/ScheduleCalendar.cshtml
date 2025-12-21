@@ -26,15 +26,24 @@ effectiveTeacherId = null;
 }
 }
 
-<h2>Timetable</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Timetable</h2>
+    @* *@
+    <button type="button" id="btnDownloadPdf" class="btn btn-danger">
+        <i class="bi bi-file-earmark-pdf"></i> Export to PDF
+    </button>
+</div>
 
 <div style="max-width: 1400px; margin: 0 auto;">
-    <div id="calendar"></div>
+    <div id="calendar-export-container" style="background: white; padding: 10px;">
+        <div id="calendar"></div>
+    </div>
 </div>
 
 @section Scripts {
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -93,6 +102,24 @@ effectiveTeacherId = null;
         });
 
         calendar.render();
+    });
+
+    document.getElementById('btnDownloadPdf').addEventListener('click', function () {
+        const element = document.getElementById('calendar-export-container');
+
+        const opt = {
+            margin:       5,
+            filename:     'Timetable-Export.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  {
+                scale: 2,
+                useCORS: true,
+                logging: false
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().set(opt).from(element).save();
     });
 </script>
 }
