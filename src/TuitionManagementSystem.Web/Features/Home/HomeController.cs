@@ -13,7 +13,7 @@ using Dashboard.TeacherDashboard;
 
 public class HomeController(IMediator mediator) : Controller
 {
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         if (User.IsInRole(nameof(AccessRoles.Administrator)))
