@@ -21,6 +21,7 @@ public class UploadFilesCommandHandler(ApplicationDbContext db, IFileService fil
         MediaTypeNames.Application.Json,
         MediaTypeNames.Application.Rtf,
         MediaTypeNames.Application.Zip,
+        "application/x-zip-compressed",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
