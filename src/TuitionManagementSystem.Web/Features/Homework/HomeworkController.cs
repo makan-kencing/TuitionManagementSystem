@@ -109,6 +109,11 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
         {
             return this.NotFound();
         }
+        if (string.IsNullOrWhiteSpace(model.Title))
+        {
+                return this.PartialView("_MakeAnnouncementError", model);
+        }
+
 
         var userId = this.User.GetUserId();
         if (userId == -1)
@@ -118,6 +123,9 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
 
         var response = await mediator.Send(new MakeAnnouncementInfoRequest(model.CourseId, userId, model.FileIds,
             model.Title, model.Description, model.DueAt));
+
+
+
         return this.PartialView("_MakeAnnouncementSuccess", model);
     }
 
