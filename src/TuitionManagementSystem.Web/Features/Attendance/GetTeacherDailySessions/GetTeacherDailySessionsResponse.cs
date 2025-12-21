@@ -7,6 +7,8 @@ public class GetTeacherDailySessionsResponse
 
 public class CourseDaily
 {
+    public required int Id { get; set; }
+
     public required string Name { get; set; }
 
     public string? SubjectName { get; set; }

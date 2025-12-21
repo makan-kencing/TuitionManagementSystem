@@ -1,5 +1,7 @@
 namespace TuitionManagementSystem.Web.Features.Attendance;
 
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using Abstractions;
 using Ardalis.Result;
 using DeleteAttendance;
@@ -12,6 +14,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Auth.Extensions;
+using StartSession;
 using TakeAttendanceCode;
 
 public class SessionController(IMediator mediator) : WebController
@@ -42,6 +45,57 @@ public class SessionController(IMediator mediator) : WebController
         }
 
         return this.View(result.Value);
+    }
+
+    [HttpGet]
+    [Route("~/courses/{id:int:required}/[controller]/start")]
+    [Authorize(Policy = "TeacherOnly")]
+    public IActionResult GetStartSessionModal(int id)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        return this.PartialView("_StartSessionModal", new StartSessionViewModel
+        {
+            CourseId = id
+        });
+    }
+
+    public class StartSessionViewModel
+    {
+        public int CourseId { get; set; }
+
+        [DisplayName("Start At")]
+        [Required]
+        [DataType(DataType.DateTime)]
+        public DateTime StartAt { get; set; } = DateTime.Now;
+
+        [DisplayName("End At")]
+        [Required]
+        [DataType(DataType.DateTime)]
+        public DateTime EndAt { get; set; } = DateTime.Now;
+    }
+
+    [HttpPost]
+    [Route("~/courses/{id:int:required}/[controller]")]
+    [Authorize(Policy = "TeacherOnly")]
+    public async Task<IActionResult> StartSession(int id, StartSessionViewModel model)
+    {
+        if (!this.Request.IsHtmx())
+        {
+            return this.NotFound();
+        }
+
+        var result = await mediator.Send(new StartSessionCommand(id, model.StartAt, model.EndAt));
+        if (result.IsNotFound())
+        {
+            return this.NotFound();
+        }
+
+        this.Response.Htmx(h => h.Refresh());
+        return this.Ok();
     }
 
     [HttpPost]

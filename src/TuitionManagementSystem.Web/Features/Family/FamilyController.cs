@@ -56,18 +56,6 @@ public class FamilyController(IMediator mediator) : Controller
         return this.RedirectToAction("Index");
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Child(int id)
-    {
-        var result = await mediator.Send(new GetChildQuery(this.User.GetUserId(), id));
-        if (result.IsNotFound())
-        {
-            return this.NotFound();
-        }
-
-        return this.View();
-    }
-
     [HttpPost]
     public async Task<IActionResult> Accept()
     {

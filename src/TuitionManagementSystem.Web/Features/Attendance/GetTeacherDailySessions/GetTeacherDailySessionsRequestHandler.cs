@@ -20,6 +20,7 @@ public sealed class GetTeacherDailySessionsRequestHandler(ApplicationDbContext d
             .Select(ct => ct.Course)
             .Select(c => new CourseDaily
             {
+                Id = c.Id,
                 SubjectName = c.Subject.Name,
                 Name = c.Name,
                 Sessions = c.Sessions
