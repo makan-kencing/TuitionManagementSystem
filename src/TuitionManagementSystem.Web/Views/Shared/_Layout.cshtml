@@ -152,9 +152,19 @@
     <ul class="nav nav-pills flex-column gap-1 p-3">
         @if (User.Identity!.IsAuthenticated)
         {
+            <li class="nav-item text-muted fw-bold">
+            <span class="ps-2">@(User.GetUserType() == nameof(Student) ? "Student Dashboard" : "Teacher Dashboard")</span></li>
             <li class="nav-item"><a class="nav-link" asp-controller="Homework" asp-action="Index"><i class="fa-solid fa-file-lines"></i>Homework</a></li>
-            <li class="nav-item"><a class="nav-link" asp-controller="Enrollment" asp-action="ViewEnrollments"><i class="fa-solid fa-users"></i>Enrollments</a></li>
-            <li class="nav-item"><a class="nav-link" asp-controller="Attendance" asp-action="Index"><i class="fa-solid fa-calendar-check"></i>Attendance</a></li>
+            if (User.GetUserType() == nameof(Teacher))
+            {
+                <li class="nav-item"><a class="nav-link" asp-controller="Enrollment" asp-action="ViewTeacherCourses"><i class="fa-solid fa-users"></i>Course Enrollments</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Session" asp-action="ViewDaily"><i class="fa-solid fa-calendar-check"></i>Today Sessions</a></li>
+            }
+            else
+            {
+                <li class="nav-item"><a class="nav-link" asp-controller="Enrollment" asp-action="ViewEnrollments"><i class="fa-solid fa-users"></i>Enrollments</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Attendance" asp-action="TakeAttendance"><i class="fa-solid fa-calendar-check"></i>Attendance</a></li>
+            }
             <li class="nav-item"><a class="nav-link" asp-controller="Schedule" asp-action="Index"><i class="fa-solid fa-calendar-days"></i>Schedule</a></li>
 
             if (User.IsInRole(nameof(AccessRoles.Administrator)))
