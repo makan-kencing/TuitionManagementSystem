@@ -8,64 +8,73 @@
 }
 
 
-@foreach (var announcement in Model.AnnouncementInfos .OfType<AssignmentInfo>()
-              .Where(a => a.DueAt != null && a.DueAt > now)
-              .OrderBy(a => a.DueAt))
-{
-    if (announcement is not AssignmentInfo assignment)
+<div class="container py-4">
+    <div class="mb-3">
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+                onclick="window.history.back();">
+            <i class="fas fa-arrow-left"></i>
+            Back
+        </button>
+    </div>
+    @foreach (var announcement in Model.AnnouncementInfos.OfType<AssignmentInfo>()
+                  .Where(a => a.DueAt != null && a.DueAt > now)
+                  .OrderBy(a => a.DueAt))
     {
-        continue;
-    }
+        if (announcement is not AssignmentInfo assignment)
+        {
+            continue;
+        }
 
-    if (assignment.DueAt == null)
-    {
-        continue;
-    }
+        if (assignment.DueAt == null)
+        {
+            continue;
+        }
 
-    if (now >= assignment.DueAt)
-    {
-        continue;
-    }
+        if (now >= assignment.DueAt)
+        {
+            continue;
+        }
 
-    <div class="container py-4">
-        <a asp-controller="Homework"
-           asp-action="GetAssignmentDetail"
-           asp-route-assignmentId="@assignment.Id"
-           class="text-decoration-none text-dark">
+        <div class="container py-4">
+            <a asp-controller="Homework"
+               asp-action="GetAssignmentDetail"
+               asp-route-assignmentId="@assignment.Id"
+               class="text-decoration-none text-dark">
 
-            <div class="bg-light p-4 rounded shadow-sm mb-3">
-                <div class="d-flex flex-wrap align-items-center justify-content-between">
-                    <div>
-                        <h3 class="mb-1">
-                            @Model.CourseInfo.Subject : @Model.CourseInfo.CourseName
-                        </h3>
-                        <h4 class="mb-1">
-                            @assignment.Title
-                        </h4>
-                        <h5 class="mb-1">
-                            @if (assignment.CreatedAt.HasValue)
-                            {
-                                var localDueAt = TimeZoneInfo.ConvertTimeFromUtc(@assignment.CreatedAt.Value, timezone);
-                                @localDueAt
-                            }
-                            -
-                            <span class="text-danger">
-                                @if (assignment.DueAt.HasValue)
+                <div class="bg-light p-4 rounded shadow-sm mb-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <div>
+                            <h3 class="mb-1">
+                                @Model.CourseInfo.Subject : @Model.CourseInfo.CourseName
+                            </h3>
+                            <h4 class="mb-1">
+                                @assignment.Title
+                            </h4>
+                            <h5 class="mb-1">
+                                @if (assignment.CreatedAt.HasValue)
                                 {
-                                    var localDueAt=TimeZoneInfo.ConvertTimeFromUtc(assignment.DueAt.Value, timezone);
+                                    var localDueAt = TimeZoneInfo.ConvertTimeFromUtc(@assignment.CreatedAt.Value, timezone);
                                     @localDueAt
                                 }
+                                -
+                                <span class="text-danger">
+                                    @if (assignment.DueAt.HasValue)
+                                    {
+                                        var localDueAt = TimeZoneInfo.ConvertTimeFromUtc(assignment.DueAt.Value, timezone);
+                                        @localDueAt
+                                    }
 
-                            </span>
-                        </h5>
+                                </span>
+                            </h5>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-        </a>
-    </div>
-}
-
+            </a>
+        </div>
+    }
+</div>
 
 
 

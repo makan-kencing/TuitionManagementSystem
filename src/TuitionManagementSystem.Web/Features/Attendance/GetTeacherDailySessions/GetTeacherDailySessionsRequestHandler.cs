@@ -4,6 +4,7 @@ using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Schedule;
 
 public sealed class GetTeacherDailySessionsRequestHandler(ApplicationDbContext db)
     : IRequestHandler<GetTeacherDailySessionsRequest, Result<GetTeacherDailySessionsResponse>>
@@ -11,8 +12,9 @@ public sealed class GetTeacherDailySessionsRequestHandler(ApplicationDbContext d
     public async Task<Result<GetTeacherDailySessionsResponse>> Handle(GetTeacherDailySessionsRequest request,
         CancellationToken cancellationToken)
     {
-        var hour0 = DateTime.UtcNow.Date.Subtract(
-            TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur").BaseUtcOffset);
+        var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
+
+        var hour0 = DateTimeUtc.ToUtcAssumingLocal(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,timezone).Date);
         var hour24 = hour0.AddDays(1);
 
         var courses = await db.CourseTeachers

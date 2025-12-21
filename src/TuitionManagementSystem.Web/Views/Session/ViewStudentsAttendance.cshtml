@@ -4,99 +4,127 @@
     ViewData["Title"] = "Student Management";
 }
 
-<h2>Student Management</h2>
+<div class="mb-3">
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+            onclick="window.history.back();">
+        <i class="fas fa-arrow-left"></i>
+        Back
+    </button>
+</div>
+<h2 class="mb-4">Student Management</h2>
 
-<table class="table table-bordered table-hover">
-    <thead class="table-light">
-    <tr>
-        <th>Id</th>
-        <th>Name</th>
-        <th>Status</th>
-        <th></th>
-    </tr>
-    </thead>
-    <tbody>
-    @if (Model.StudentList.Count == 0)
-    {
+<div class="table-responsive">
+    <table class="table align-middle table-bordered table-hover">
+        <thead class="table-light text-center">
         <tr>
-            <td colspan="4">
-                No students enrolled for this session
-            </td>
+            <th style="width: 80px;">ID</th>
+            <th>Name</th>
+            <th style="width: 140px;">Status</th>
+            <th style="width: 120px;">Action</th>
         </tr>
-    }
-    @foreach (var student in Model.StudentList)
-    {
-        var attend = student.AttendanceId is not null;
+        </thead>
 
-        <tr>
-            <td>@student.StudentId</td>
-            <td>@student.DisplayName</td>
-            <td>
-                <div>
+        <tbody>
+        @if (Model.StudentList.Count == 0)
+        {
+            <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                    No students enrolled for this session
+                </td>
+            </tr>
+        }
+
+        @foreach (var student in Model.StudentList)
+        {
+            var attend = student.AttendanceId is not null;
+
+            <tr>
+                <td class="text-center">@student.StudentId</td>
+
+                <td>
+                    <div class="fw-semibold">@student.DisplayName</div>
+                </td>
+
+                <td class="text-center">
                     @if (attend)
                     {
-                        <span id="status-@student.StudentId" class="badge bg-success">Attend</span>
+                        <span id="status-@student.StudentId"
+                              class="badge bg-success px-3 py-2">
+                            Attend
+                        </span>
                     }
                     else if (Model.CreatedOn < Model.EndDate)
                     {
-                        <span id="status-@student.StudentId" class="badge bg-warning text-dark">Not Taken</span>
+                        <span id="status-@student.StudentId"
+                              class="badge bg-warning text-dark px-3 py-2">
+                            Not Taken
+                        </span>
                     }
                     else
                     {
-                        <span id="status-@student.StudentId" class="badge bg-danger">Absent</span>
+                        <span id="status-@student.StudentId"
+                              class="badge bg-danger px-3 py-2">
+                            Absent
+                        </span>
                     }
-                </div>
-            </td>
-            <td>
-                @if (Model.CanTakeAttendance)
-                {
-                    if (attend)
+                </td>
+
+                <td class="text-center">
+                    @if (Model.CanTakeAttendance)
                     {
-                        <button
-                            id="attendance-action-@student.StudentId"
-                            hx-delete
-                            hx-controller="Session"
-                            hx-action="RemoveStudentAttendanceHtmx"
-                            hx-route-id="@Model.SessionId"
-                            hx-route-attendanceId="@student.AttendanceId"
-                            hx-target="#modal"
-                            type="submit"
-                            class="btn btn-danger"
-                            data-bs-toggle="modal" data-bs-target="#modal">
-                            <i class="fa-solid fa-delete-left"></i>
-                        </button>
+                        if (attend)
+                        {
+                            <button
+                                id="attendance-action-@student.StudentId"
+                                hx-delete
+                                hx-controller="Session"
+                                hx-action="RemoveStudentAttendanceHtmx"
+                                hx-route-id="@Model.SessionId"
+                                hx-route-attendanceId="@student.AttendanceId"
+                                hx-target="#modal"
+                                type="submit"
+                                class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal"
+                                title="Remove Attendance">
+                                <i class="fa-solid fa-delete-left"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button
+                                id="attendance-action-@student.StudentId"
+                                hx-post
+                                hx-controller="Session"
+                                hx-action="MarkStudentAttendedHtmx"
+                                hx-route-id="@Model.SessionId"
+                                hx-route-studentId="@student.StudentId"
+                                hx-target="#modal"
+                                type="submit"
+                                class="btn btn-sm btn-outline-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal"
+                                title="Mark Attendance">
+                                <i class="fa-solid fa-handshake-angle"></i>
+                            </button>
+                        }
+                    }
+                    else if (!Model.IsCodeGenerated)
+                    {
+                        <span class="badge bg-secondary px-3 py-2">
+                            Code not generated
+                        </span>
                     }
                     else
                     {
-                        <button
-                            id="attendance-action-@student.StudentId"
-                            hx-post
-                            hx-controller="Session"
-                            hx-action="MarkStudentAttendedHtmx"
-                            hx-route-id="@Model.SessionId"
-                            hx-route-studentId="@student.StudentId"
-                            hx-target="#modal"
-                            type="submit"
-                            class="btn btn-primary"
-                            data-bs-toggle="modal" data-bs-target="#modal">
-                            <i class="fa-solid fa-handshake-angle"></i>
-                        </button>
+                        <span class="badge bg-secondary px-3 py-2">
+                            Time expired
+                        </span>
                     }
-                }
-                else if (!Model.IsCodeGenerated)
-                {
-                    <span class="badge bg-danger">
-                        The code haven generate yet
-                    </span>
-                }
-                else
-                {
-                    <span class="badge bg-danger">
-                        Over The Taken Time
-                    </span>
-                }
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
