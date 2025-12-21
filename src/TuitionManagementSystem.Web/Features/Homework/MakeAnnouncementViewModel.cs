@@ -20,5 +20,5 @@ public class MakeAnnouncementViewModel
     public ICollection<int> FileIds { get; set; } = [];
 
     [DisplayName("DueAt")]
-    public DateTime DueAt { get; set; }
+    public DateTime ?DueAt { get; set; }
 }
