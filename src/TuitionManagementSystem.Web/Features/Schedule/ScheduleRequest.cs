@@ -13,6 +13,7 @@ public record RecurrencePatternDto(
 
 public record CreateSchedule(
     int CourseId,
+    int? ClassId,
     string? Summary,
     string? Description,
     DateTime Start,
@@ -25,6 +26,7 @@ public record CreateSchedule(
 public record UpdateSchedule(
     int Id,
     int CourseId,
+    int? ClassId,
     string? Summary,
     string? Description,
     DateTime Start,

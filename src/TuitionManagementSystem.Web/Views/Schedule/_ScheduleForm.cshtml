@@ -1,35 +1,49 @@
 @model TuitionManagementSystem.Web.ViewModels.Schedule.ScheduleFormVm
 
-<div class="mb-3">
-    <label asp-for="CourseId"></label>
-    <select asp-for="CourseId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Courses" class="form-select">
-        <option value="">Select course</option>
-    </select>
-    <span asp-validation-for="CourseId" class="text-danger"></span>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label asp-for="CourseId" class="form-label">Course</label>
+        <select asp-for="CourseId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Courses" class="form-select">
+            <option value="">-- Select Course --</option>
+        </select>
+        <span asp-validation-for="CourseId" class="text-danger"></span>
+    </div>
+
+
+    <div class="col-md-6 mb-3">
+        <label asp-for="ClassId" class="form-label">Classroom (Optional)</label>
+        <select asp-for="ClassId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Classrooms" class="form-select">
+            <option value="">-- Use Course Default Room --</option>
+        </select>
+        <span asp-validation-for="ClassId" class="text-danger"></span>
+    </div>
 </div>
 
 <div class="mb-3">
-    <label asp-for="Summary"></label>
-    <input asp-for="Summary" class="form-control" />
+    <label asp-for="Summary" class="form-label"></label>
+    <input asp-for="Summary" class="form-control" placeholder="e.g., Mathematics Grade 10" />
     <span asp-validation-for="Summary" class="text-danger"></span>
 </div>
 
 <div class="mb-3">
-    <label asp-for="Description"></label>
-    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+    <label asp-for="Description" class="form-label"></label>
+    <textarea asp-for="Description" class="form-control" rows="2"></textarea>
     <span asp-validation-for="Description" class="text-danger"></span>
 </div>
 
 <div class="row">
     <div class="col-md-6 mb-3">
-        <label asp-for="Start"></label>
+        <label asp-for="Start" class="form-label"></label>
         <input asp-for="Start" class="form-control" type="datetime-local"
                value="@Model.Start.ToString("yyyy-MM-ddTHH:mm")" />
         <span asp-validation-for="Start" class="text-danger"></span>
     </div>
 
     <div class="col-md-6 mb-3">
-        <label asp-for="End"></label>
+        <label asp-for="End" class="form-label"></label>
         <input asp-for="End" class="form-control" type="datetime-local"
                value="@Model.End.ToString("yyyy-MM-ddTHH:mm")" />
         <span asp-validation-for="End" class="text-danger"></span>
@@ -38,8 +52,10 @@
 
 <hr />
 
+<h5 class="mb-3">Recurrence Settings</h5>
+
 <div class="mb-3">
-    <label asp-for="Repeat"></label>
+    <label asp-for="Repeat" class="form-label"></label>
     <select asp-for="Repeat" class="form-select"
             asp-items="Html.GetEnumSelectList<TuitionManagementSystem.Web.ViewModels.Schedule.RepeatKind>()">
     </select>
@@ -47,44 +63,48 @@
 
 <div class="row">
     <div class="col-md-4 mb-3">
-        <label asp-for="Interval">Interval (weeks)</label>
+        <label asp-for="Interval" class="form-label">Every X weeks</label>
         <input asp-for="Interval" class="form-control" min="1" />
     </div>
 
     <div class="col-md-8 mb-3">
-        <label>Days of week</label>
-        <div>
+        <label class="form-label d-block">Days of week</label>
+
+        <div class="btn-group" role="group">
             @{
                 var days = Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>().ToList();
             }
             @foreach (var d in days)
             {
                 var isChecked = Model.ByDay != null && Model.ByDay.Contains(d);
-                <label style="margin-right:12px;">
-                    <input type="checkbox" name="ByDay" value="@d" @(isChecked ? "checked" : "") />
-                    @d
-                </label>
+                <input type="checkbox" class="btn-check" name="ByDay" id="day_@d" value="@d" @(isChecked ? "checked" : "") autocomplete="off">
+                <label class="btn btn-outline-primary btn-sm" for="day_@d">@d.ToString().Substring(0, 3)</label>
             }
         </div>
     </div>
 </div>
 
 <div class="mb-3">
-    <label asp-for="Until">Until (optional)</label>
+    <label asp-for="Until" class="form-label">End Recurrence (Until)</label>
     <input asp-for="Until" class="form-control" type="date"
            value="@(Model.Until.HasValue ? Model.Until.Value.ToString("yyyy-MM-dd") : "")" />
 </div>
 
 <hr />
 
-<div class="mb-3">
-    <label asp-for="RecurrenceDatesText">RDATE (one yyyy-MM-dd per line)</label>
-    <textarea asp-for="RecurrenceDatesText" class="form-control" rows="4"></textarea>
-</div>
 
-<div class="mb-3">
-    <label asp-for="ExceptionDatesText">EXDATE (one yyyy-MM-dd per line)</label>
-    <textarea asp-for="ExceptionDatesText" class="form-control" rows="4"></textarea>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label asp-for="RecurrenceDatesText" class="form-label">Add Specific Dates (RDATE)</label>
+        <textarea asp-for="RecurrenceDatesText" class="form-control" rows="3" placeholder="yyyy-MM-dd"></textarea>
+        <small class="text-muted">Enter one date per line</small>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label asp-for="ExceptionDatesText" class="form-label">Exclude Dates (EXDATE)</label>
+        <textarea asp-for="ExceptionDatesText" class="form-control" rows="3" placeholder="yyyy-MM-dd"></textarea>
+        <small class="text-muted">Enter one date per line</small>
+    </div>
 </div>
 
 @section Scripts {

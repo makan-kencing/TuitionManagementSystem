@@ -6,7 +6,9 @@ using System.Linq.Expressions;
 using Infrastructure.Persistence;
 using Ical.Net.DataTypes;
 using MediatR;
+using Classroom;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Models.Class;
 
 public class ScheduleRequestHandler(ApplicationDbContext db) :
@@ -29,6 +31,9 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
         var startUtc = DateTimeUtc.ToUtcAssumingLocal(request.Start);
         var endUtc = DateTimeUtc.ToUtcAssumingLocal(request.End);
 
+        await EnsureNoClassroomConflict(null, request.CourseId, startUtc, endUtc,
+            request.RecurrencePatterns, request.RecurrenceDates ?? [], request.ExceptionDates ?? [], ct);
+
         var entity = new Schedule
         {
             CourseId = request.CourseId,
@@ -36,6 +41,8 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
             Description = request.Description,
             Start = startUtc,
             End = endUtc,
+
+
             RecurrencePatterns = request.RecurrencePatterns.Select(MapPatternUtc).ToList(),
             RecurrenceDates = DateTimeUtc.ToUtcAssumingLocal(
                 (request.RecurrenceDates ?? [])
@@ -57,6 +64,11 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
     public async Task<bool> Handle(UpdateSchedule request, CancellationToken ct)
     {
         ValidateTimeWindow(request.Start, request.End);
+        var startUtc = DateTimeUtc.ToUtcAssumingLocal(request.Start);
+        var endUtc = DateTimeUtc.ToUtcAssumingLocal(request.End);
+
+        await EnsureNoClassroomConflict(request.Id, request.CourseId, startUtc, endUtc,
+            request.RecurrencePatterns, request.RecurrenceDates ?? [], request.ExceptionDates ?? [], ct);
 
         var entity = await db.Schedules
             .Include(s => s.RecurrencePatterns)
@@ -168,11 +180,8 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
         .Include(s => s.RecurrencePatterns)
         .Include(s => s.Course).ThenInclude(c => c.PreferredClassroom)
         .Where(s =>
-            // Non-recurring: only if the single instance overlaps the window
             (s.End > fromUtc)
-            // Recurring: include if it could produce occurrences in/after fromUtc
             || s.RecurrencePatterns.Any(p => p.Until == null || p.Until > fromUtc)
-            // RDATE-only schedules: include (EF Core can translate primitive collection count on supported providers)
             || s.RecurrenceDates.Count > 0)
         .Where(s => s.Start < toUtc);
 
@@ -205,7 +214,6 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
 
         var isRecurring = s.RecurrencePatterns.Count > 0 || s.RecurrenceDates.Count > 0;
 
-// Non-recurring schedule: add the single instance directly
         if (!isRecurring)
         {
             if (s.Start < toUtc && s.End > fromUtc)
@@ -224,7 +232,6 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
             continue;
         }
 
-// Recurring schedule: use Ical.Net expansion
         var ev = s.ToICalendarEvent();
         var occ = ev.GetOccurrences(startTime: new CalDateTime(fromUtc));
 
@@ -293,6 +300,84 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
             ClassroomLocation: s.Course.PreferredClassroom?.Location
         )).ToList();
     }
+
+    private async Task EnsureNoClassroomConflict(
+    int? currentScheduleId,
+    int courseId,
+    DateTime startUtc,
+    DateTime endUtc,
+    IEnumerable<RecurrencePatternDto> patterns,
+    IEnumerable<DateTime> recurrenceDates,
+    IEnumerable<DateTime> exceptionDates,
+    CancellationToken ct)
+{
+    var course = await db.Courses
+        .AsNoTracking()
+        .FirstOrDefaultAsync(c => c.Id == courseId, ct);
+
+    if (course?.PreferredClassroomId == null) return;
+
+    var candidate = new Schedule
+    {
+        Start = startUtc,
+        End = endUtc,
+        RecurrencePatterns = patterns.Select(p => new ScheduleRecurrencePattern
+        {
+            FrequencyType = p.FrequencyType,
+            Interval = p.Interval,
+            Until = p.Until,
+            Count = p.Count,
+            ByDay = p.ByDay.ToList()
+        }).ToList(),
+
+        RecurrenceDates = recurrenceDates.ToList(),
+        ExceptionDates = exceptionDates.ToList()
+    };
+
+    var candidateEvent = candidate.ToICalendarEvent();
+    var candidateDuration = endUtc - startUtc;
+    var checkStart = new CalDateTime(startUtc);
+
+    var maxCheckDate = startUtc.AddYears(2);
+
+    var otherSchedules = await db.Schedules
+        .AsNoTracking()
+        .Include(s => s.RecurrencePatterns)
+        .Include(s => s.Course)
+        .Where(s => s.Id != currentScheduleId &&
+                    s.Course.PreferredClassroomId == course.PreferredClassroomId)
+        .ToListAsync(ct);
+
+    foreach (var candOcc in candidateEvent.GetOccurrences(checkStart))
+    {
+        var cStart = candOcc.Period.StartTime.AsUtc;
+        if (cStart > maxCheckDate) break;
+
+        var cEnd = candOcc.Period.EndTime?.AsUtc ?? cStart.Add(candidateDuration);
+
+        foreach (var other in otherSchedules)
+        {
+            var otherEvent = other.ToICalendarEvent();
+            var otherDuration = other.End - other.Start;
+
+            foreach (var existingOcc in otherEvent.GetOccurrences(checkStart))
+            {
+                var oStart = existingOcc.Period.StartTime.AsUtc;
+                if (oStart > maxCheckDate) break;
+
+                var oEnd = existingOcc.Period.EndTime?.AsUtc ?? oStart.Add(otherDuration);
+
+
+                if (cStart < oEnd && cEnd > oStart)
+                {
+                    throw new InvalidOperationException(
+                        $"Classroom Conflict: Room is busy for '{other.Summary}' " +
+                        $"on {cStart.ToLocalTime():MMM dd, yyyy} at {cStart.ToLocalTime():HH:mm}.");
+                }
+            }
+        }
+    }
+}
 
     private static void ValidateTimeWindow(DateTime start, DateTime end)
     {

@@ -15,6 +15,8 @@ public class ScheduleFormVm
     [Required, Range(1, int.MaxValue)]
     public int CourseId { get; set; }
 
+    public int ClassId { get; set; }
+
     [StringLength(50)]
     public string? Summary { get; set; }
 
