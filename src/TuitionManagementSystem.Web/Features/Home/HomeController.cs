@@ -1,10 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics;
+
 namespace TuitionManagementSystem.Web.Features.Home;
 
-using System.Diagnostics;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Models.User;
 using Services.Auth.Constants;
 using Services.Auth.Extensions;
 
@@ -31,9 +31,28 @@ public class HomeController(IMediator mediator) : Controller
         }
     }
 
+    [AllowAnonymous]
+    [Route("404")]
+    [IgnoreAntiforgeryToken]
+    public IActionResult NotFoundPage()
+    {
+        Response.StatusCode = 404;
+        return View("404");
+    }
 
+    [AllowAnonymous]
+    [Route("500")]
+    [IgnoreAntiforgeryToken]
+    public IActionResult ServerError()
+    {
+        Response.StatusCode = 500;
+        return View("500");
+    }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() =>
-        this.View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier });
+        this.View(new ErrorViewModel
+        {
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+        });
 }

@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Server Error";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+    .error-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .error-code {
+        font-size: 6rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .error-message {
+        font-size: 1.25rem;
+        color: #6c757d;
+    }
+
+    .error-card {
+        padding: 3rem;
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        background: #fff;
+    }
+</style>
+}
+
+<div class="container error-container">
+    <div class="error-card">
+        <div class="error-code">500</div>
+        <h3 class="mb-3">Something Went Wrong</h3>
+        <p class="error-message mb-4">
+            An unexpected error occurred on the server. Please try again later.
+        </p>
+
+        <a href="/"
+           class="btn btn-primary btn-lg">
+            <i class="fas fa-home me-2"></i>
+            Back to Home
+        </a>
+    </div>
+</div>

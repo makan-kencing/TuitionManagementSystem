@@ -142,16 +142,21 @@ public class Startup(IConfiguration configuration)
         // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0#order
         if (env.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage()
+            app
+                .UseDeveloperExceptionPage()
+                .UseExceptionHandler("/500")
+                .UseStatusCodePagesWithReExecute("/404")
                 .UseForwardedHeaders();
         }
         else
         {
             app
-                .UseExceptionHandler("/Home/Error")
+                .UseExceptionHandler("/500")
+                .UseStatusCodePagesWithReExecute("/404")
                 .UseForwardedHeaders()
-                .UseHsts(); // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                .UseHsts();
         }
+
 
         app
             .UseHttpsRedirection()
