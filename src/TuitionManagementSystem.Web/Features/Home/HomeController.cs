@@ -3,14 +3,17 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using MediatR;
 using TuitionManagementSystem.Web.Features.Dashboard.StudentDashboard;
+using TuitionManagementSystem.Web.Features.Dashboard.TeacherDashboard;
 using TuitionManagementSystem.Web.Services.Auth.Constants;
 using TuitionManagementSystem.Web.Services.Auth.Extensions;
 
 namespace TuitionManagementSystem.Web.Features.Home;
 
+using Dashboard.TeacherDashboard;
+
 public class HomeController(IMediator mediator) : Controller
 {
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         if (User.IsInRole(nameof(AccessRoles.Administrator)))
@@ -23,10 +26,7 @@ public class HomeController(IMediator mediator) : Controller
             case nameof(Student):
             {
                 var response = await mediator.Send(
-                    new StudentDashboardRequest
-                    {
-                        StudentId = User.GetUserId()
-                    },
+                    new StudentDashboardRequest { StudentId = User.GetUserId() },
                     cancellationToken
                 );
 
@@ -34,7 +34,14 @@ public class HomeController(IMediator mediator) : Controller
             }
 
             case nameof(Teacher):
-                return View("TeacherDashboard");
+            {
+                var response = await mediator.Send(
+                    new TeacherDashboardRequest { TeacherId = User.GetUserId() },
+                    cancellationToken
+                );
+
+                return View("TeacherDashboard", response);
+            }
 
             case nameof(Parent):
                 return View("ParentDashboard");
@@ -64,8 +71,5 @@ public class HomeController(IMediator mediator) : Controller
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() =>
-        View(new ErrorViewModel
-        {
-            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
-        });
+        View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 }
