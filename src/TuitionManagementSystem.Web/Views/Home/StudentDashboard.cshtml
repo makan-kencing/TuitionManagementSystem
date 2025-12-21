@@ -1,8 +1,447 @@
+@using TuitionManagementSystem.Web.Services.Auth.Extensions
+@model TuitionManagementSystem.Web.Features.Dashboard.StudentDashboard.StudentDashboardResponse
+
 @{
     ViewData["Title"] = "Student Dashboard";
+    Layout = "_Layout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome to Student Page</h1>
-    <p>say hi</p>
+@section Styles {
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --attendance-gradient: linear-gradient(135deg, #00b09b, #96c93d);
+            --schedule-gradient: linear-gradient(135deg, #1e3c72, #2a5298);
+            --homework-gradient: linear-gradient(135deg, #ff7e5f, #feb47b);
+            --billing-gradient: linear-gradient(135deg, #ff416c, #ff4b2b);
+        }
+
+        .dashboard-header {
+            background: var(--primary-gradient);
+            border-radius: 1.5rem;
+            color: white;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            animation: float 20s linear infinite;
+        }
+
+        .welcome-text h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .date-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .dashboard-card {
+            border: none;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+        .card-attendance::before { background: var(--attendance-gradient); }
+        .card-schedule::before { background: var(--schedule-gradient); }
+        .card-homework::before { background: var(--homework-gradient); }
+        .card-billing::before { background: var(--billing-gradient); }
+
+        .dashboard-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .card-attendance .card-icon { background: var(--attendance-gradient); }
+        .card-schedule .card-icon { background: var(--schedule-gradient); }
+        .card-homework .card-icon { background: var(--homework-gradient); }
+        .card-billing .card-icon { background: var(--billing-gradient); }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin: 1rem 0;
+            background: linear-gradient(90deg, #2c3e50, #4a6491);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-label {
+            font-size: 0.95rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .card-subtext {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .attendance-progress {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .attendance-progress-bar {
+            height: 100%;
+            background: var(--attendance-gradient);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .quick-action-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn-schedule {
+            background: var(--schedule-gradient);
+            color: white;
+        }
+
+        .btn-homework {
+            background: var(--homework-gradient);
+            color: white;
+        }
+
+        .btn-pay {
+            background: var(--billing-gradient);
+            color: white;
+        }
+
+        .stat-info h6 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        @@keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(30px, 30px) rotate(360deg); }
+        }
+
+        @@keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @@media (max-width: 768px) {
+            .dashboard-header {
+                padding: 1.5rem;
+            }
+
+            .welcome-text h2 {
+                font-size: 2rem;
+            }
+
+            .card-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+}
+
+<div class="container py-4">
+
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="welcome-text">
+                    <h2>Welcome back, @(User.GetDisplayName())! 👋</h2>
+                    <p class="mb-0 opacity-90 fs-5">
+                        Here's your learning dashboard for today. Keep up the great work!
+                    </p>
+                </div>
+                <div class="date-badge">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    @DateTime.Now.ToString("dddd, MMMM dd, yyyy")
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                <div class="pulse-animation">
+                    <i class="bi bi-stars" style="font-size: 4rem; opacity: 0.8;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="dashboard-card card-attendance">
+                <div class="card-body">
+                    <div class="card-icon">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <div class="card-value">
+                        @if(Model.TotalSessionsToday == 0)
+                        {
+                            <span style="font-size: 1.8rem;">No Classes</span>
+                        }
+                        else
+                        {
+                            @Model.AttendanceTakenToday<small class="text-muted fs-6">/@Model.TotalSessionsToday</small>
+                        }
+                    </div>
+                    <div class="card-label">Attendance Today</div>
+
+                    @if(Model.TotalSessionsToday > 0)
+                    {
+                        <div class="attendance-progress mt-3">
+                            <div class="attendance-progress-bar"
+                                 style="width: @((Model.AttendanceTakenToday * 100) / Model.TotalSessionsToday)%"></div>
+                        </div>
+                        <div class="card-subtext text-muted">
+                            @((Model.AttendanceTakenToday * 100) / Model.TotalSessionsToday)% attended
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="dashboard-card card-schedule">
+                <div class="card-body">
+                    <div class="card-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="card-value">@Model.ClassesToday</div>
+                    <div class="card-label">Classes Today</div>
+                    <div class="card-subtext text-muted">
+                        @if(Model.ClassesToday > 0)
+                        {
+                            <span>Check your schedule for timings</span>
+                        }
+                        else
+                        {
+                            <span>Enjoy your day off!</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="dashboard-card card-homework">
+                <div class="card-body">
+                    <div class="card-icon">
+                        <i class="bi bi-journal-bookmark"></i>
+                    </div>
+                    <div class="card-value">@Model.HomeworkPending</div>
+                    <div class="card-label">Pending Homework</div>
+                    <div class="card-subtext text-muted">
+                        @if(Model.HomeworkPending > 0)
+                        {
+                            <span class="text-warning">
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                Needs attention
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-success">
+                                <i class="bi bi-check-circle me-1"></i>
+                                All caught up!
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="dashboard-card card-billing">
+                <div class="card-body">
+                    <div class="card-icon">
+                        <i class="bi bi-credit-card"></i>
+                    </div>
+                    <div class="card-value">
+                        RM @(Model.PendingAmount + Model.OverdueAmount)
+                    </div>
+                    <div class="card-label">Total Due</div>
+                    <div class="card-subtext">
+                        @if(Model.OverdueAmount > 0)
+                        {
+                            <span class="text-danger fw-bold">
+                                <i class="bi bi-alarm me-1"></i>
+                                RM @Model.OverdueAmount overdue
+                            </span>
+                        }
+                        else if(Model.PendingAmount > 0)
+                        {
+                            <span class="text-warning">
+                                <i class="bi bi-clock me-1"></i>
+                                Payment pending
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-success">
+                                <i class="bi bi-check-circle me-1"></i>
+                                All paid up
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-action-card mb-5">
+        <h5 class="fw-bold mb-4" style="color: #2c3e50;">
+            <i class="bi bi-lightning me-2"></i>Quick Actions
+        </h5>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="text-center p-3 rounded-3" style="background: rgba(52, 152, 219, 0.1);">
+                    <div class="action-icon mb-3" style="background: var(--schedule-gradient);">
+                        <i class="bi bi-calendar-week text-white"></i>
+                    </div>
+                    <h6 class="fw-bold mb-3">View Schedule</h6>
+                    <a href="/schedules/calendar" class="btn btn-schedule action-btn">
+                        Go to Schedule
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="text-center p-3 rounded-3" style="background: rgba(241, 196, 15, 0.1);">
+                    <div class="action-icon mb-3" style="background: var(--homework-gradient);">
+                        <i class="bi bi-journal-text text-white"></i>
+                    </div>
+                    <h6 class="fw-bold mb-3">Homework</h6>
+                    <a href="/homework" class="btn btn-homework action-btn">
+                        View Assignments
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="text-center p-3 rounded-3" style="background: rgba(231, 76, 60, 0.1);">
+                    <div class="action-icon mb-3" style="background: var(--billing-gradient);">
+                        <i class="bi bi-credit-card text-white"></i>
+                    </div>
+                    <h6 class="fw-bold mb-3">Fee Payment</h6>
+                    <a href="/invoice/list" class="btn btn-pay action-btn">
+                        Pay Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBars = document.querySelectorAll('.attendance-progress-bar');
+            progressBars.forEach(bar => {
+                const currentWidth = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = currentWidth;
+                }, 300);
+            });
+
+            const cards = document.querySelectorAll('.dashboard-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+    </script>
+}

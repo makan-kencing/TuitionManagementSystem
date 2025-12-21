@@ -1,8 +1,111 @@
 @{
-    ViewData["Title"] = "Tuition";
+    ViewData["Title"] = "Welcome to Horizon Tuition Center";
+    Layout = "_Layout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome to Guest Page</h1>
-    <p>say hi</p>
+@section Styles {
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #FFA500, #FF4500, #FF8C00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+    </style>
+}
+
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6 text-center text-lg-start">
+            <h1 class="display-4 fw-bold gradient-text">
+                Horizon Tuition Center
+            </h1>
+            <p class="lead text-muted mt-3">
+                Empowering students to achieve academic excellence through
+                expert guidance, structured learning, and personalized support.
+            </p>
+
+            <div class="mt-4 d-flex gap-3 justify-content-center justify-content-lg-start">
+                <a asp-controller="Authentication"
+                   asp-action="Login"
+                   class="btn btn-primary btn-lg px-4">
+                    Login
+                </a>
+
+                <a asp-controller="Authentication"
+                   asp-action="Register"
+                   class="btn btn-outline-primary btn-lg px-4">
+                    Register
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-6 text-center mt-4 mt-lg-0">
+            <img src="/assets/img/guesthomepage.jpg"
+                 class="img-fluid"
+                 alt="Education Illustration"
+                 style="max-height: 320px;"/>
+        </div>
+    </div>
+
+    <div class="row text-center g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="bi bi-mortarboard-fill fs-1 text-primary"></i>
+                    <h5 class="mt-3 fw-semibold">Experienced Teachers</h5>
+                    <p class="text-muted">
+                        Learn from qualified and passionate educators
+                        committed to student success.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="bi bi-calendar-check-fill fs-1 text-primary"></i>
+                    <h5 class="mt-3 fw-semibold">Structured Schedules</h5>
+                    <p class="text-muted">
+                        Well-planned classes with consistent schedules
+                        to ensure effective learning.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="bi bi-graph-up-arrow fs-1 text-primary"></i>
+                    <h5 class="mt-3 fw-semibold">Proven Results</h5>
+                    <p class="text-muted">
+                        Track progress and improvements through
+                        assessments and attendance records.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="position-relative mt-5 py-5">
+        <div class="position-absolute top-0 start-0 w-100 h-100"
+             style="background: url('../assets/img/guestjoin.png') no-repeat center center; background-size: cover; z-index: -1;">
+        </div>
+
+        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index: -1;"></div>
+
+        <div class="position-relative text-center py-5">
+            <p class="text-white mb-2 fs-5">
+                Ready to start your learning journey with us?
+            </p>
+            <a asp-controller="Authentication"
+               asp-action="Register"
+               class="btn btn-success btn-lg px-5 mt-3">
+                Join Horizon Today
+            </a>
+        </div>
+    </div>
 </div>

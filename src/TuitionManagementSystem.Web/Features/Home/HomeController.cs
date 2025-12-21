@@ -1,33 +1,46 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using MediatR;
+using TuitionManagementSystem.Web.Features.Dashboard.StudentDashboard;
+using TuitionManagementSystem.Web.Services.Auth.Constants;
+using TuitionManagementSystem.Web.Services.Auth.Extensions;
 
 namespace TuitionManagementSystem.Web.Features.Home;
-
-using MediatR;
-using Services.Auth.Constants;
-using Services.Auth.Extensions;
 
 public class HomeController(IMediator mediator) : Controller
 {
     [AllowAnonymous]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         if (User.IsInRole(nameof(AccessRoles.Administrator)))
         {
             return RedirectToAction("AdminDashBoard", "Admin");
         }
 
-        switch (this.User.GetUserType())
+        switch (User.GetUserType())
         {
             case nameof(Student):
-                return this.View("StudentDashboard");
+            {
+                var response = await mediator.Send(
+                    new StudentDashboardRequest
+                    {
+                        StudentId = User.GetUserId()
+                    },
+                    cancellationToken
+                );
+
+                return View("StudentDashboard", response);
+            }
+
             case nameof(Teacher):
-                return this.View("TeacherDashboard");
+                return View("TeacherDashboard");
+
             case nameof(Parent):
-                return this.View("ParentDashboard");
+                return View("ParentDashboard");
+
             default:
-                return this.View("GuestDashboard");
+                return View("GuestDashboard");
         }
     }
 
@@ -51,7 +64,7 @@ public class HomeController(IMediator mediator) : Controller
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() =>
-        this.View(new ErrorViewModel
+        View(new ErrorViewModel
         {
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
         });
