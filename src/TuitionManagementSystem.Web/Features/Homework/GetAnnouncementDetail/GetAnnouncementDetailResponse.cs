@@ -23,17 +23,14 @@ public class GetAnnouncementDetailResponse
 
     public double AverageSubmissionRate { get; set; }
 
-    public required StudentHomework? Assigned { get; set; }
+    public UploadFilesResponse? AnnouncementFiles { get; set; }
 
-    public UploadFilesResponse AnnouncementFiles { get; set; }
-
-}
-
-
-public class StudentHomework
-{
     public required AssignmentSubmission? Submission { get; set; }
+
 }
+
+
+
 
 public class AssignmentSubmission
 {

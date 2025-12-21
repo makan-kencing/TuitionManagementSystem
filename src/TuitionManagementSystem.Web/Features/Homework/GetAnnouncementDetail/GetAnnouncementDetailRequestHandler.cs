@@ -29,11 +29,9 @@ public class GetAnnouncementDetailRequestHandler(ApplicationDbContext db)
                     af.File.MimeType,
                     af.File.Uri
                 )).ToList()),
-                Assigned = a.Submissions
+                Submission = a.Submissions
                     .Where(s => s.Student.Id == request.StudentId)
-                    .Select(s => new StudentHomework
-                    {
-                        Submission = new AssignmentSubmission
+                    .Select(s => new AssignmentSubmission
                         {
                             Id = s.Id,
                             Content = s.Content,
@@ -47,9 +45,13 @@ public class GetAnnouncementDetailRequestHandler(ApplicationDbContext db)
                                     MimeType = sf.File.MimeType,
                                     MappedPath = sf.File.Uri
                                 }).ToList()
-                        }
                     }).FirstOrDefault()
             }).FirstOrDefaultAsync(cancellationToken);
+
+        if (assignmentDetails==null)
+        {
+            return Result.NotFound("Not found");
+        }
 
 
         return Result.Success(assignmentDetails);

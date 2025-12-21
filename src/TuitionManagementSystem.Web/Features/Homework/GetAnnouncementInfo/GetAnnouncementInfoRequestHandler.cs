@@ -18,6 +18,9 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
             .Where(c => c.Id == request.CourseId)
             .Include(c => c.Announcements)
             .ThenInclude(a => a.CreatedBy.Account)
+            .Include(c => c.Announcements)
+            .ThenInclude(af => af.Attachments)
+            .ThenInclude(af => af.File)
             .Select(c => new
             {
                 c.Id,
@@ -51,14 +54,15 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                         UpdatedAt = assignment.UpdatedAt,
                         TeacherName = assignment.CreatedBy.Account.DisplayName,
                         DueAt = assignment.DueAt,
-                        SubmissionFiles = new UploadFilesResponse(announcement.Attachments.Select(
-                            sf=> new UploadedFile
-                            (
-                                sf.Id,
-                                sf.File.FileName,
-                                sf.File.MimeType,
-                                sf.File.Uri
-                            )).ToList())
+                        AttechmentFiles =  announcement.Attachments
+                        .Select(sf => new AnnouncementFile
+                        {
+                        Id =  sf.Id,
+                        FileName = sf.File.FileName,
+                        MimeType = sf.File.MimeType,
+                        MappedPath = sf.File.Uri
+                    })
+                .ToList()
                     },
                     Material material => new MaterialInfo
                     {
@@ -68,14 +72,15 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                         CreatedAt = material.CreatedAt,
                         UpdatedAt = material.UpdatedAt,
                         TeacherName = material.CreatedBy.Account.DisplayName,
-                        SubmissionFiles = new UploadFilesResponse(announcement.Attachments.Select(
-                            sf=> new UploadedFile
-                            (
-                                sf.Id,
-                                sf.File.FileName,
-                                sf.File.MimeType,
-                                sf.File.Uri
-                            )).ToList())
+                        AttechmentFiles =announcement.Attachments
+                            .Select(sf => new AnnouncementFile
+                            {
+                                Id =  sf.Id,
+                                FileName = sf.File.FileName,
+                                MimeType = sf.File.MimeType,
+                                MappedPath = sf.File.Uri
+                            })
+                            .ToList()
                     },
                     _ => new AnnouncementInfo
                     {
@@ -85,14 +90,15 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                         CreatedAt = announcement.CreatedAt,
                         UpdatedAt = announcement.UpdatedAt,
                         TeacherName = announcement.CreatedBy.Account.DisplayName,
-                        SubmissionFiles = new UploadFilesResponse(announcement.Attachments.Select(
-                            sf=> new UploadedFile
-                            (
-                                sf.Id,
-                                sf.File.FileName,
-                                sf.File.MimeType,
-                                sf.File.Uri
-                            )).ToList())
+                        AttechmentFiles = announcement.Attachments
+                            .Select(sf => new AnnouncementFile
+                            {
+                                Id =  sf.Id,
+                                FileName = sf.File.FileName,
+                                MimeType = sf.File.MimeType,
+                                MappedPath = sf.File.Uri
+                            })
+                            .ToList()
                     }
                 }).ToList()
         };

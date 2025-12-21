@@ -26,7 +26,7 @@ public class AnnouncementInfo
 
     public string? TeacherName { get; set; }
 
-    public UploadFilesResponse SubmissionFiles { get; set; }
+    public required ICollection<AnnouncementFile> AttechmentFiles { get; set; }
 }
 
 public class AssignmentInfo : AnnouncementInfo
