@@ -1,92 +1,89 @@
 ﻿@model TuitionManagementSystem.Web.Features.Homework.MakeAnnouncementViewModel
 
-<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">Make Announcement</h5>
-        </div>
+<div id="make-announcement-modal-@Model.CourseId">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
 
-        <div class="modal-body">
-            <form id="make-announcement"
-                  hx-post
-                  hx-controller="Homework"
-                  hx-action="MakeAnnouncement">
-                <input type="hidden" asp-for="CourseId">
+            <div class="modal-header">
+                <h5 class="modal-title">Make Announcement</h5>
+            </div>
 
-                <div class="row g-3">
-                    <div class="col-md-8">
-                        <div class="form-floating">
-                            <textarea asp-for="Title"
-                                      class="form-control"
-                                      id="titleInput"
-                                      placeholder="Enter title"
-                                      required></textarea>
-                            <label asp-for="Title"></label>
-                            <div class="invalid-feedback">
-                                Title cannot be empty
+            <div class="modal-body">
+                <form id="make-announcement"
+                      hx-post
+                      hx-controller="Homework"
+                      hx-action="MakeAnnouncement">
+
+                    <input type="hidden" asp-for="CourseId" />
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="form-floating">
+                                <textarea asp-for="Title"
+                                          class="form-control"
+                                          style="height:100px"
+                                          required></textarea>
+                                <label asp-for="Title"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="datetime-local"
+                                       asp-for="DueAt"
+                                       class="form-control" />
+                                <label asp-for="DueAt"></label>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <input type="datetime-local"
-                                   asp-for="DueAt"
-                                   class="form-control"
-                                   placeholder="Select due date"
-                                   min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
-                            <label asp-for="DueAt"></label>
-                        </div>
+
+                    <div class="mt-3 form-floating">
+                        <textarea asp-for="Description"
+                                  class="form-control"
+                                  style="height:150px"></textarea>
+                        <label asp-for="Description"></label>
                     </div>
-                </div>
 
-                <div class="mt-3 form-floating">
-                    <textarea asp-for="Description"
-                              class="form-control"
-                              placeholder="Enter description"></textarea>
-                    <label asp-for="Description"></label>
-                </div>
+                    <div id="file-list" class="mt-3"></div>
+                </form>
 
-                <div id="file-list" class="mt-3"></div>
-            </form>
+                <form id="file-form"
+                      hx-post
+                      hx-controller="File"
+                      hx-action="Upload"
+                      hx-target="#file-list"
+                      hx-swap="beforeend"
+                      hx-encoding="multipart/form-data">
+                    <input type="file" name="files" />
+                    <button type="submit">Upload</button>
+                    <progress id="progress" value="0" max="100"></progress>
+                </form>
 
-            <form id="file-form"
-                  hx-post hx-controller="File" hx-action="Upload"
-                  hx-target="#file-list" hx-swap="beforeend" hx-encoding="multipart/form-data">
-                <input type="file" name="files">
-                <button type="submit">Upload</button>
-                <progress id="progress" value="0" max="100"></progress>
-            </form>
+                <script>
+                    htmx.on('#file-form', 'htmx:xhr:progress', function (event) {
+                        htmx.find('#file-form #progress')
+                            .setAttribute(
+                                'value',
+                                event.detail.loaded / event.detail.total * 100
+                            );
+                    });
+                </script>
+            </div>
 
-            <script>
-                htmx.on('#file-form', 'htmx:xhr:progress', function (event) {
-                    htmx.find('#file-form #progress')
-                        .setAttribute('value', event.detail.loaded / event.detail.total * 100);
-                });
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn text-primary"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
 
-                const titleInput = document.getElementById("titleInput");
-                const submitBtn = document.getElementById("submitBtn");
+                <button type="submit"
+                        class="btn btn-danger"
+                        form="make-announcement">
+                    Submit
+                </button>
+            </div>
 
-                titleInput.addEventListener("input", function () {
-                    if (titleInput.value.trim() === "") {
-                        titleInput.classList.add("is-invalid");
-                        submitBtn.disabled = true;
-                    } else {
-                        titleInput.classList.remove("is-invalid");
-                        titleInput.classList.add("is-valid");
-                        submitBtn.disabled = false;
-                    }
-                });
-            </script>
-        </div>
-
-        <div class="modal-footer">
-            <button type="button" class="btn text-primary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit"
-                    id="submitBtn"
-                    class="btn btn-danger"
-                    data-bs-dismiss="modal"
-                    form="make-announcement"
-                    disabled>Submit</button>
         </div>
     </div>
 </div>

@@ -1,21 +1,25 @@
 ﻿@model TuitionManagementSystem.Web.Features.Homework.MakeAnnouncementViewModel
 
-<div id="make-announcement-@Model.CourseId" hx-swap-oob="delete"></div>
+<div id="make-announcement-modal-@Model.CourseId"
+     hx-swap-oob="delete"></div>
 
 <div id="toast-container" hx-swap-oob="beforeend">
-    <div class="toast align-items-center text-bg-success text-white border-0"
-         role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body btn btn-primary">
-                Submission successful
-            </div>
-
-            <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                    data-bs-dismiss="toast" aria-label="Close"></button>
+    <div class="toast text-bg-success border-0">
+        <div class="toast-body">
+            Make Announcement successful
         </div>
     </div>
 
     <script>
-        new bootstrap.Toast(document.querySelector("#toast-container .toast:last-of-type")).show();
+        // 🔴 关键：让 Bootstrap 正确关闭 modal（会自动清 backdrop）
+        const modalEl = document.querySelector('.modal.show');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal?.hide();
+        }
+
+        new bootstrap.Toast(
+            document.querySelector("#toast-container .toast:last-of-type")
+        ).show();
     </script>
 </div>
