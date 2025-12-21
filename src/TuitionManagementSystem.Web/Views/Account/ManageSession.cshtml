@@ -1,0 +1,82 @@
+﻿@model IEnumerable<TuitionManagementSystem.Web.Models.User.AccountSession>
+
+@{
+    ViewData["Title"] = "Manage Sessions";
+    var currentSessionId = (Guid)ViewData["CurrentSessionId"];
+}
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Session ID</th>
+        <th>IP Address</th>
+        <th>Last Login</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var session in Model)
+    {
+        var isCurrent = session.SessionId == currentSessionId;
+        <tr id="session-@session.SessionId" class="@(isCurrent ? "table-success" : "")">
+            <td>@session.SessionId @(isCurrent ? "(Current)" : "")</td>
+            <td>@session.LastIp</td>
+            <td>@session.LastLogin.ToLocalTime()</td>
+            <td>
+                @if (!isCurrent)
+                {
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeSession('@session.SessionId')">
+                        Remove
+                    </button>
+                }
+                else
+                {
+                    <span class="text-muted">Current Session</span>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+
+<form id="antiForgeryForm">
+    @Html.AntiForgeryToken()
+</form>
+
+
+@section Scripts {
+<script>
+    function removeSession(sessionId) {
+        Swal.fire({
+            title: 'Remove this session?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, remove',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
+
+                const formData = new FormData();
+                formData.append('sessionId', sessionId);
+                formData.append('__RequestVerificationToken', token);
+
+                fetch('@Url.Action("RemoveSession", "Account")', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Removed!', data.message, 'success');
+                            document.getElementById(`session-${sessionId}`).remove();
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    });
+            }
+        });
+    }
+</script>
+}
