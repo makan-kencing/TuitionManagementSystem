@@ -25,10 +25,10 @@
                 if (member.User.Type == nameof(Student))
                 {
                     <a id="member-@(member.User.Id)" class="list-group-item list-group-item-action d-flex"
-                       asp-controller="Child" asp-action="Index" asp-route-id="@member.User.Id">
+                         asp-controller="Child" asp-action="Index" asp-route-id="@member.User.Id">
                         <div>
-                            <a href="@member.User.AccountProfileImageUri" alt=""
-                               class="rounded-circle" width="30" height="30"></a>
+                            <img src="@member.User.AccountProfileImageUri" alt=""
+                                 class="rounded-circle" width="30" height="30"/>
                         </div>
 
                         <div>
@@ -36,9 +36,9 @@
                             <small>@member.User.Type</small>
                         </div>
 
-                        <div class="ms-auto d-flex">
-                            @if (member.User.Id != User.GetUserId())
-                            {
+                        @if (User.GetUserType() == nameof(Parent) && member.User.Id != User.GetUserId())
+                        {
+                            <div class="ms-auto d-flex">
                                 <button hx-get
                                         hx-controller="Family"
                                         hx-action="GetRemoveMember"
@@ -49,16 +49,16 @@
                                         class="btn" title="Remove Member">
                                     <i class="fa-solid fa-delete-left"></i>
                                 </button>
-                            }
-                        </div>
+                            </div>
+                        }
                     </a>
                 }
                 else
                 {
                     <div id="member-@(member.User.Id)" class="list-group-item d-flex">
                         <div>
-                            <a href="@member.User.AccountProfileImageUri" alt=""
-                               class="rounded-circle" width="30" height="30"></a>
+                            <img src="@member.User.AccountProfileImageUri" alt=""
+                                 class="rounded-circle" width="30" height="30"/>
                         </div>
 
                         <div>
@@ -66,9 +66,9 @@
                             <small>@member.User.Type</small>
                         </div>
 
-                        <div class="ms-auto d-flex">
-                            @if (member.User.Id != User.GetUserId())
-                            {
+                        @if (User.GetUserType() == nameof(Parent) && member.User.Id != User.GetUserId())
+                        {
+                            <div class="ms-auto d-flex">
                                 <button hx-get
                                         hx-controller="Family"
                                         hx-action="GetRemoveMember"
@@ -79,13 +79,12 @@
                                         class="btn" title="Remove Member">
                                     <i class="fa-solid fa-delete-left"></i>
                                 </button>
-                            }
-                        </div>
+                            </div>
+                        }
                     </div>
                 }
             }
         </div>
-
     </div>
 
     <div>
