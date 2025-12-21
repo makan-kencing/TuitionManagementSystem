@@ -1,7 +1,9 @@
 namespace TuitionManagementSystem.Web.Features.Schedule;
 
 using System.Globalization;
+using System.Linq.Expressions;
 using Course;
+using Classroom;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -59,27 +61,42 @@ public sealed class ScheduleController(IMediator mediator) : Controller
             return View("ScheduleCreate", vm);
         }
 
-        // IMPORTANT: keep wall-clock local in the controller.
-        // The handler will validate and convert to UTC for storage.
+
         vm.Start = NormalizeWallClockLocal(vm.Start);
         vm.End   = NormalizeWallClockLocal(vm.End);
         vm.Until = vm.Until is null ? null : NormalizeWallClockLocal(vm.Until.Value);
 
-        var patterns = BuildPatterns(vm);
-        var rdates = ParseDateLines(vm.RecurrenceDatesText);
-        var exdates = ParseDateLines(vm.ExceptionDatesText);
+        var classId = vm.ClassId;
 
         try
         {
+            vm.Start = NormalizeWallClockLocal(vm.Start);
+            vm.End   = NormalizeWallClockLocal(vm.End);
+            vm.Until = vm.Until is null ? null : NormalizeWallClockLocal(vm.Until.Value);
+
+            var patterns = BuildPatterns(vm);
+            var rdates = ParseDateLines(vm.RecurrenceDatesText);
+            var exdates = ParseDateLines(vm.ExceptionDatesText);
+
             await mediator.Send(new CreateSchedule(
-                vm.CourseId, vm.Summary, vm.Description, vm.Start, vm.End,
+                vm.CourseId,vm.ClassId, vm.Summary, vm.Description, vm.Start, vm.End,
                 patterns, rdates, exdates));
+
+            return RedirectToAction(nameof(Index), new
+            {
+                year = vm.Start.Year,
+                month = vm.Start.Month,
+                courseId = vm.CourseId
+            });
         }
         catch (InvalidOperationException ex)
         {
-            // Prevent “unhandled exception” page for validation rules like 09:00–23:00
+            // 4. This catches classroom conflicts and logic errors from the Handler
             ModelState.AddModelError(string.Empty, ex.Message);
+
             await LoadCourses(vm.CourseId);
+            await LoadClassrooms(vm.ClassId);
+
             return View("ScheduleCreate", vm);
         }
         catch (DbUpdateException ex) when (
@@ -88,18 +105,13 @@ public sealed class ScheduleController(IMediator mediator) : Controller
             p.ConstraintName == "IX_Schedules_CourseId")
         {
             ModelState.AddModelError(nameof(vm.CourseId),
-                "A schedule already exists for this course. Please edit the existing schedule.");
+                "A schedule already exists for this course.");
 
             await LoadCourses(vm.CourseId);
+            await LoadClassrooms(vm.ClassId);
+
             return View("ScheduleCreate", vm);
         }
-
-        return RedirectToAction(nameof(Index), new
-        {
-            year = vm.Start.Year,
-            month = vm.Start.Month,
-            courseId = vm.CourseId
-        });
     }
 
     [HttpGet("{id:int}/edit")]
@@ -149,36 +161,39 @@ public sealed class ScheduleController(IMediator mediator) : Controller
             return View("ScheduleEdit", vm);
         }
 
-        // IMPORTANT: keep wall-clock local in the controller.
-        vm.Start = NormalizeWallClockLocal(vm.Start);
-        vm.End   = NormalizeWallClockLocal(vm.End);
-        vm.Until = vm.Until is null ? null : NormalizeWallClockLocal(vm.Until.Value);
-
-        var patterns = BuildPatterns(vm);
-        var rdates = ParseDateLines(vm.RecurrenceDatesText);
-        var exdates = ParseDateLines(vm.ExceptionDatesText);
 
         try
         {
+            vm.Start = NormalizeWallClockLocal(vm.Start);
+            vm.End   = NormalizeWallClockLocal(vm.End);
+            vm.Until = vm.Until is null ? null : NormalizeWallClockLocal(vm.Until.Value);
+
+            var patterns = BuildPatterns(vm);
+            var rdates = ParseDateLines(vm.RecurrenceDatesText);
+            var exdates = ParseDateLines(vm.ExceptionDatesText);
+
             var ok = await mediator.Send(new UpdateSchedule(
-                vm.Id, vm.CourseId, vm.Summary, vm.Description, vm.Start, vm.End,
+                vm.Id, vm.CourseId, vm.ClassId, vm.Summary, vm.Description, vm.Start, vm.End,
                 patterns, rdates, exdates));
 
             if (!ok) return NotFound();
+
+            return RedirectToAction(nameof(Index), new
+            {
+                year = vm.Start.Year,
+                month = vm.Start.Month,
+                courseId = vm.CourseId
+            });
         }
         catch (InvalidOperationException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
             await LoadCourses(vm.CourseId);
+            await LoadClassrooms(vm.ClassId);
             return View("ScheduleEdit", vm);
         }
 
-        return RedirectToAction(nameof(Index), new
-        {
-            year = vm.Start.Year,
-            month = vm.Start.Month,
-            courseId = vm.CourseId
-        });
+
     }
 
     [HttpPost("{id:int}/delete")]
@@ -221,7 +236,6 @@ public sealed class ScheduleController(IMediator mediator) : Controller
             if (DateTime.TryParseExact(line.Trim(), "yyyy-MM-dd",
                     CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
             {
-                // Keep date as local wall-clock date.
                 list.Add(DateTime.SpecifyKind(dt.Date, DateTimeKind.Local));
             }
         }
@@ -255,7 +269,6 @@ public sealed class ScheduleController(IMediator mediator) : Controller
         int? studentId,
         CancellationToken ct)
     {
-        // FullCalendar often sends UTC; normalize to local wall-clock before handler converts.
         start = NormalizeWallClockLocal(start);
         end   = NormalizeWallClockLocal(end);
 
@@ -297,6 +310,17 @@ public sealed class ScheduleController(IMediator mediator) : Controller
             Value = c.Id.ToString(),
             Text = c.Name,
             Selected = selectedCourseId.HasValue && c.Id == selectedCourseId.Value
+        }).ToList();
+    }
+
+    private async Task LoadClassrooms(int? selectedClassroomId)
+    {
+        var classrooms = await mediator.Send(new GetClassrooms());
+        ViewBag.Classrooms = classrooms.Select(c => new SelectListItem
+        {
+            Value = c.Id.ToString(),
+            Text = c.Location,
+            Selected = selectedClassroomId.HasValue && c.Id == selectedClassroomId.Value
         }).ToList();
     }
 
