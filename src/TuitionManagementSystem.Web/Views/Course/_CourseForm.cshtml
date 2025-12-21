@@ -15,9 +15,11 @@
     <span asp-validation-for="Price" class="text-danger"></span>
 </div>
 <div class="mb-3">
-    <label asp-for="SubjectId" class="form-label">SubjectName</label>
+    <label asp-for="SubjectId" class="form-label">Name</label>
     <select asp-for="SubjectId" class="form-select" asp-items="ViewBag.Subjects"></select>
     <span asp-validation-for="SubjectId" class="text-danger"></span>
+    <div class="form-text text-muted">Archived subjects are unavailable for selection. Restore archived subjects from the <a href="/subjects">Subjects</a> page to use them.</div>
+
 </div>
 <div class="mb-3">
     <label asp-for="PreferredClassroomId" class="form-label">Classroom Location</label>
