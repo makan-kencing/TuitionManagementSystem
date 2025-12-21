@@ -8,8 +8,11 @@ namespace TuitionManagementSystem.Web.Features.Dashboard.TeacherDashboard
         public int ClassesToTeachToday { get; set; }
         public int TotalStudents { get; set; }
         public int HomeworkPending { get; set; }
+        public Dictionary<string, int> AttendancePerSession { get; set; }
+        public Dictionary<string, int> SubmissionPerCourse { get; set; }
 
-        public Dictionary<string, int> AttendancePerSession { get; set; } = new();
-        public Dictionary<string, int> SubmissionPerCourse { get; set; } = new();
+        public Dictionary<string, int> AverageAttendancePerCourse { get; set; }
+        public Dictionary<string, int> CourseCapacity { get; set; }
+        public Dictionary<string, int> AttendancePercentagePerCourse { get; set; }
     }
 }

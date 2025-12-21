@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Accounts;
 using Authentication.Registration;
+using Dashboard.TeacherDashboard;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,13 +15,22 @@ using Microsoft.EntityFrameworkCore;
 using Models;
 using Models.User;
 using Services.Auth.Constants;
+using Services.Auth.Extensions;
 using Services.File;
 using User;
 
 [Authorize(Roles = nameof(AccessRoles.Administrator))]
 public class AdminController(ApplicationDbContext db,  IFileService fileService, IMediator mediator) : Controller
 {
-    public IActionResult AdminDashBoard() => this.View();
+    public async Task<IActionResult> AdminDashBoard(CancellationToken cancellationToken)
+    {
+        var response = await mediator.Send(
+            new TeacherDashboardRequest { TeacherId = User.GetUserId() },
+            cancellationToken
+        );
+
+       return this.View(response);
+    }
 
     public IActionResult AdminPanel() => this.View();
 

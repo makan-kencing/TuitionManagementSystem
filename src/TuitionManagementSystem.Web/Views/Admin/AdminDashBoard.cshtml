@@ -1,8 +1,553 @@
-﻿@{
-    ViewData["Title"] = "Admin Page";
+﻿@model TuitionManagementSystem.Web.Features.Dashboard.TeacherDashboard.TeacherDashboardResponse
+@using TuitionManagementSystem.Web.Services.Auth.Extensions
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_Layout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome to Admin Page</h1>
-    <p>say hi</p>
+@section Styles {
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --attendance-gradient: linear-gradient(135deg, #00b09b, #96c93d);
+            --schedule-gradient: linear-gradient(135deg, #1e3c72, #2a5298);
+            --homework-gradient: linear-gradient(135deg, #ff7e5f, #feb47b);
+            --students-gradient: linear-gradient(135deg, #3498db, #2ecc71);
+        }
+
+        .dashboard-header {
+            background: var(--primary-gradient);
+            border-radius: 1.5rem;
+            color: white;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            animation: float 20s linear infinite;
+        }
+
+        @@keyframes float {
+            from {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            to {
+                transform: translate(30px, 30px) rotate(360deg);
+            }
+
+        }
+
+        .welcome-text h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .date-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .dashboard-card {
+            border: none;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+        .card-attendance::before {
+            background: var(--attendance-gradient);
+        }
+
+        .card-schedule::before {
+            background: var(--schedule-gradient);
+        }
+
+        .card-homework::before {
+            background: var(--homework-gradient);
+        }
+
+        .card-students::before {
+            background: var(--students-gradient);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .card-attendance .card-icon {
+            background: var(--attendance-gradient);
+        }
+
+        .card-schedule .card-icon {
+            background: var(--schedule-gradient);
+        }
+
+        .card-homework .card-icon {
+            background: var(--homework-gradient);
+        }
+
+        .card-students .card-icon {
+            background: var(--students-gradient);
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin: 1rem 0;
+            background: linear-gradient(90deg, #2c3e50, #4a6491);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-label {
+            font-size: 0.95rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .card-subtext {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .attendance-progress {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .attendance-progress-bar {
+            height: 100%;
+            background: var(--attendance-gradient);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        @@media (max-width: 768px) {
+            .dashboard-header {
+                padding: 1.5rem;
+            }
+
+            .welcome-text h2 {
+                font-size: 2rem;
+            }
+
+            .card-value {
+                font-size: 2rem;
+            }
+
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+    </style>
+}
+
+<div class="container py-4">
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="welcome-text">
+                    <h2>Welcome back, @User.GetDisplayName()! 👋</h2>
+                    <p class="mb-0 opacity-90 fs-5">Here's your teaching dashboard for today.</p>
+                </div>
+                <div class="date-badge">
+                    <i class="bi bi-calendar3 me-2"></i>@DateTime.Now.ToString("dddd, MMMM dd, yyyy")
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                <div class="pulse-animation">
+                    <i class="bi bi-stars" style="font-size: 4rem; opacity: 0.8;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="dashboard-card card-attendance">
+                <div class="card-body">
+                    <div class="card-icon"><i class="bi bi-check2-circle"></i></div>
+                    <div class="card-value">
+                        @if (Model.TotalSessionsToday == 0)
+                        {
+                            <span style="font-size:1.8rem;">No Classes</span>
+                        }
+                        else
+                        {
+                            @Model.TotalSessionsToday
+                        }
+                    </div>
+                    <div class="card-label">Sessions Today</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="dashboard-card card-schedule">
+                <div class="card-body">
+                    <div class="card-icon"><i class="bi bi-calendar-event"></i></div>
+                    <div class="card-value">@Model.ClassesToTeachToday</div>
+                    <div class="card-label">Classes to Teach</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="dashboard-card card-homework">
+                <div class="card-body">
+                    <div class="card-icon"><i class="bi bi-journal-bookmark"></i></div>
+                    <div class="card-value">@Model.HomeworkPending</div>
+                    <div class="card-label">Homework Pending</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="dashboard-card card-students">
+                <div class="card-body">
+                    <div class="card-icon"><i class="bi bi-people"></i></div>
+                    <div class="card-value">@Model.TotalStudents</div>
+                    <div class="card-label">Total Students</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="dashboard-card">
+                <div class="card-body">
+                    <h5>Course Attendance Rate (%)</h5>
+                    <div class="chart-container">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="dashboard-card">
+                <div class="card-body">
+                    <h5>Homework Submission Rate (%)</h5>
+                    <div class="chart-container">
+                        <canvas id="submissionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const averageAttendance = @Html.Raw(
+                                          System.Text.Json.JsonSerializer.Serialize(Model.AverageAttendancePerCourse ?? new Dictionary<string, int>())
+                                      );
+
+            const courseCapacity = @Html.Raw(
+                                       System.Text.Json.JsonSerializer.Serialize(Model.CourseCapacity ?? new Dictionary<string, int>())
+                                   );
+
+            const submissionData = @Html.Raw(
+                                       System.Text.Json.JsonSerializer.Serialize(Model.SubmissionPerCourse ?? new Dictionary<string, int>())
+                                   );
+
+            if (averageAttendance && Object.keys(averageAttendance).length > 0 &&
+                Object.keys(averageAttendance)[0] !== "No Courses") {
+
+                const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+
+                const courseNames = Object.keys(averageAttendance);
+                const avgAttendanceData = courseNames.map(name => averageAttendance[name]);
+                const capacityData = courseNames.map(name => {
+                    return courseCapacity[name] || 0;
+                });
+
+                const attendancePercentages = courseNames.map((name, index) => {
+                    const attendance = avgAttendanceData[index];
+                    const capacity = capacityData[index];
+                    if (capacity > 0) {
+                        return Math.round((attendance / capacity) * 100);
+                    }
+                    return 0;
+                });
+
+                const remainingPercentages = attendancePercentages.map(p => 100 - p);
+
+                new Chart(attendanceCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: courseNames,
+                        datasets: [
+                            {
+                                label: 'Attendance',
+                                data: attendancePercentages,
+                                backgroundColor: courseNames.map((_, index) => {
+                                    const percentage = attendancePercentages[index];
+                                    if (percentage >= 80) return 'rgba(46, 204, 113, 0.9)'; // Green
+                                    if (percentage >= 60) return 'rgba(241, 196, 15, 0.9)'; // Yellow
+                                    return 'rgba(231, 76, 60, 0.9)'; // Red
+                                }),
+                                borderColor: courseNames.map((_, index) => {
+                                    const percentage = attendancePercentages[index];
+                                    if (percentage >= 80) return 'rgba(46, 204, 113, 1)';
+                                    if (percentage >= 60) return 'rgba(241, 196, 15, 1)';
+                                    return 'rgba(231, 76, 60, 1)';
+                                }),
+                                borderWidth: 1,
+                                borderRadius: {
+                                    topRight: 4,
+                                    bottomRight: 0,
+                                    topLeft: 0,
+                                    bottomLeft: 4
+                                },
+                                borderSkipped: false
+                            },
+                            {
+                                label: 'Remaining Capacity',
+                                data: remainingPercentages,
+                                backgroundColor: 'rgba(236, 240, 241, 0.7)',
+                                borderColor: 'rgba(189, 195, 199, 0.5)',
+                                borderWidth: 1,
+                                borderRadius: {
+                                    topRight: 0,
+                                    bottomRight: 4,
+                                    topLeft: 4,
+                                    bottomLeft: 0
+                                },
+                                borderSkipped: false
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                stacked: true,
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Attendance Rate (%)'
+                                },
+                                ticks: {
+                                    callback: function (value) {
+                                        return value + '%';
+                                    },
+                                    stepSize: 20
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    },
+                                    autoSkip: false
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'rect'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: 'rgba(255, 255, 255, 0.1)',
+                                borderWidth: 1,
+                                padding: 12,
+                                callbacks: {
+                                    label: function (context) {
+                                        const courseIndex = context.dataIndex;
+                                        const attendance = avgAttendanceData[courseIndex];
+                                        const capacity = capacityData[courseIndex];
+                                        const percentage = attendancePercentages[courseIndex];
+
+                                        if (context.datasetIndex === 0) {
+                                            return [
+                                                `Attendance: ${percentage}%`,
+                                                `Students: ${attendance}/${capacity}`
+                                            ];
+                                        } else {
+                                            return `Remaining: ${100 - percentage}%`;
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            onComplete: function () {
+                                const chart = this;
+                                const ctx = chart.ctx;
+
+                                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                                    const meta = chart.getDatasetMeta(datasetIndex);
+                                    meta.data.forEach((bar, index) => {
+                                        if (datasetIndex === 0) {
+                                            const percentage = attendancePercentages[index];
+                                            if (percentage > 15) {
+                                                const x = bar.x;
+                                                const y = bar.y;
+                                                const width = bar.width;
+                                                const height = bar.height;
+
+                                                ctx.save();
+                                                ctx.fillStyle = '#2c3e50';
+                                                ctx.font = 'bold 11px Arial';
+                                                ctx.textAlign = 'left';
+                                                ctx.textBaseline = 'middle';
+                                                ctx.fillText(percentage + '%', x - width + 10, y);
+                                                ctx.restore();
+                                            }
+                                        }
+                                    });
+                                });
+                            }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('attendanceChart').parentElement.innerHTML =
+                    '<div class="text-center py-5"><p class="text-muted">No attendance data available</p></div>';
+            }
+
+            if (submissionData && Object.keys(submissionData).length > 0 &&
+                Object.keys(submissionData)[0] !== "No Courses") {
+
+                const submissionCtx = document.getElementById('submissionChart').getContext('2d');
+                const submissionValues = Object.values(submissionData).map(v => Number(v));
+
+                new Chart(submissionCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(submissionData),
+                        datasets: [{
+                            label: 'Submission Rate %',
+                            data: submissionValues,
+                            backgroundColor: [
+                                '#3498db', '#2ecc71', '#e74c3c', '#f1c40f',
+                                '#9b59b6', '#1abc9c', '#34495e', '#e67e22',
+                                '#16a085', '#8e44ad', '#27ae60', '#d35400'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 15,
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.label}: ${context.raw}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('submissionChart').parentElement.innerHTML =
+                    '<div class="text-center py-5"><p class="text-muted">No submission data available</p></div>';
+            }
+
+            console.log('Average Attendance Data:', averageAttendance);
+            console.log('Course Capacity Data:', courseCapacity);
+            console.log('Submission Data:', submissionData);
+        });
+    </script>
+}

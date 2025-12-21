@@ -286,7 +286,7 @@
         <div class="col-md-6">
             <div class="dashboard-card">
                 <div class="card-body">
-                    <h5>Attendance Per Session</h5>
+                    <h5>Course Attendance Rate (%)</h5>
                     <div class="chart-container">
                         <canvas id="attendanceChart"></canvas>
                     </div>
@@ -310,64 +310,185 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const attendanceData = @Html.Raw(
-                                       System.Text.Json.JsonSerializer.Serialize(Model.AttendancePerSession ?? new Dictionary<string, int>())
+            const averageAttendance = @Html.Raw(
+                                          System.Text.Json.JsonSerializer.Serialize(Model.AverageAttendancePerCourse ?? new Dictionary<string, int>())
+                                      );
+
+            const courseCapacity = @Html.Raw(
+                                       System.Text.Json.JsonSerializer.Serialize(Model.CourseCapacity ?? new Dictionary<string, int>())
                                    );
 
             const submissionData = @Html.Raw(
                                        System.Text.Json.JsonSerializer.Serialize(Model.SubmissionPerCourse ?? new Dictionary<string, int>())
                                    );
 
-            console.log('Attendance Data:', attendanceData);
-            console.log('Submission Data:', submissionData);
+            if (averageAttendance && Object.keys(averageAttendance).length > 0 &&
+                Object.keys(averageAttendance)[0] !== "No Courses") {
 
-            if (attendanceData && Object.keys(attendanceData).length > 0) {
                 const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
 
-                const attendanceValues = Object.values(attendanceData).map(v => Number(v));
+                const courseNames = Object.keys(averageAttendance);
+                const avgAttendanceData = courseNames.map(name => averageAttendance[name]);
+                const capacityData = courseNames.map(name => {
+                    return courseCapacity[name] || 0;
+                });
+
+                const attendancePercentages = courseNames.map((name, index) => {
+                    const attendance = avgAttendanceData[index];
+                    const capacity = capacityData[index];
+                    if (capacity > 0) {
+                        return Math.round((attendance / capacity) * 100);
+                    }
+                    return 0;
+                });
+
+                const remainingPercentages = attendancePercentages.map(p => 100 - p);
 
                 new Chart(attendanceCtx, {
                     type: 'bar',
                     data: {
-                        labels: Object.keys(attendanceData),
-                        datasets: [{
-                            label: 'Number of Students',
-                            data: attendanceValues,
-                            backgroundColor: 'rgba(52,152,219,.7)',
-                            borderColor: 'rgba(52,152,219,1)',
-                            borderWidth: 1
-                        }]
+                        labels: courseNames,
+                        datasets: [
+                            {
+                                label: 'Attendance',
+                                data: attendancePercentages,
+                                backgroundColor: courseNames.map((_, index) => {
+                                    const percentage = attendancePercentages[index];
+                                    if (percentage >= 80) return 'rgba(46, 204, 113, 0.9)'; // Green
+                                    if (percentage >= 60) return 'rgba(241, 196, 15, 0.9)'; // Yellow
+                                    return 'rgba(231, 76, 60, 0.9)'; // Red
+                                }),
+                                borderColor: courseNames.map((_, index) => {
+                                    const percentage = attendancePercentages[index];
+                                    if (percentage >= 80) return 'rgba(46, 204, 113, 1)';
+                                    if (percentage >= 60) return 'rgba(241, 196, 15, 1)';
+                                    return 'rgba(231, 76, 60, 1)';
+                                }),
+                                borderWidth: 1,
+                                borderRadius: {
+                                    topRight: 4,
+                                    bottomRight: 0,
+                                    topLeft: 0,
+                                    bottomLeft: 4
+                                },
+                                borderSkipped: false
+                            },
+                            {
+                                label: 'Remaining Capacity',
+                                data: remainingPercentages,
+                                backgroundColor: 'rgba(236, 240, 241, 0.7)',
+                                borderColor: 'rgba(189, 195, 199, 0.5)',
+                                borderWidth: 1,
+                                borderRadius: {
+                                    topRight: 0,
+                                    bottomRight: 4,
+                                    topLeft: 4,
+                                    bottomLeft: 0
+                                },
+                                borderSkipped: false
+                            }
+                        ]
                     },
                     options: {
+                        indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            y: {
+                            x: {
+                                stacked: true,
                                 beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Attendance Rate (%)'
+                                },
                                 ticks: {
                                     callback: function (value) {
-                                        if (value % 1 === 0) {
-                                            return value;
-                                        }
+                                        return value + '%';
                                     },
-                                    stepSize: 1
+                                    stepSize: 20
                                 },
-                                title: {
-                                    display: true,
-                                    text: 'Number of Students'
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
                                 }
                             },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Session'
+                            y: {
+                                stacked: true,
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    },
+                                    autoSkip: false
+                                },
+                                grid: {
+                                    display: false
                                 }
                             }
                         },
                         plugins: {
                             legend: {
                                 display: true,
-                                position: 'top'
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'rect'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: 'rgba(255, 255, 255, 0.1)',
+                                borderWidth: 1,
+                                padding: 12,
+                                callbacks: {
+                                    label: function (context) {
+                                        const courseIndex = context.dataIndex;
+                                        const attendance = avgAttendanceData[courseIndex];
+                                        const capacity = capacityData[courseIndex];
+                                        const percentage = attendancePercentages[courseIndex];
+
+                                        if (context.datasetIndex === 0) {
+                                            return [
+                                                `Attendance: ${percentage}%`,
+                                                `Students: ${attendance}/${capacity}`
+                                            ];
+                                        } else {
+                                            return `Remaining: ${100 - percentage}%`;
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            onComplete: function () {
+                                const chart = this;
+                                const ctx = chart.ctx;
+
+                                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                                    const meta = chart.getDatasetMeta(datasetIndex);
+                                    meta.data.forEach((bar, index) => {
+                                        if (datasetIndex === 0) {
+                                            const percentage = attendancePercentages[index];
+                                            if (percentage > 15) {
+                                                const x = bar.x;
+                                                const y = bar.y;
+                                                const width = bar.width;
+                                                const height = bar.height;
+
+                                                ctx.save();
+                                                ctx.fillStyle = '#2c3e50';
+                                                ctx.font = 'bold 11px Arial';
+                                                ctx.textAlign = 'left';
+                                                ctx.textBaseline = 'middle';
+                                                ctx.fillText(percentage + '%', x - width + 10, y);
+                                                ctx.restore();
+                                            }
+                                        }
+                                    });
+                                });
                             }
                         }
                     }
@@ -377,9 +498,10 @@
                     '<div class="text-center py-5"><p class="text-muted">No attendance data available</p></div>';
             }
 
-            if (submissionData && Object.keys(submissionData).length > 0) {
-                const submissionCtx = document.getElementById('submissionChart').getContext('2d');
+            if (submissionData && Object.keys(submissionData).length > 0 &&
+                Object.keys(submissionData)[0] !== "No Courses") {
 
+                const submissionCtx = document.getElementById('submissionChart').getContext('2d');
                 const submissionValues = Object.values(submissionData).map(v => Number(v));
 
                 new Chart(submissionCtx, {
@@ -389,7 +511,11 @@
                         datasets: [{
                             label: 'Submission Rate %',
                             data: submissionValues,
-                            backgroundColor: ['#3498db', '#2ecc71', '#e74c3c', '#f1c40f', '#9b59b6', '#1abc9c', '#34495e']
+                            backgroundColor: [
+                                '#3498db', '#2ecc71', '#e74c3c', '#f1c40f',
+                                '#9b59b6', '#1abc9c', '#34495e', '#e67e22',
+                                '#16a085', '#8e44ad', '#27ae60', '#d35400'
+                            ]
                         }]
                     },
                     options: {
@@ -419,10 +545,9 @@
                     '<div class="text-center py-5"><p class="text-muted">No submission data available</p></div>';
             }
 
-            console.log(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AttendancePerSession)));
-            console.log(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SubmissionPerCourse)));
-
-
+            console.log('Average Attendance Data:', averageAttendance);
+            console.log('Course Capacity Data:', courseCapacity);
+            console.log('Submission Data:', submissionData);
         });
     </script>
 }
