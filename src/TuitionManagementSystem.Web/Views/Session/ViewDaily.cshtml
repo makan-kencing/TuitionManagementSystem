@@ -16,11 +16,25 @@
             <div class="list-group-item ">
                 <h5>@course.SubjectName : @course.Name</h5>
 
-                <button class="btn btn-primary btn-sm"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#sessions@(i)" aria-expanded="false" aria-controls="sessions@(i)">
-                    Toggle Sessions
-                </button>
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-secondary btn-sm"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#sessions@(i)" aria-expanded="false" aria-controls="sessions@(i)">
+                        <i class="fa-solid fa-angle-down me-2"></i> Toggle Sessions
+                    </button>
+
+                    <button
+                        hx-get
+                        hx-controller="Session"
+                        hx-action="GetStartSessionModal"
+                        hx-route-id="@course.Id"
+                        hx-target="#modal"
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        data-bs-toggle="modal" data-bs-target="#modal">
+                        <i class="fa-solid fa-plus me-2"></i> Start New Session
+                    </button>
+                </div>
 
                 <div class="collapse" id="sessions@(i)">
                     @if (course.Sessions.Count == 0)
