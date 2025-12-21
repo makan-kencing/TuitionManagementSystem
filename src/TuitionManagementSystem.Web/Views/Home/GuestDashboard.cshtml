@@ -90,7 +90,12 @@
         </div>
     </div>
 
-    <div class="position-relative mt-5 py-5">
+    <div class="mt-5">
+        <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt me-2"></i>Tuition Center Location</h5>
+        <div id="guestMap" style="height: 400px; width: 100%; border-radius: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.08);"></div>
+    </div>
+
+    <div class="position-relative py-5">
         <div class="position-absolute top-0 start-0 w-100 h-100"
              style="background: url('../assets/img/guestjoin.png') no-repeat center center; background-size: cover; z-index: -1;">
         </div>
@@ -109,3 +114,20 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const map = L.map('guestMap').setView([3.2000, 101.7400], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            const marker = L.marker([3.2000, 101.7400]).addTo(map)
+                .bindPopup('<b>Danau Kota, Setapak, KL</b>')
+                .openPopup();
+        });
+    </script>
+}

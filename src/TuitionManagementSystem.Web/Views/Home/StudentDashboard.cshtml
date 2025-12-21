@@ -33,7 +33,7 @@
             right: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
             background-size: 30px 30px;
             opacity: 0.3;
             animation: float 20s linear infinite;
@@ -77,14 +77,25 @@
             height: 5px;
         }
 
-        .card-attendance::before { background: var(--attendance-gradient); }
-        .card-schedule::before { background: var(--schedule-gradient); }
-        .card-homework::before { background: var(--homework-gradient); }
-        .card-billing::before { background: var(--billing-gradient); }
+        .card-attendance::before {
+            background: var(--attendance-gradient);
+        }
+
+        .card-schedule::before {
+            background: var(--schedule-gradient);
+        }
+
+        .card-homework::before {
+            background: var(--homework-gradient);
+        }
+
+        .card-billing::before {
+            background: var(--billing-gradient);
+        }
 
         .dashboard-card:hover {
             transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
 
         .card-body {
@@ -103,10 +114,21 @@
             color: white;
         }
 
-        .card-attendance .card-icon { background: var(--attendance-gradient); }
-        .card-schedule .card-icon { background: var(--schedule-gradient); }
-        .card-homework .card-icon { background: var(--homework-gradient); }
-        .card-billing .card-icon { background: var(--billing-gradient); }
+        .card-attendance .card-icon {
+            background: var(--attendance-gradient);
+        }
+
+        .card-schedule .card-icon {
+            background: var(--schedule-gradient);
+        }
+
+        .card-homework .card-icon {
+            background: var(--homework-gradient);
+        }
+
+        .card-billing .card-icon {
+            background: var(--billing-gradient);
+        }
 
         .card-value {
             font-size: 2.5rem;
@@ -148,13 +170,13 @@
             background: white;
             border-radius: 1.5rem;
             padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
         }
 
         .quick-action-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
         }
 
         .action-icon {
@@ -178,7 +200,7 @@
 
         .action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         .btn-schedule {
@@ -203,13 +225,21 @@
         }
 
         @@keyframes float {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            100% { transform: translate(30px, 30px) rotate(360deg); }
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            100% {
+                transform: translate(30px, 30px) rotate(360deg);
+            }
         }
 
         @@keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
         }
 
         .pulse-animation {
@@ -264,7 +294,7 @@
                         <i class="bi bi-check2-circle"></i>
                     </div>
                     <div class="card-value">
-                        @if(Model.TotalSessionsToday == 0)
+                        @if (Model.TotalSessionsToday == 0)
                         {
                             <span style="font-size: 1.8rem;">No Classes</span>
                         }
@@ -275,7 +305,7 @@
                     </div>
                     <div class="card-label">Attendance Today</div>
 
-                    @if(Model.TotalSessionsToday > 0)
+                    @if (Model.TotalSessionsToday > 0)
                     {
                         <div class="attendance-progress mt-3">
                             <div class="attendance-progress-bar"
@@ -298,7 +328,7 @@
                     <div class="card-value">@Model.ClassesToday</div>
                     <div class="card-label">Classes Today</div>
                     <div class="card-subtext text-muted">
-                        @if(Model.ClassesToday > 0)
+                        @if (Model.ClassesToday > 0)
                         {
                             <span>Check your schedule for timings</span>
                         }
@@ -320,7 +350,7 @@
                     <div class="card-value">@Model.HomeworkPending</div>
                     <div class="card-label">Pending Homework</div>
                     <div class="card-subtext text-muted">
-                        @if(Model.HomeworkPending > 0)
+                        @if (Model.HomeworkPending > 0)
                         {
                             <span class="text-warning">
                                 <i class="bi bi-exclamation-triangle me-1"></i>
@@ -350,14 +380,14 @@
                     </div>
                     <div class="card-label">Total Due</div>
                     <div class="card-subtext">
-                        @if(Model.OverdueAmount > 0)
+                        @if (Model.OverdueAmount > 0)
                         {
                             <span class="text-danger fw-bold">
                                 <i class="bi bi-alarm me-1"></i>
                                 RM @Model.OverdueAmount overdue
                             </span>
                         }
-                        else if(Model.PendingAmount > 0)
+                        else if (Model.PendingAmount > 0)
                         {
                             <span class="text-warning">
                                 <i class="bi bi-clock me-1"></i>
@@ -421,9 +451,15 @@
     </div>
 </div>
 
+<div class="mb-5">
+    <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt me-2"></i>Tuition Center Location</h5>
+    <div id="studentMap"
+         style="height: 400px; width: 100%; border-radius: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.08);"></div>
+</div>
+
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const progressBars = document.querySelectorAll('.attendance-progress-bar');
             progressBars.forEach(bar => {
                 const currentWidth = bar.style.width;
@@ -435,13 +471,26 @@
 
             const cards = document.querySelectorAll('.dashboard-card');
             cards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
+                card.addEventListener('mouseenter', function () {
                     this.style.transform = 'translateY(-10px) scale(1.02)';
                 });
-                card.addEventListener('mouseleave', function() {
+                card.addEventListener('mouseleave', function () {
                     this.style.transform = 'translateY(0) scale(1)';
                 });
             });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const map = L.map('studentMap').setView([3.2000, 101.7400], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            const marker = L.marker([3.2000, 101.7400]).addTo(map)
+                .bindPopup('<b>Danau Kota, Setapak, KL</b>')
+                .openPopup();
         });
     </script>
 }
