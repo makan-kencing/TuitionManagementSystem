@@ -82,9 +82,7 @@
                 <td>@u.Email</td>
                 <td class="text-end">
                     <a class="btn btn-sm btn-outline-primary"
-                       asp-controller="Admin"
-                       asp-action="EditUser"
-                       asp-route-userId="@u.Id">
+                       href="@Url.Action("EditUser", "Admin", new { userId = u.Id })">
                         Edit
                     </a>
                     <button type="button"
