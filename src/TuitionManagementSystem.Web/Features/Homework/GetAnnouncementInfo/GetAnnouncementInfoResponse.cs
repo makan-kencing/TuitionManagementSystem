@@ -1,5 +1,7 @@
 ﻿namespace TuitionManagementSystem.Web.Features.Homework.GetAnnouncementInfo;
 
+using File.UploadFiles;
+
 public class GetAnnouncementInfoResponse
 {
     public string? TeacherName { get; set; }
@@ -24,7 +26,7 @@ public class AnnouncementInfo
 
     public string? TeacherName { get; set; }
 
-    public required ICollection<AnnouncementFile>  Files { get; set; }
+    public UploadFilesResponse SubmissionFiles { get; set; }
 }
 
 public class AssignmentInfo : AnnouncementInfo
