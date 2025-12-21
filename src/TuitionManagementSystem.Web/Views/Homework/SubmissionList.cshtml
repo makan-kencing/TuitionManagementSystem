@@ -6,26 +6,52 @@
     var now = DateTime.UtcNow;
 }
 
-<div><h1>Submission List</h1></div>
 
-@foreach (var announcement in Model.AnnouncementInfos)
+@foreach (var announcement in Model.AnnouncementInfos .OfType<AssignmentInfo>()
+              .Where(a => a.DueAt != null && a.DueAt > now)
+              .OrderBy(a => a.DueAt))
 {
+    if (announcement is not AssignmentInfo assignment)
+    {
+        continue;
+    }
+
+    if (assignment.DueAt == null)
+    {
+        continue;
+    }
+
+    if (now >= assignment.DueAt)
+    {
+        continue;
+    }
+
     <div class="container py-4">
-        <a asp-controller="Homework" asp-action="GetAssignmentDetail" asp-route-assignmentId="@announcement.Id">
+        <a asp-controller="Homework"
+           asp-action="GetAssignmentDetail"
+           asp-route-assignmentId="@assignment.Id"
+           class="text-decoration-none text-dark">
+
             <div class="bg-light p-4 rounded shadow-sm mb-3">
                 <div class="d-flex flex-wrap align-items-center justify-content-between">
                     <div>
-                       @if (announcement is AssignmentInfo assignment)
-                        {
-                        if (now < assignment.DueAt)
-                          {
-                            <h3 class="mb-1 ">@Model.CourseInfo.Subject : @Model.CourseInfo.CourseName</h3>
-                            <h4 class="mb-1">@announcement.CreatedAt -@assignment.DueAt</h4>
-                          }
-                        }
+                        <h3 class="mb-1">
+                            @Model.CourseInfo.Subject : @Model.CourseInfo.CourseName
+                        </h3>
+                        <h4 class="mb-1">
+                            @assignment.Title
+                        </h4>
+                        <h5 class="mb-1">
+                            @assignment.CreatedAt
+                            -
+                            <span class="text-danger">
+                                @assignment.DueAt
+                            </span>
+                        </h5>
                     </div>
                 </div>
             </div>
+
         </a>
     </div>
 }
