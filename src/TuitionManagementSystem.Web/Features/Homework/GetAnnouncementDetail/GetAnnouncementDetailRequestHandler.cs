@@ -46,8 +46,7 @@ public class GetAnnouncementDetailRequestHandler(ApplicationDbContext db)
                                     FileName = sf.File.FileName,
                                     MimeType = sf.File.MimeType,
                                     MappedPath = sf.File.Uri
-                                })
-                                .ToList()
+                                }).ToList()
                         }
                     }).FirstOrDefault()
             }).FirstOrDefaultAsync(cancellationToken);

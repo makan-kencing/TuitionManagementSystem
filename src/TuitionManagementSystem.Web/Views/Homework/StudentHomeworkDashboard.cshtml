@@ -37,38 +37,47 @@
             <div class="row gy-4">
                 <div class="col-12">
 
-                    @foreach (var announcement in Model.AnnouncementInfos)
+                    @foreach (var announcement in Model.AnnouncementInfos
+                                      .OrderByDescending(a => a.CreatedAt))
                     {
-                        <a  asp-controller="Homework"
-                              asp-action="AnnouncementDetail"
-                              asp-route-announcementId="@announcement.Id">
-                        <div class="card shadow-sm mt-3">
-                            <div class="card-body">
-                                <h5 class="card-title mb-2">@announcement.Title</h5>
-                                <p class="card-text">@announcement.Description</p>
+                        if (announcement is AssignmentInfo assignment)
+                        {
+                            @if (assignment.DueAt > now)
+                            {
+                                <a asp-controller="Homework"
+                                   asp-action="AnnouncementDetail"
+                                   asp-route-announcementId="@announcement.Id"
+                                   class="text-decoration-none text-dark">
+                                    <div class="card shadow-sm mt-3">
+                                        <div class="card-body">
 
-                                @if (announcement is AssignmentInfo assignment)
-                                {
-                                    if (assignment.DueAt > now)
-                                    {
-                                        <div id="make-submission-@(assignment.Id)">
-                                            <button hx-get
-                                                    hx-controller="Homework"
-                                                    hx-action="GetMakeSubmissionModal"
-                                                    hx-route-id="@assignment.Id"
-                                                    hx-target="#modal"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal"
-                                                    class="btn btn-primary">
-                                                Submit Homework
-                                            </button>
+                                            <h5 class="card-title mb-2">@announcement.Title</h5>
+                                            <p class="card-text">@announcement.Description</p>
+                                            <small class="text-muted">
+                                                @assignment.DueAt
+                                            </small>
+                                            <div id="submissionCarousel" class="carousel slide">
+                                                <partial name="../File/_File" model="assignment.SubmissionFiles"/>
+                                            </div>
                                         </div>
-                                    }
-                                }
-                            </div>
-                        </div>
-                        </a>
+                                    </div>
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="card shadow-sm mt-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-2">@announcement.Title</h5>
+                                        <p class="card-text">@announcement.Description</p>
+                                        <div id="submissionCarousel" class="carousel slide">
+                                            <partial name="../File/_File" model="assignment.SubmissionFiles"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
                     }
+
                 </div>
             </div>
         </div>

@@ -1,6 +1,7 @@
 ﻿namespace TuitionManagementSystem.Web.Features.Homework.GetAnnouncementInfo;
 
 using Ardalis.Result;
+using File.UploadFiles;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -50,15 +51,14 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                         UpdatedAt = assignment.UpdatedAt,
                         TeacherName = assignment.CreatedBy.Account.DisplayName,
                         DueAt = assignment.DueAt,
-                        Files = assignment.Attachments
-                            .Select(sf => new AnnouncementFile
-                            {
-                                Id =  sf.Id,
-                                FileName = sf.File.FileName,
-                                MimeType = sf.File.MimeType,
-                                MappedPath = sf.File.Uri
-                            })
-                            .ToList()
+                        SubmissionFiles = new UploadFilesResponse(announcement.Attachments.Select(
+                            sf=> new UploadedFile
+                            (
+                                sf.Id,
+                                sf.File.FileName,
+                                sf.File.MimeType,
+                                sf.File.Uri
+                            )).ToList())
                     },
                     Material material => new MaterialInfo
                     {
@@ -68,15 +68,14 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                         CreatedAt = material.CreatedAt,
                         UpdatedAt = material.UpdatedAt,
                         TeacherName = material.CreatedBy.Account.DisplayName,
-                        Files = material.Attachments
-                            .Select(sf => new AnnouncementFile
-                            {
-                                Id =  sf.Id,
-                                FileName = sf.File.FileName,
-                                MimeType = sf.File.MimeType,
-                                MappedPath = sf.File.Uri
-                            })
-                            .ToList()
+                        SubmissionFiles = new UploadFilesResponse(announcement.Attachments.Select(
+                            sf=> new UploadedFile
+                            (
+                                sf.Id,
+                                sf.File.FileName,
+                                sf.File.MimeType,
+                                sf.File.Uri
+                            )).ToList())
                     },
                     _ => new AnnouncementInfo
                     {
@@ -86,15 +85,14 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                         CreatedAt = announcement.CreatedAt,
                         UpdatedAt = announcement.UpdatedAt,
                         TeacherName = announcement.CreatedBy.Account.DisplayName,
-                        Files = announcement.Attachments
-                            .Select(sf => new AnnouncementFile
-                            {
-                                Id =  sf.Id,
-                                FileName = sf.File.FileName,
-                                MimeType = sf.File.MimeType,
-                                MappedPath = sf.File.Uri
-                            })
-                            .ToList()
+                        SubmissionFiles = new UploadFilesResponse(announcement.Attachments.Select(
+                            sf=> new UploadedFile
+                            (
+                                sf.Id,
+                                sf.File.FileName,
+                                sf.File.MimeType,
+                                sf.File.Uri
+                            )).ToList())
                     }
                 }).ToList()
         };
