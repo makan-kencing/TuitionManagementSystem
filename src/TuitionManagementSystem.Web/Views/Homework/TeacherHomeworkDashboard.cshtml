@@ -37,7 +37,6 @@
     </div>
 
 
-
     <div class="row">
         <div class="col-md-4 mb-4 mt-3">
             <div class="bg-white border rounded p-3" style="max-height: 420px; overflow-y: auto;">
@@ -61,28 +60,40 @@
         <div class="col-md-8">
             <div class="row gy-4">
                 <div class="col-12">
-                    @foreach (var announcement in Model.AnnouncementInfos)
+                    @foreach (var announcement in Model.AnnouncementInfos
+                                      .OrderByDescending(a => a.CreatedAt))
                     {
-                        <div class="card shadow-sm mt-3">
-                            <div class="card-body">
-                                <h5 class="card-title mb-2">@announcement.Title</h5>
-                                <p class="card-text">@announcement.Description</p>
-
-                                @if (announcement is AssignmentInfo assignment)
-                                {
-                                    <div id="make-submission-@(assignment.Id)">
-                                        @* <button hx-get *@
-                                        @*         hx-controller="Homework" *@
-                                        @*         hx-action="GetMakeSubmissionModal" *@
-                                        @*         hx-target="#modal" *@
-                                        @*         data-bs-toggle="modal" *@
-                                        @*         data-bs-target="#modal"> *@
-                                        @*     Submit Homework *@
-                                        @* </button> *@
+                        if (announcement is AssignmentInfo assignment)
+                        {
+                            @if (assignment.DueAt > now)
+                            {
+                                    <div class="card shadow-sm mt-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title mb-2">@announcement.Title</h5>
+                                            <p class="card-text">@announcement.Description</p>
+                                            <small class="text-muted">
+                                                @assignment.DueAt
+                                            </small>
+                                            <div id="submissionCarousel" class="carousel slide">
+                                                <partial name="../File/_File" model="assignment.SubmissionFiles"/>
+                                            </div>
+                                        </div>
                                     </div>
-                                }
-                            </div>
-                        </div>
+                            }
+                            else
+                            {
+                                <div class="card shadow-sm mt-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-2">@announcement.Title</h5>
+                                        <p class="card-text">@announcement.Description</p>
+                                    </div>
+                                    <div id="submissionCarousel" class="carousel slide">
+                                        <partial name="../File/_File" model="assignment.SubmissionFiles"/>
+                                    </div>
+                                </div>
+
+                            }
+                        }
                     }
                 </div>
             </div>
