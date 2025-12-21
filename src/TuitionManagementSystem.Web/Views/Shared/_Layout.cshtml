@@ -165,7 +165,7 @@
                 <li class="nav-item"><a class="nav-link" asp-controller="Enrollment" asp-action="ViewEnrollments"><i class="fa-solid fa-users"></i>Enrollments</a></li>
                 <li class="nav-item"><a class="nav-link" asp-controller="Attendance" asp-action="TakeAttendance"><i class="fa-solid fa-calendar-check"></i>Attendance</a></li>
             }
-            <li class="nav-item"><a class="nav-link" asp-controller="Schedule" asp-action="Index"><i class="fa-solid fa-calendar-days"></i>Schedule</a></li>
+            <li class="nav-item"><a class="nav-link" href="/schedules/calendar"><i class="fa-solid fa-calendar-days"></i>Schedule</a></li>
 
             if (User.IsInRole(nameof(AccessRoles.Administrator)))
             {
