@@ -21,6 +21,7 @@ public class GetAssignmentDetailsQueryHandler(ApplicationDbContext db)
                 CreatedAt = a.CreatedAt,
                 UpdatedAt = a.UpdatedAt,
                 DueAt = a.DueAt,
+
                 Assigned = a.Course.Enrollments
                     .GroupJoin(
                         a.Submissions.DefaultIfEmpty(),

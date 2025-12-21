@@ -72,6 +72,7 @@ public sealed class GetAnnouncementInfoRequestHandler(ApplicationDbContext db)
                 }).ToList()
         };
 
+
         return Result<GetAnnouncementInfoResponse>.Success(courseAnnouncements);
     }
 }

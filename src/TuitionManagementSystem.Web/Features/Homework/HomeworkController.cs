@@ -1,6 +1,7 @@
 ﻿namespace TuitionManagementSystem.Web.Features.Homework;
 
 using Ardalis.Result;
+using GetAnnouncementDetail;
 using GetAnnouncementInfo;
 using GetAssignmentDetail;
 using GetSubmissionFile;
@@ -246,6 +247,18 @@ public class HomeworkController(IMediator mediator, ApplicationDbContext db) : C
             return this.NotFound();
         }
 
+        return this.View(response.Value);
+    }
+
+    public async Task<IActionResult> AnnouncementDetail(int announcementId, CancellationToken cancellationToken)
+    {
+
+        var userId = this.User.GetUserId();
+        if (userId == -1)
+        {
+            return this.Unauthorized();
+        }
+        var response = await mediator.Send(new GetAnnouncementDetailRequest(announcementId, userId), cancellationToken);
         return this.View(response.Value);
     }
 }
