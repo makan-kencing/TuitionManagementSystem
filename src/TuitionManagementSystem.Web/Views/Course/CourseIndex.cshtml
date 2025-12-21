@@ -8,126 +8,317 @@
     var teachers = (IEnumerable<SelectListItem>)ViewBag.Teachers;
 }
 
-<h2>Courses</h2>
+<style>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
-</p>
+    .row-changed {
+        background-color: #fff8e1 !important;
+        transition: background-color 0.3s ease;
+    }
 
-<form id="antiForgeryForm" method="post">
+    #bulkActionBar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        z-index: 1000;
+        transform: translateY(100%); /* Hidden below screen */
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-top: 1px solid #dee2e6;
+    }
+
+    #bulkActionBar.visible {
+        transform: translateY(0);
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 mb-0 text-gray-800">Course Management</h2>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Create New Course
+    </a>
+</div>
+
+<form id="antiForgeryForm" method="post" class="d-none">
     @Html.AntiForgeryToken()
 </form>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Subject</th>
-            <th>Preferred Classroom</th>
-            <th>Teacher</th>
-            <th>Price</th>
-            <th></th>
-        </tr>
-    </thead>
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                <tr>
+                    <th class="ps-4 py-3">Name</th>
+                    <th class="py-3">Subject</th>
+                    <th class="py-3">Preferred Classroom</th>
+                    <th class="py-3">Teacher</th>
+                    <th class="py-3">Price</th>
+                    <th class="text-center py-3">Actions</th>
+                </tr>
+                </thead>
 
-    <tbody>
-    @foreach (var c in Model)
-    {
-        <tr>
-            <td>@c.Name</td>
+                <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr data-row-id="@c.Id">
+                        <td class="ps-4 fw-bold text-dark">@c.Name</td>
 
-            <td>
-                <select class="form-select subject-select" data-course-id="@c.Id">
-                    @foreach (var s in subjects)
-                    {
-                        <option value="@s.Value" selected="@(s.Value == c.SubjectId.ToString() ? "selected" : null)">
-                            @s.Text
-                        </option>
-                    }
-                </select>
-            </td>
+                        <td>
+                            <select class="form-select form-select-sm course-input subject-select"
+                                    style="max-width: 160px;"
+                                    data-course-id="@c.Id"
+                                    data-original="@c.SubjectId">
+                                @foreach (var s in subjects)
+                                {
+                                    <option value="@s.Value" selected="@(s.Value == c.SubjectId.ToString() ? "selected" : null)">
+                                        @s.Text
+                                    </option>
+                                }
+                            </select>
+                        </td>
 
-            <td>
-                <select class="form-select classroom-select" data-course-id="@c.Id">
-                    @foreach (var r in classrooms)
-                    {
-                        <option value="@r.Value" selected="@(r.Value == c.PreferredClassroomId.ToString() ? "selected" : null)">
-                            @r.Text
-                        </option>
-                    }
-                </select>
-            </td>
+                        <td>
+                            <select class="form-select form-select-sm course-input classroom-select"
+                                    style="max-width: 140px;"
+                                    data-course-id="@c.Id"
+                                    data-original="@c.PreferredClassroomId">
+                                @foreach (var r in classrooms)
+                                {
+                                    <option value="@r.Value" selected="@(r.Value == c.PreferredClassroomId.ToString() ? "selected" : null)">
+                                        @r.Text
+                                    </option>
+                                }
+                            </select>
+                        </td>
 
-            <td>
-                <select class="form-select teacher-select" data-course-id="@c.Id">
-                    <option value="">-- Select teacher --</option>
-                    @foreach (var t in teachers)
-                    {
-                        <option value="@t.Value" selected="@(c.TeacherId?.ToString() == t.Value ? "selected" : null)">
-                            @t.Text
-                        </option>
-                    }
-                </select>
-                <div class="small text-muted mt-1">
-                    @c.TeacherNames
+                        <td>
+                            <select class="form-select form-select-sm course-input teacher-select"
+                                    style="max-width: 180px;"
+                                    data-course-id="@c.Id"
+                                    data-original="@(c.TeacherId?.ToString() ?? "")">
+                                <option value="">-- Select --</option>
+                                @foreach (var t in teachers)
+                                {
+                                    <option value="@t.Value" selected="@(c.TeacherId?.ToString() == t.Value ? "selected" : null)">
+                                        @t.Text
+                                    </option>
+                                }
+                            </select>
+                            <div class="teacher-subtext">
+                                @(string.IsNullOrEmpty(c.TeacherNames) ? "No teacher assigned" : c.TeacherNames)
+                            </div>
+                        </td>
+
+                        <td class="fw-medium">@c.Price.ToString("0.00")</td>
+
+                        <td class="action-cell text-center">
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <div class="btn-group btn-group-sm action-buttons">
+                                    <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-outline-secondary px-3">Edit</a>
+                                    <a asp-action="Delete" asp-route-id="@c.Id" class="btn btn-outline-danger px-3">Delete</a>
+                                </div>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-warning text-white btn-update-row shadow-sm"
+                                        style="display:none;"
+                                        onclick="saveRowChanges(@c.Id)">
+                                    Update
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-light border btn-reset-row"
+                                        style="display:none;"
+                                        onclick="resetRowChanges(@c.Id)">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+
+                                <div class="spinner-border spinner-border-sm text-primary row-spinner"
+                                     style="display:none;"
+                                     role="status">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="bulkActionBar" class="p-3">
+        <div class="container d-flex justify-content-between align-items-center">
+
+            <div class="d-flex align-items-center">
+                <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                    <i class="bi bi-pencil-fill"></i>
                 </div>
-            </td>
+                <div>
+                    <h6 class="mb-0 fw-bold">Changes Made</h6>
+                    <small class="text-muted">You have modified <span id="changeCount">0</span> row(s).</small>
+                </div>
+            </div>
 
-            <td>@c.Price.ToString("0.00")</td>
-
-            <td>
-                <a asp-action="Details" asp-route-id="@c.Id">Details</a> |
-                <a asp-action="Edit" asp-route-id="@c.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@c.Id" class="text-danger">Delete</a>
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-light border" onclick="discardAllChanges()">
+                    Discard
+                </button>
+                <button type="button" class="btn btn-warning text-dark fw-bold px-4 shadow-sm" id="btnSaveAll" onclick="saveAllChanges()">
+                    <span class="normal-text">Save Changes</span>
+                    <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
 <script>
 (() => {
-  const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
+    const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
+    const actionBar = document.getElementById('bulkActionBar');
+    const changeCountLabel = document.getElementById('changeCount');
+    let dirtyRowIds = new Set();
 
-  async function postJson(url, body) {
-    return await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'RequestVerificationToken': token
-      },
-      body: JSON.stringify(body)
-    });
-  }
-
-  async function updateLookups(courseId) {
-    const subjectId = Number(document.querySelector(`.subject-select[data-course-id="${courseId}"]`).value);
-    const preferredClassroomId = Number(document.querySelector(`.classroom-select[data-course-id="${courseId}"]`).value);
-
-    const res = await postJson(`/courses/${courseId}/inline-lookups`, { subjectId, preferredClassroomId });
-    if (!res.ok) alert('Failed updating subject/classroom.');
-  }
-
-    async function updateTeacher(courseId) {
-        const v = document.querySelector(`.teacher-select[data-course-id="${courseId}"]`).value;
-        const teacherId = v ? Number(v) : null;
-
-        const res = await postJson(`/courses/${courseId}/inline-teacher`, { teacherId });
-        if (!res.ok) alert('Failed updating teacher.');
+    async function postJson(url, body) {
+        return await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': token
+            },
+            body: JSON.stringify(body)
+        });
     }
 
-  document.querySelectorAll('.subject-select').forEach(el => {
-    el.addEventListener('change', () => updateLookups(el.dataset.courseId));
-  });
+    function checkForChanges() {
+        dirtyRowIds.clear();
+        const allRows = document.querySelectorAll('tbody tr');
 
-  document.querySelectorAll('.classroom-select').forEach(el => {
-    el.addEventListener('change', () => updateLookups(el.dataset.courseId));
-  });
+        allRows.forEach(row => {
+            const rowId = row.dataset.rowId;
+            let isRowDirty = false;
 
-  document.querySelectorAll('.teacher-select').forEach(el => {
-    el.addEventListener('change', () => updateTeacher(el.dataset.courseId));
-  });
+            row.querySelectorAll('.course-input').forEach(input => {
+                if (input.value !== input.dataset.original) {
+                    isRowDirty = true;
+                }
+            });
+
+
+            const resetBtn = row.querySelector('.btn-reset-row');
+            if (isRowDirty) {
+                dirtyRowIds.add(rowId);
+                row.classList.add('row-changed');
+                if (resetBtn) resetBtn.style.display = '';
+            } else {
+                row.classList.remove('row-changed');
+                if (resetBtn) resetBtn.style.display = 'none';
+            }
+        });
+
+        updateActionBarVisibility();
+    }
+
+    function updateActionBarVisibility() {
+        changeCountLabel.innerText = dirtyRowIds.size;
+
+        if (dirtyRowIds.size > 0) {
+            actionBar.classList.add('visible');
+        } else {
+            actionBar.classList.remove('visible');
+        }
+    }
+
+    window.discardAllChanges = () => {
+        if (!confirm("Discard all pending changes?")) return;
+
+        dirtyRowIds.forEach(id => {
+            const row = document.querySelector(`tr[data-row-id="${id}"]`);
+            row.querySelectorAll('.course-input').forEach(input => {
+                input.value = input.dataset.original;
+            });
+            row.classList.remove('row-changed');
+            const resetBtn = row.querySelector('.btn-reset-row');
+            if (resetBtn) resetBtn.style.display = 'none';
+        });
+
+        dirtyRowIds.clear();
+        updateActionBarVisibility();
+    };
+
+    window.saveAllChanges = async () => {
+        const btn = document.getElementById('btnSaveAll');
+        const spinner = btn.querySelector('.spinner-border');
+        const text = btn.querySelector('.normal-text');
+
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        text.innerText = "Saving...";
+
+        try {
+            const promises = [];
+
+            dirtyRowIds.forEach(id => {
+                const row = document.querySelector(`tr[data-row-id="${id}"]`);
+                const subEl = row.querySelector('.subject-select');
+                const classEl = row.querySelector('.classroom-select');
+                const teachEl = row.querySelector('.teacher-select');
+
+                const lookupsModified = subEl.value !== subEl.dataset.original ||
+                    classEl.value !== classEl.dataset.original;
+                const teacherModified = teachEl.value !== teachEl.dataset.original;
+
+                if (lookupsModified) {
+                    promises.push(
+                        postJson(`/courses/${id}/inline-lookups`, {
+                            subjectId: Number(subEl.value),
+                            preferredClassroomId: Number(classEl.value)
+                        }).then(res => {
+                            if(res.ok) {
+                                subEl.dataset.original = subEl.value;
+                                classEl.dataset.original = classEl.value;
+                            }
+                        })
+                    );
+                }
+
+                if (teacherModified) {
+                    promises.push(
+                        postJson(`/courses/${id}/inline-teacher`, {
+                            teacherId: teachEl.value ? Number(teachEl.value) : null
+                        }).then(res => {
+                            if(res.ok) {
+                                teachEl.dataset.original = teachEl.value;
+                            }
+                        })
+                    );
+                }
+            });
+
+            await Promise.all(promises);
+
+            // Clean up UI after success
+            dirtyRowIds.clear();
+            document.querySelectorAll('.row-changed').forEach(r => r.classList.remove('row-changed'));
+            updateActionBarVisibility();
+            alert("Changes saved successfully!");
+
+        } catch (err) {
+            console.error(err);
+            alert("Error saving changes. Check console.");
+        } finally {
+            btn.disabled = false;
+            spinner.classList.add('d-none');
+            text.innerText = "Save Changes";
+        }
+    };
+
+    document.querySelectorAll('.course-input').forEach(input => {
+        input.addEventListener('change', checkForChanges);
+    });
+    checkForChanges();
+
 })();
 </script>
 }
