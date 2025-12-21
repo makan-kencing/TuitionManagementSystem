@@ -526,7 +526,8 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Uri")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.HasKey("Id");
 
@@ -578,7 +579,8 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ActionUrl")
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("DeliveredAt")
                         .HasColumnType("timestamp with time zone");
@@ -735,11 +737,21 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
+                    b.Property<bool>("IsTwoFactorEnabled")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("LastChanged")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("ProfileImageId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("TwoFactorToken")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("TwoFactorTokenExpiry")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -1001,7 +1013,7 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.Class.Announcement.Submission", b =>
                 {
                     b.HasOne("TuitionManagementSystem.Web.Models.Class.Announcement.Assignment", "Assignment")
-                        .WithMany()
+                        .WithMany("Submissions")
                         .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1386,6 +1398,11 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence.Migrations
                     b.Navigation("Files");
 
                     b.Navigation("Notifications");
+                });
+
+            modelBuilder.Entity("TuitionManagementSystem.Web.Models.Class.Announcement.Assignment", b =>
+                {
+                    b.Navigation("Submissions");
                 });
 
             modelBuilder.Entity("TuitionManagementSystem.Web.Models.User.Student", b =>
