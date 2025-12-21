@@ -1,6 +1,7 @@
 ﻿@model TuitionManagementSystem.Web.Features.Homework.StudentHomework.GetStudentHomeworkResponse
 @{
     ViewData["Title"] = "Homework Menu";
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
 }
 
 
@@ -31,17 +32,6 @@
                         </div>
                         <div class="card-body">
                             <h6 class="card-subtitle mb-2 text-muted">@course.Teacher.Name</h6>
-                            @* <p class="card-text">THAMARAI A/P SUBRAMANIAM</p> *@
-                            @* <div class="d-flex justify-content-between align-items-center"> *@
-                            @*     <div> *@
-                            @*         <i class="bi bi-calendar-check me-1"></i> *@
-                            @*         <span class="text-danger fw-bold">学期: 202505</span> *@
-                            @*     </div> *@
-                            @*     <div> *@
-                            @*         <i class="bi bi-clock me-1"></i> *@
-                            @*         <span class="text-muted">周三 2pm, 周四 2:30pm</span> *@
-                            @*     </div> *@
-                            @* </div> *@
                         </div>
                     </div>
                 </div>

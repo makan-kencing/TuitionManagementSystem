@@ -3,6 +3,7 @@
 
 @{
     var now = DateTime.UtcNow;
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
 }
 
 <div class="container py-4">
@@ -32,12 +33,20 @@
                 {
                     if (announcement is AssignmentInfo assignment)
                     {
-                        if (now < assignment.DueAt)
+                        if (assignment.DueAt.HasValue && now < assignment.DueAt.Value)
                         {
-                            <li class="list-group-item">@assignment.DueAt - @assignment.Title</li>
+                            var localDueAt = TimeZoneInfo.ConvertTimeFromUtc(
+                                assignment.DueAt.Value,
+                                timezone
+                            );
+
+                            <li class="list-group-item">
+                                @localDueAt.ToString("dd/MM/yyyy HH:mm")- @assignment.Title
+                            </li>
                         }
                     }
                 }
+
             </div>
         </div>
 
@@ -47,7 +56,7 @@
                 <div class="col-12">
 
                     @foreach (var announcement in Model.AnnouncementInfos
-                                  .OrderByDescending(a => a.CreatedAt))
+                                      .OrderByDescending(a => a.CreatedAt))
                     {
                         if (announcement is AssignmentInfo assignment)
                         {
@@ -62,9 +71,20 @@
 
                                             <h5 class="card-title mb-2">@announcement.Title</h5>
                                             <p class="card-text">@announcement.Description</p>
-                                            <small class="text-muted">
-                                                @assignment.DueAt
-                                            </small>
+
+                                            @if (assignment.DueAt.HasValue)
+                                            {
+                                                var localDueAt = TimeZoneInfo.ConvertTimeFromUtc(
+                                                    assignment.DueAt.Value,
+                                                    timezone
+                                                );
+
+                                                <small class="text-muted">
+                                                    @localDueAt.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            }
+
+
 
                                             <div class="container">
                                                 @foreach (var path in announcement.AttechmentFiles)

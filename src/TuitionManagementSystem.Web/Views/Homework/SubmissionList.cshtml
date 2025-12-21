@@ -4,6 +4,7 @@
 
 @{
     var now = DateTime.UtcNow;
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
 }
 
 
@@ -42,10 +43,19 @@
                             @assignment.Title
                         </h4>
                         <h5 class="mb-1">
-                            @assignment.CreatedAt
+                            @if (assignment.CreatedAt.HasValue)
+                            {
+                                var localDueAt = TimeZoneInfo.ConvertTimeFromUtc(@assignment.CreatedAt.Value, timezone);
+                                @localDueAt
+                            }
                             -
                             <span class="text-danger">
-                                @assignment.DueAt
+                                @if (assignment.DueAt.HasValue)
+                                {
+                                    var localDueAt=TimeZoneInfo.ConvertTimeFromUtc(assignment.DueAt.Value, timezone);
+                                    @localDueAt
+                                }
+
                             </span>
                         </h5>
                     </div>
