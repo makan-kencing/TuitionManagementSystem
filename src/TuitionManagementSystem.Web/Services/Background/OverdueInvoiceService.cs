@@ -10,7 +10,7 @@ namespace TuitionManagementSystem.Web.Services.Background
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<OverdueInvoiceService> _logger;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromHours(24); // check once per day
+        private readonly TimeSpan _checkInterval = TimeSpan.FromHours(1); //check one every 1 hour
 
         public OverdueInvoiceService(
             IServiceProvider serviceProvider,
