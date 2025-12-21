@@ -24,7 +24,13 @@ public sealed class GetTeacherHomeworkRequestHandler(ApplicationDbContext db)
         var courseHandler = await db.CourseTeachers
             .Where(ct => ct.TeacherId == request.UserId)
             .Select(ct => ct.Course)
-            .Select(c => new CourseInfo { CourseId = c.Id, CourseName = c.Name, SubjectName = c.Subject.Name })
+            .Select(c => new CourseInfo
+            {
+                CourseId = c.Id,
+                CourseName = c.Name,
+                SubjectName = c.Subject.Name
+                
+            })
             .ToListAsync(cancellationToken);
 
         if (courseHandler == null)
