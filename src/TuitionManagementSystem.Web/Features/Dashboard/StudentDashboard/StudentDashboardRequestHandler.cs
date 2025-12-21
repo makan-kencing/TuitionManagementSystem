@@ -15,9 +15,6 @@ namespace TuitionManagementSystem.Web.Features.Dashboard.StudentDashboard
             var today = DateTime.UtcNow.Date;
             var tomorrow = today.AddDays(1);
 
-            // -------------------------
-            // Sessions TODAY for student
-            // -------------------------
             var todaySessionsQuery = db.Sessions
                 .Where(s =>
                     s.StartAt >= today &&
@@ -28,9 +25,6 @@ namespace TuitionManagementSystem.Web.Features.Dashboard.StudentDashboard
             var totalSessionsToday = await todaySessionsQuery
                 .CountAsync(cancellationToken);
 
-            // -------------------------
-            // Attendance TAKEN today
-            // -------------------------
             var attendanceTakenToday = await db.Attendances
                 .CountAsync(a =>
                         a.StudentId == request.StudentId &&
@@ -38,14 +32,8 @@ namespace TuitionManagementSystem.Web.Features.Dashboard.StudentDashboard
                         a.Session.StartAt < tomorrow,
                     cancellationToken);
 
-            // -------------------------
-            // Classes Today
-            // -------------------------
             var classesToday = totalSessionsToday;
 
-            // -------------------------
-            // Homework Pending
-            // -------------------------
             var homeworkPending = await db.Assignments
                 .Where(a =>
                     a.Course.Enrollments.Any(e =>
@@ -55,18 +43,12 @@ namespace TuitionManagementSystem.Web.Features.Dashboard.StudentDashboard
                         s.StudentId == request.StudentId))
                 .CountAsync(cancellationToken);
 
-            // -------------------------
-            // Pending Amount
-            // -------------------------
             var pendingAmount = await db.Invoices
                 .Where(i =>
                     i.StudentId == request.StudentId &&
                     i.Status == InvoiceStatus.Pending)
                 .SumAsync(i => (decimal?)i.Amount, cancellationToken) ?? 0;
 
-            // -------------------------
-            // Overdue Amount
-            // -------------------------
             var overdueAmount = await db.Invoices
                 .Where(i =>
                     i.StudentId == request.StudentId &&
