@@ -1,6 +1,7 @@
 ﻿@model TuitionManagementSystem.Web.Features.Attendance.GetAttendanceSummary.GetAttendanceSummaryResponse
 @{
     ViewData["Title"] = "Students Attendance Summary";
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
 }
 
 <div class="container-fluid">
@@ -17,14 +18,6 @@
     {
         foreach (var course in Model.Courses)
         {
-            var rate = course.Stats.AttendanceRate;
-
-            string barClass =
-                rate >= 80 ? "bg-success" :
-                rate >= 60 ? "bg-warning" :
-                rate > 0 ? "bg-danger" :
-                "bg-secondary";
-
             <a asp-controller="Attendance" asp-action="CourseHistory" asp-route-id="@course.Course.Id"
                class="text-decoration-none text-dark">
                 <div class="card mb-3 shadow-sm attendance-card">
@@ -48,13 +41,19 @@
                             }
                             else
                             {
-                                <div class="progress" style="height:20px">
-                                    <div class="progress-bar @barClass"
+
+                                <div class="progress" style="height:20px;">
+                                    <div class="progress-bar bg-success"
                                          role="progressbar"
-                                         style="width:@rate%">
-                                        @rate%
+                                         style="width:@($"{course.Stats.AttendancePercentage}%");"
+                                         aria-valuenow="@course.Stats.AttendancePercentage"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        @course.Stats.AttendancePercentage%
                                     </div>
                                 </div>
+
+
                             }
                         </div>
 
@@ -64,3 +63,6 @@
         }
     }
 </div>
+
+
+

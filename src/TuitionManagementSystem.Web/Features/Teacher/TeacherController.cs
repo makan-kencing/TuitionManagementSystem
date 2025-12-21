@@ -30,6 +30,8 @@ public class TeacherController(ApplicationDbContext db) : Controller
             .ToListAsync();
 
         ViewData["Title"] = "Manage Teachers";
+        ViewData["UserType"] = "Teacher";
+        ViewData["CreateUrl"] = Url.Action(nameof(Create), "Teacher");
 
         return View("~/Views/Admin/UserList.cshtml", teachers);
     }
@@ -53,7 +55,7 @@ public class TeacherController(ApplicationDbContext db) : Controller
         {
             Username = model.Username,
             Email = model.Email,
-            Password = model.Password
+            Password = model.Password,
         });
 
         TempData["Status"] = result.Value.IsSuccess ? "success" : "error";

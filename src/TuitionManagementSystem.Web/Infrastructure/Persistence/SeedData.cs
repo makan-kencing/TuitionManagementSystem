@@ -9,6 +9,7 @@ using Models.Class;
 using Models.User;
 using Services.Auth.Constants;
 using Microsoft.AspNetCore.Identity;
+using Models.Class.Announcement;
 using Newtonsoft.Json;
 using NuGet.Protocol;
 
@@ -28,6 +29,8 @@ public class SeedData
     private readonly List<Session> sessions;
     private readonly List<Attendance> attendances;
     private readonly List<CourseTeacher> courseTeachers;
+    private readonly List<Announcement> announcements;
+    private readonly List<Submission> submissions;
 
     private IEnumerable<User> Users => this.teachers.Cast<User>()
         .Concat(this.students)
@@ -63,8 +66,8 @@ public class SeedData
             new Classroom { Location = "Room B", MaxCapacity = 25 },
             new Classroom { Location = "Room C", MaxCapacity = 20 },
             new Classroom { Location = "Room D", MaxCapacity = 35 },
-            new Classroom { Location = "Room E",  MaxCapacity = 15 },
-            new Classroom { Location = "Room F",  MaxCapacity = 15 },
+            new Classroom { Location = "Room E", MaxCapacity = 15 },
+            new Classroom { Location = "Room F", MaxCapacity = 15 },
             new Classroom { Location = "Room G", MaxCapacity = 50 },
             new Classroom { Location = "Room H", MaxCapacity = 12 },
             new Classroom { Location = "Room I", MaxCapacity = 28 },
@@ -72,435 +75,422 @@ public class SeedData
         ];
 
         this.courses =
-[
-    new Course
-    {
-        Name = "Basic Algebra",
-        Subject = this.subjects[0],
-        PreferredClassroom = this.classrooms[0],
-        Price = 100.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(14),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Monday]
-                }
-            ]
-        },
-        Sessions =
         [
-            new Session
+            new Course
             {
-                StartAt = DateTime.UtcNow.Date.AddDays(2).AddHours(14),
-                EndAt = DateTime.UtcNow.Date.AddDays(2).AddHours(16),
-                Classroom = this.classrooms[0]
+                Name = "Basic Algebra",
+                Subject = this.subjects[0],
+                PreferredClassroom = this.classrooms[0],
+                Price = 100.00m,
+                Schedule = new Schedule
+                {
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(14),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Monday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(2).AddHours(14),
+                        EndAt = DateTime.UtcNow.Date.AddDays(2).AddHours(16),
+                        Classroom = this.classrooms[0]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(9).AddHours(14),
+                        EndAt = DateTime.UtcNow.Date.AddDays(9).AddHours(16),
+                        Classroom = this.classrooms[0]
+                    }
+                ]
             },
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(9).AddHours(14),
-                EndAt = DateTime.UtcNow.Date.AddDays(9).AddHours(16),
-                Classroom = this.classrooms[0]
-            }
-        ]
-    },
 
-    new Course
-    {
-        Name = "General Science",
-        Subject = this.subjects[1],
-        PreferredClassroom = this.classrooms[1],
-        Price = 120.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(10),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(12),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Wednesday]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
+            new Course
             {
-                StartAt = DateTime.UtcNow.Date.AddDays(4).AddHours(10),
-                EndAt = DateTime.UtcNow.Date.AddDays(4).AddHours(12),
-                Classroom = this.classrooms[1]
+                Name = "General Science",
+                Subject = this.subjects[1],
+                PreferredClassroom = this.classrooms[1],
+                Price = 120.00m,
+                Schedule = new Schedule
+                {
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(10),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(12),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Wednesday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(4).AddHours(10),
+                        EndAt = DateTime.UtcNow.Date.AddDays(4).AddHours(12),
+                        Classroom = this.classrooms[1]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(11).AddHours(10),
+                        EndAt = DateTime.UtcNow.Date.AddDays(11).AddHours(12),
+                        Classroom = this.classrooms[1]
+                    }
+                ]
             },
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(11).AddHours(10),
-                EndAt = DateTime.UtcNow.Date.AddDays(11).AddHours(12),
-                Classroom = this.classrooms[1]
-            }
-        ]
-    },
 
-    new Course
-    {
-        Name = "English Grammar",
-        Subject = this.subjects[2],
-        PreferredClassroom = this.classrooms[2],
-        Price = 110.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(17).AddMinutes(30),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Tuesday, DayOfWeek.Thursday]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
+            new Course
             {
-                StartAt = DateTime.UtcNow.Date.AddDays(3).AddHours(16),
-                EndAt = DateTime.UtcNow.Date.AddDays(3).AddHours(17).AddMinutes(30),
-                Classroom = this.classrooms[2]
+                Name = "English Grammar",
+                Subject = this.subjects[2],
+                PreferredClassroom = this.classrooms[2],
+                Price = 110.00m,
+                Schedule = new Schedule
+                {
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(17).AddMinutes(30),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Tuesday, DayOfWeek.Thursday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(3).AddHours(16),
+                        EndAt = DateTime.UtcNow.Date.AddDays(3).AddHours(17).AddMinutes(30),
+                        Classroom = this.classrooms[2]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(5).AddHours(16),
+                        EndAt = DateTime.UtcNow.Date.AddDays(5).AddHours(17).AddMinutes(30),
+                        Classroom = this.classrooms[2]
+                    }
+                ]
             },
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(5).AddHours(16),
-                EndAt = DateTime.UtcNow.Date.AddDays(5).AddHours(17).AddMinutes(30),
-                Classroom = this.classrooms[2]
-            }
-        ]
-    },
 
-    new Course
-    {
-        Name = "Sejarah",
-        Subject = this.subjects[3],
-        PreferredClassroom = this.classrooms[6],
-        Price = 95.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(9),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(11),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Friday]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
+            new Course
             {
-                StartAt = DateTime.UtcNow.Date.AddDays(6).AddHours(9),
-                EndAt = DateTime.UtcNow.Date.AddDays(6).AddHours(11),
-                Classroom = this.classrooms[6]
+                Name = "Sejarah",
+                Subject = this.subjects[3],
+                PreferredClassroom = this.classrooms[6],
+                Price = 95.00m,
+                Schedule = new Schedule
+                {
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(9),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(11),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Friday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(6).AddHours(9),
+                        EndAt = DateTime.UtcNow.Date.AddDays(6).AddHours(11),
+                        Classroom = this.classrooms[6]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(13).AddHours(9),
+                        EndAt = DateTime.UtcNow.Date.AddDays(13).AddHours(11),
+                        Classroom = this.classrooms[6]
+                    }
+                ]
             },
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(13).AddHours(9),
-                EndAt = DateTime.UtcNow.Date.AddDays(13).AddHours(11),
-                Classroom = this.classrooms[6]
-            }
-        ]
-    },
 
-    new Course
-    {
-        Name = "Nuclear Physics",
-        Subject = this.subjects[4],
-        PreferredClassroom = this.classrooms[4],
-        Price = 130.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(18),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(21),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Monthly,
-                    ByDay = [DayOfWeek.Monday],
-                    BySetPosition = [1]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
+            new Course
             {
-                StartAt = DateTime.UtcNow.Date.AddDays(15).AddHours(18),
-                EndAt = DateTime.UtcNow.Date.AddDays(15).AddHours(21),
-                Classroom = this.classrooms[4]
-            }
-        ]
-    },
-
-    new Course
-    {
-        Name = "Renaissance Art",
-        Subject = this.subjects[5],
-        PreferredClassroom = this.classrooms[7],
-        Price = 140.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(13),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
+                Name = "Nuclear Physics",
+                Subject = this.subjects[4],
+                PreferredClassroom = this.classrooms[4],
+                Price = 130.00m,
+                Schedule = new Schedule
                 {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Saturday]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(7).AddHours(13),
-                EndAt = DateTime.UtcNow.Date.AddDays(7).AddHours(16),
-                Classroom = this.classrooms[7]
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(18),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(21),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Monthly, ByDay = [DayOfWeek.Monday], BySetPosition = [1]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(15).AddHours(18),
+                        EndAt = DateTime.UtcNow.Date.AddDays(15).AddHours(21),
+                        Classroom = this.classrooms[4]
+                    }
+                ]
             },
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(14).AddHours(13),
-                EndAt = DateTime.UtcNow.Date.AddDays(14).AddHours(16),
-                Classroom = this.classrooms[7]
-            }
-        ]
-    },
 
-    new Course
-    {
-        Name = "Python for Beginners",
-        Subject = this.subjects[6],
-        PreferredClassroom = this.classrooms[5],
-        Price = 150.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(19),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(21),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
+            new Course
+            {
+                Name = "Renaissance Art",
+                Subject = this.subjects[5],
+                PreferredClassroom = this.classrooms[7],
+                Price = 140.00m,
+                Schedule = new Schedule
                 {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Tuesday]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(3).AddHours(19),
-                EndAt = DateTime.UtcNow.Date.AddDays(3).AddHours(21),
-                Classroom = this.classrooms[5]
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(13),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Saturday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(7).AddHours(13),
+                        EndAt = DateTime.UtcNow.Date.AddDays(7).AddHours(16),
+                        Classroom = this.classrooms[7]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(14).AddHours(13),
+                        EndAt = DateTime.UtcNow.Date.AddDays(14).AddHours(16),
+                        Classroom = this.classrooms[7]
+                    }
+                ]
             },
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(10).AddHours(19),
-                EndAt = DateTime.UtcNow.Date.AddDays(10).AddHours(21),
-                Classroom = this.classrooms[5]
-            }
-        ]
-    },
 
-    new Course
-    {
-        Name = "Physical Geography",
-        Subject = this.subjects[7],
-        PreferredClassroom = this.classrooms[8],
-        Price = 105.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(15),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(17),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
+            new Course
+            {
+                Name = "Python for Beginners",
+                Subject = this.subjects[6],
+                PreferredClassroom = this.classrooms[5],
+                Price = 150.00m,
+                Schedule = new Schedule
                 {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Thursday]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(5).AddHours(15),
-                EndAt = DateTime.UtcNow.Date.AddDays(5).AddHours(17),
-                Classroom = this.classrooms[8]
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(19),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(21),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Tuesday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(3).AddHours(19),
+                        EndAt = DateTime.UtcNow.Date.AddDays(3).AddHours(21),
+                        Classroom = this.classrooms[5]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(10).AddHours(19),
+                        EndAt = DateTime.UtcNow.Date.AddDays(10).AddHours(21),
+                        Classroom = this.classrooms[5]
+                    }
+                ]
             },
-            new Session
+
+            new Course
             {
-                StartAt = DateTime.UtcNow.Date.AddDays(12).AddHours(15),
-                EndAt = DateTime.UtcNow.Date.AddDays(12).AddHours(17),
-                Classroom = this.classrooms[8]
-            }
-        ]
-    },
-
-
-    new Course
-    {
-        Name = "Statistics",
-        Subject = this.subjects[8],
-        PreferredClassroom = this.classrooms[7],
-        Price = 115.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(9),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(12),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
+                Name = "Physical Geography",
+                Subject = this.subjects[7],
+                PreferredClassroom = this.classrooms[8],
+                Price = 105.00m,
+                Schedule = new Schedule
                 {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Saturday, DayOfWeek.Sunday]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(7).AddHours(9),
-                EndAt = DateTime.UtcNow.Date.AddDays(7).AddHours(12),
-                Classroom = this.classrooms[7]
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(15),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(17),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Thursday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(5).AddHours(15),
+                        EndAt = DateTime.UtcNow.Date.AddDays(5).AddHours(17),
+                        Classroom = this.classrooms[8]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(12).AddHours(15),
+                        EndAt = DateTime.UtcNow.Date.AddDays(12).AddHours(17),
+                        Classroom = this.classrooms[8]
+                    }
+                ]
             },
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(8).AddHours(9),
-                EndAt = DateTime.UtcNow.Date.AddDays(8).AddHours(12),
-                Classroom = this.classrooms[7]
-            }
-        ]
-    },
 
-    new Course
-    {
-        Name = "Organic Chemistry",
-        Subject = this.subjects[9],
-        PreferredClassroom = this.classrooms[4],
-        Price = 135.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(14),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Monday, DayOfWeek.Wednesday]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(2).AddHours(14),
-                EndAt = DateTime.UtcNow.Date.AddDays(2).AddHours(16),
-                Classroom = this.classrooms[4]
-            },
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(4).AddHours(14),
-                EndAt = DateTime.UtcNow.Date.AddDays(4).AddHours(16),
-                Classroom = this.classrooms[4]
-            }
-        ]
-    },
 
-    new Course
-    {
-        Name = "Calculus I",
-        Subject = this.subjects[0],
-        PreferredClassroom = this.classrooms[3],
-        Price = 125.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(18),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(20),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
+            new Course
+            {
+                Name = "Statistics",
+                Subject = this.subjects[8],
+                PreferredClassroom = this.classrooms[7],
+                Price = 115.00m,
+                Schedule = new Schedule
                 {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Friday]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(6).AddHours(18),
-                EndAt = DateTime.UtcNow.Date.AddDays(6).AddHours(20),
-                Classroom = this.classrooms[3]
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(9),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(12),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Saturday, DayOfWeek.Sunday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(7).AddHours(9),
+                        EndAt = DateTime.UtcNow.Date.AddDays(7).AddHours(12),
+                        Classroom = this.classrooms[7]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(8).AddHours(9),
+                        EndAt = DateTime.UtcNow.Date.AddDays(8).AddHours(12),
+                        Classroom = this.classrooms[7]
+                    }
+                ]
             },
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(13).AddHours(18),
-                EndAt = DateTime.UtcNow.Date.AddDays(13).AddHours(20),
-                Classroom = this.classrooms[3]
-            }
-        ]
-    },
 
-    new Course
-    {
-        Name = "Creative Writing",
-        Subject = this.subjects[2],
-        PreferredClassroom = this.classrooms[9],
-        Price = 110.00m,
-        Schedule = new Schedule
-        {
-            Start = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
-            End = DateTime.UtcNow.Date.AddDays(1).AddHours(18),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
+            new Course
+            {
+                Name = "Organic Chemistry",
+                Subject = this.subjects[9],
+                PreferredClassroom = this.classrooms[4],
+                Price = 135.00m,
+                Schedule = new Schedule
                 {
-                    FrequencyType = FrequencyType.Weekly,
-                    ByDay = [DayOfWeek.Wednesday]
-                }
-            ]
-        },
-        Sessions =
-        [
-            new Session
-            {
-                StartAt = DateTime.UtcNow.Date.AddDays(4).AddHours(16),
-                EndAt = DateTime.UtcNow.Date.AddDays(4).AddHours(18),
-                Classroom = this.classrooms[9]
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(14),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Monday, DayOfWeek.Wednesday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(2).AddHours(14),
+                        EndAt = DateTime.UtcNow.Date.AddDays(2).AddHours(16),
+                        Classroom = this.classrooms[4]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(4).AddHours(14),
+                        EndAt = DateTime.UtcNow.Date.AddDays(4).AddHours(16),
+                        Classroom = this.classrooms[4]
+                    }
+                ]
             },
-            new Session
+
+            new Course
             {
-                StartAt = DateTime.UtcNow.Date.AddDays(11).AddHours(16),
-                EndAt = DateTime.UtcNow.Date.AddDays(11).AddHours(18),
-                Classroom = this.classrooms[9]
+                Name = "Calculus I",
+                Subject = this.subjects[0],
+                PreferredClassroom = this.classrooms[3],
+                Price = 125.00m,
+                Schedule = new Schedule
+                {
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(18),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(20),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Friday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(6).AddHours(18),
+                        EndAt = DateTime.UtcNow.Date.AddDays(6).AddHours(20),
+                        Classroom = this.classrooms[3]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(13).AddHours(18),
+                        EndAt = DateTime.UtcNow.Date.AddDays(13).AddHours(20),
+                        Classroom = this.classrooms[3]
+                    }
+                ]
+            },
+
+            new Course
+            {
+                Name = "Creative Writing",
+                Subject = this.subjects[2],
+                PreferredClassroom = this.classrooms[9],
+                Price = 110.00m,
+                Schedule = new Schedule
+                {
+                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
+                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(18),
+                    RecurrencePatterns =
+                    [
+                        new ScheduleRecurrencePattern
+                        {
+                            FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Wednesday]
+                        }
+                    ]
+                },
+                Sessions =
+                [
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(4).AddHours(16),
+                        EndAt = DateTime.UtcNow.Date.AddDays(4).AddHours(18),
+                        Classroom = this.classrooms[9]
+                    },
+                    new Session
+                    {
+                        StartAt = DateTime.UtcNow.Date.AddDays(11).AddHours(16),
+                        EndAt = DateTime.UtcNow.Date.AddDays(11).AddHours(18),
+                        Classroom = this.classrooms[9]
+                    }
+                ]
             }
-        ]
-    }
-];
+        ];
 
         this.teachers = Enumerable.Range(1, 3)
             .Select(i => new Teacher
@@ -519,7 +509,7 @@ public class SeedData
                     Account = new Account
                     {
                         Username = $"teacher{i}",
-                        DisplayName= $"Teacher {i}",
+                        DisplayName = $"Teacher {i}",
                         HashedPassword = this.HashedDefaultPassword,
                         Email = $"teacher{i}@example.com",
                         AccessRole = AccessRoles.User
@@ -568,13 +558,17 @@ public class SeedData
 
         this.enrollments = this.students
             .Select(s => this.courses.OrderBy(_ => this.random.Next())
-                    .Take(this.random.Next(this.courses.Count))
-                    .Select(c => new Enrollment
+                .Take(this.random.Next(this.courses.Count))
+                .Select(c =>
+                {
+                    var enrollment = new Enrollment
                     {
-                        Student = s,
-                        Course = c,
-                        EnrolledAt = DateTime.UtcNow.AddDays(-this.random.Next(1, 30))
-                    })
+                        Student = s, Course = c, EnrolledAt = DateTime.UtcNow.AddDays(-this.random.Next(1, 30))
+                    };
+                    s.Enrollments.Add(enrollment);
+                    c.Enrollments.Add(enrollment);
+                    return enrollment;
+                })
             )
             .SelectMany(i => i)
             .ToList();
@@ -588,10 +582,7 @@ public class SeedData
 
                     return new Session
                     {
-                        Course = c,
-                        Classroom = c.PreferredClassroom,
-                        StartAt = start,
-                        EndAt = start.AddHours(2)
+                        Course = c, Classroom = c.PreferredClassroom, StartAt = start, EndAt = start.AddHours(2)
                     };
                 }))
             .SelectMany(i => i)
@@ -609,29 +600,73 @@ public class SeedData
                     End = start.AddHours(2),
                     Course = c
                 };
-
             })
             .ToList();
 
         this.attendances = this.enrollments
             .Select(e => e.Course.Sessions
-                .Select(s => new Attendance
+                .Select(s => this.random.Next(1, 11) switch
                 {
-                    Student = e.Student,
-                    Session = s,
-                    TakenOn = s.StartAt.AddMinutes(this.random.Next(0, 10))
+                    1 => null,
+                    _ => new Attendance
+                    {
+                        Student = e.Student, Session = s, TakenOn = s.StartAt.AddMinutes(this.random.Next(0, 10))
+                    }
                 }))
             .SelectMany(i => i)
+            .OfType<Attendance>()
             .ToList();
 
         {
             var coursesCursor = this.courses.GetEnumerator().ToIEnumerable();
             this.courseTeachers = this.teachers
                 .Select(t => coursesCursor.Take(this.random.Next(1, 3))
-                    .Select(c => new CourseTeacher { Course = c, Teacher = t }))
+                    .Select(c =>
+                    {
+                        var ct = new CourseTeacher { Course = c, Teacher = t };
+                        c.TeachersInCharge.Add(ct);
+                        t.Courses.Add(ct);
+                        return ct;
+                    }))
                 .SelectMany(i => i)
                 .ToList();
         }
+
+        this.announcements = this.courses
+            .Select(c => Enumerable.Range(1, this.random.Next(5))
+                .Select(i => this.random.Next(1, 3) switch
+                {
+                    1 => new Announcement
+                    {
+                        Title = $"Announcement {i + 1} - {c.Name}",
+                        Description = "Below are the following contents.",
+                        Course = c,
+                        CreatedBy = c.TeachersInCharge.ElementAt(this.random.Next(c.TeachersInCharge.Count)).Teacher
+                    },
+                    _ => new Assignment
+                    {
+                        Title = $"Assignment {i + 1} - {c.Name}",
+                        Description = "Submit the assignment before the due date.",
+                        Course = c,
+                        CreatedBy =
+                            c.TeachersInCharge.ElementAt(this.random.Next(c.TeachersInCharge.Count)).Teacher,
+                        DueAt = DateTime.UtcNow.AddDays(2)
+                    }
+                }))
+            .SelectMany(i => i)
+            .ToList();
+
+        this.submissions = this.announcements
+            .OfType<Assignment>()
+            .Select(a => a.Course.Enrollments
+                .Select(e => this.random.Next(1, 10) switch
+                {
+                    1 => new Submission { Student = e.Student, Assignment = a, Content = "Homework completed" },
+                    _ => null
+                }))
+            .SelectMany(i => i)
+            .OfType<Submission>()
+            .ToList();
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -647,9 +682,12 @@ public class SeedData
         await this.Seed(this.sessions, cancellationToken);
         await this.Seed(this.attendances, cancellationToken);
         await this.Seed(this.courseTeachers, cancellationToken);
+        await this.Seed(this.announcements, cancellationToken);
+        await this.Seed(this.submissions, cancellationToken);
     }
 
-    private async Task Seed<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
+    private async Task Seed<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+        where TEntity : class
     {
         this.random = new Random(1);
 
@@ -660,7 +698,8 @@ public class SeedData
         }
     }
 
-    private async Task BulkSeed<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
+    private async Task BulkSeed<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+        where TEntity : class
     {
         this.random = new Random(1);
 
@@ -681,7 +720,8 @@ public class SeedData
 
 internal static class IEnumeratorExtensions
 {
-    public static IEnumerable<T> ToIEnumerable<T>(this IEnumerator<T> enumerator) {
+    public static IEnumerable<T> ToIEnumerable<T>(this IEnumerator<T> enumerator)
+    {
         while (enumerator.MoveNext())
         {
             yield return enumerator.Current;

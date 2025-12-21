@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Attendance History";
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
 }
 
 <div class="container mt-4">
@@ -35,10 +36,10 @@
                 {
                     <tr>
                         <td>
-                            @session.StartAt.ToString("dd MMM yyyy, hh:mm tt")
+                            @TimeZoneInfo.ConvertTimeFromUtc(session.StartAt,timezone)
                         </td>
                         <td>
-                            @session.EndAt.ToString("dd MMM yyyy, hh:mm tt")
+                            @TimeZoneInfo.ConvertTimeFromUtc(session.EndAt,timezone)
                         </td>
                         <td>
                             @if (session.IsValid)

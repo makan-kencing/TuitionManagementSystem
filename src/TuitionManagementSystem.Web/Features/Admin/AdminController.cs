@@ -144,14 +144,44 @@ public class AdminController(ApplicationDbContext db,  IFileService fileService,
     public async Task<IActionResult> UserList(
         string? sortColumn,
         string? sortOrder,
-        string? search)
+        string? search,
+        string? userType)
     {
+        ViewData["UserType"] = userType;
+
+        ViewData["CreateUrl"] = userType switch
+        {
+            "Teacher" => Url.Action("Create", "Teacher"),
+            "Student" => Url.Action("Create", "Student"),
+            "Parent"  => Url.Action("Create", "Parent"),
+            _ => null
+        };
+
         sortColumn ??= "Id";
         sortOrder ??= "asc";
 
-        IQueryable<User> query = db.Users
-            .Include(u => u.Account)
-            .Where(u => u.Account.DeletedAt == null);
+        IQueryable<User?> query = userType switch
+        {
+            "Teacher" => db.Teachers
+                .Include(t => t.Account)
+                .Where(t => t.Account.DeletedAt == null)
+                .Select(t => t.Account.User),
+
+            "Student" => db.Students
+                .Include(s => s.Account)
+                .Where(s => s.Account.DeletedAt == null)
+                .Select(s => s.Account.User),
+
+            "Parent" => db.Parents
+                .Include(p => p.Account)
+                .Where(p => p.Account.DeletedAt == null)
+                .Select(p => p.Account.User),
+
+            _ => db.Users
+                .Include(u => u.Account)
+                .Where(u => u.Account.DeletedAt == null)
+        };
+
 
         if (!string.IsNullOrWhiteSpace(search))
         {

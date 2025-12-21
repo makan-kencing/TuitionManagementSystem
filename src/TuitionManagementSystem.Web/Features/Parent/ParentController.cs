@@ -32,6 +32,8 @@ public class ParentController(ApplicationDbContext db) : Controller
             .ToListAsync();
 
         ViewData["Title"] = "Manage Parents";
+        ViewData["UserType"] = "Parent";
+        ViewData["CreateUrl"] = Url.Action(nameof(Create), "Parent");
 
         return View("~/Views/Admin/UserList.cshtml", parents);
     }

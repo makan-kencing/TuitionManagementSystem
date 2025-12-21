@@ -36,6 +36,13 @@ public class Account
 
     public User? User { get; set; }
 
+    public bool IsTwoFactorEnabled { get; set; } = false;
+
+    [StringLength(100)]
+    public string? TwoFactorToken { get; set; }
+
+    public DateTime? TwoFactorTokenExpiry { get; set; }
+
     public ICollection<AccountSession> Sessions { get; set; } = [];
 
     [NotMapped] public string Name => this.DisplayName ?? this.Username;

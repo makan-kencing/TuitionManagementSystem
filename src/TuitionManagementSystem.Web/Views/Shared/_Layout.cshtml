@@ -74,6 +74,8 @@
 
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" asp-controller="Account" asp-action="AccountProfile"><i class="fa-solid fa-user-gear me-2"></i>My Account</a></li>
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="ManageSession"><i class="fa-solid fa-key me-2"></i>Manage Sessions</a></li>
+
                             @if (User.GetUserType() == nameof(Teacher) || User.GetUserType() == nameof(Student))
                             {
                                 <li><a class="dropdown-item" asp-controller="Homework" asp-action="Index"><i class="fa-solid fa-book me-2"></i>My Classes</a></li>
@@ -219,6 +221,8 @@
 <script src="~/js/site.js" asp-append-version="true"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>

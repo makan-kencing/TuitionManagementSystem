@@ -32,17 +32,9 @@ public class AccountProfileViewModel
     [DataType(DataType.Password)]
     public string? ConfirmPassword { get; set; } = string.Empty;
 
-    // Add this property to handle profile image upload
     [DisplayName("Profile Image")]
     public IFormFile? ProfileImage { get; set; }
-}
 
-public class HasDigit : RegularExpressionAttribute
-{
-    public HasDigit() : base(@"\d") { }
-}
-
-public class HasAlphabet : RegularExpressionAttribute
-{
-    public HasAlphabet() : base("[a-zA-Z]") { }
+    [DisplayName("Enable Two-Factor Authentication")]
+    public bool IsTwoFactorEnabled { get; set; }
 }

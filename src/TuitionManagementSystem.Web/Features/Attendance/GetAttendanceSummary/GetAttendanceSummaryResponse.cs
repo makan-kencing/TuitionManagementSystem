@@ -38,5 +38,15 @@ public record AttendanceStats(
     int AttendedSessions
 )
 {
-    public double AttendanceRate => (double)this.AttendedSessions / this.TotalSessions;
+    public double AttendanceRate =>
+        this.TotalSessions == 0
+            ? 0
+            : (double)this.AttendedSessions / this.TotalSessions;
+
+    public int AttendancePercentage =>
+        this.TotalSessions == 0
+            ? 0
+            : (int)Math.Round(
+                (double)this.AttendedSessions / this.TotalSessions * 100
+            );
 }

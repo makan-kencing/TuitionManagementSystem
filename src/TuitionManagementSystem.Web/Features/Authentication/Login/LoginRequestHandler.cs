@@ -2,7 +2,9 @@ namespace TuitionManagementSystem.Web.Features.Authentication.Login;
 
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Net.Mail;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
@@ -11,10 +13,13 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Models.User;
+using Services.Email;
 
 public sealed class LoginRequestHandler(
     ApplicationDbContext db,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<LoginRequest, Result<LoginResponse>>
+    IHttpContextAccessor httpContextAccessor,
+    IEmailService emailService
+    ) : IRequestHandler<LoginRequest, Result<LoginResponse>>
 {
     private static readonly PasswordHasher<object> ph = new();
 
@@ -32,15 +37,18 @@ public sealed class LoginRequestHandler(
 
         if (HasTwoFactor(account))
         {
-            if (request.TwoFactorToken == null)
-            {
-                return Result<LoginResponse>.Success(new LoginResponse(LoginResponseStatus.TwoFactorRequired));
-            }
+            // Generate token & email
+            var token = TwoFactorHelper.GenerateToken();
 
-            if (!VerifyTwoFactor(account, request.TwoFactorToken))
-            {
-                return Result<LoginResponse>.Unauthorized();
-            }
+            account.TwoFactorToken = token;
+            account.TwoFactorTokenExpiry = DateTime.UtcNow.AddMinutes(10);
+
+            await db.SaveChangesAsync(cancellationToken);
+
+            await SendTwoFactorEmail(account, token, cancellationToken);
+
+            return Result<LoginResponse>.Success(
+                new LoginResponse(LoginResponseStatus.TwoFactorRequired));
         }
 
         // passed checks, configure authentications
@@ -63,6 +71,39 @@ public sealed class LoginRequestHandler(
         return Result<LoginResponse>.Success(new LoginResponse(LoginResponseStatus.Success));
     }
 
+    private async Task SendTwoFactorEmail(
+        Account account,
+        string token,
+        CancellationToken cancellationToken)
+    {
+        var link = $"http://localhost:8080/auth/twofactor/verify?token={token}";
+
+        var mail = new MailMessage
+        {
+            Subject = "🔐 Login Verification",
+            IsBodyHtml = true
+        };
+
+        mail.To.Add(account.Email!);
+
+        mail.Body = $@"
+                <html>
+                <body style='font-family:Arial'>
+                    <h2>Login Verification</h2>
+                    <p>Hello <strong>{account.Name}</strong>,</p>
+                    <p>Click the button below to complete your login:</p>
+                    <p style='text-align:center'>
+                        <a href='{link}'
+                           style='padding:10px 20px; background:#0d6efd; color:white; text-decoration:none; border-radius:5px'>
+                           Verify Login
+                        </a>
+                    </p>
+                    <p>This link expires in 10 minutes.</p>
+                </body>
+                </html>";
+
+        await emailService.SendAsync(mail, cancellationToken);
+    }
     private static bool VerifyPassword([NotNullWhen(true)] Account? account, string password)
     {
         //dummy verify password to simulate time taken if record exists
@@ -77,16 +118,15 @@ public sealed class LoginRequestHandler(
 
     private static bool HasTwoFactor(Account account)
     {
-        // TODO: implement checking logic
-        _ = "TODO";
-        return false;
+        return account.IsTwoFactorEnabled && !string.IsNullOrEmpty(account.Email);
     }
 
-    private static bool VerifyTwoFactor(Account account, string token)
+    public static class TwoFactorHelper
     {
-        // TODO: implement 2fa logic
-        _ = "TODO";
-        return true;
+        public static string GenerateToken()
+        {
+            return Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+        }
     }
 
     private AccountSession CreateAccountSession(Account account) =>

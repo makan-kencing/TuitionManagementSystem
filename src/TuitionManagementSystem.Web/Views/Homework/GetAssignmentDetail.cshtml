@@ -1,5 +1,9 @@
 ﻿@model TuitionManagementSystem.Web.Features.Homework.GetAssignmentDetail.GetAssignmentDetailsResponse
 
+@{
+    var now = DateTime.UtcNow;
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
+}
 
 
 <div class="container py-4">
@@ -58,7 +62,18 @@
                 <td>@detail.StudentName</td>
                 <td>@detail.Submission?.Content</td>
                 <td>@detail.Submission?.Grade</td>
-                <td>@detail.Submission?.SubmittedAt</td>
+                @if (detail.Submission!=null)
+                {
+                    var localDueAt = TimeZoneInfo.ConvertTimeFromUtc(
+                        detail.Submission.SubmittedAt, timezone);
+                    <td> @localDueAt</td>
+
+                }
+                else
+                {
+                    <td> --- </td>
+                }
+
                 @if (detail.Submission == null)
                 {
                     <td>

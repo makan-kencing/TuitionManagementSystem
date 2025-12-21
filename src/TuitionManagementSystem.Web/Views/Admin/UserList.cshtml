@@ -21,9 +21,11 @@
             <input type="text" id="searchInput" class="form-control me-2" placeholder="Search users..." />
         </div>
 
-        <a class="btn btn-primary" asp-action="Create">+ Add</a>
+        <a class="btn btn-primary"
+           href="@((string)ViewData["CreateUrl"])">
+            + Add
+        </a>
     </div>
-
 
     <table class="table table-striped table-hover">
         <thead class="table-dark">
@@ -33,6 +35,7 @@
                        asp-action="UserList"
                        asp-route-sortColumn="Id"
                        asp-route-sortOrder="@getSortOrder("Id")"
+                       asp-route-userType="@ViewData["UserType"]"
                        class="text-white text-decoration-none">
                         ID
                         @getSortArrow("Id")
@@ -43,6 +46,7 @@
                        asp-action="UserList"
                        asp-route-sortColumn="Username"
                        asp-route-sortOrder="@getSortOrder("Username")"
+                       asp-route-userType="@ViewData["UserType"]"
                        class="text-white text-decoration-none">
                         Username
                         @getSortArrow("Username")
@@ -53,6 +57,7 @@
                        asp-action="UserList"
                        asp-route-sortColumn="Name"
                        asp-route-sortOrder="@getSortOrder("Name")"
+                       asp-route-userType="@ViewData["UserType"]"
                        class="text-white text-decoration-none">
                         Name
                         @getSortArrow("Name")
@@ -63,6 +68,7 @@
                        asp-action="UserList"
                        asp-route-sortColumn="Email"
                        asp-route-sortOrder="@getSortOrder("Email")"
+                       asp-route-userType="@ViewData["UserType"]"
                        class="text-white text-decoration-none">
                         Email
                         @getSortArrow("Email")
@@ -92,10 +98,12 @@
                     </button>
 
                     <form id="delete-form-@u.Id"
+                          asp-controller="@ViewData["UserType"]"
                           asp-action="Delete"
                           asp-route-id="@u.Id"
                           method="post"
                           class="d-none">
+                        @Html.AntiForgeryToken()
                     </form>
                 </td>
             </tr>
