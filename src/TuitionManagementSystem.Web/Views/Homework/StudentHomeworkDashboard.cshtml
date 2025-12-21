@@ -39,6 +39,9 @@
 
                     @foreach (var announcement in Model.AnnouncementInfos)
                     {
+                        <a  asp-controller="Homework"
+                              asp-action="AnnouncementDetail"
+                              asp-route-announcementId="@announcement.Id">
                         <div class="card shadow-sm mt-3">
                             <div class="card-body">
                                 <h5 class="card-title mb-2">@announcement.Title</h5>
@@ -46,26 +49,29 @@
 
                                 @if (announcement is AssignmentInfo assignment)
                                 {
-                                    <div id="make-submission-@(assignment.Id)">
-                                        <button hx-get
-                                                hx-controller="Homework"
-                                                hx-action="GetMakeSubmissionModal"
-                                                hx-route-id="@assignment.Id"
-                                                hx-target="#modal"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#modal"
-                                                class="btn btn-primary">
-                                            Submit Homework
-                                        </button>
-                                    </div>
+                                    if (assignment.DueAt > now)
+                                    {
+                                        <div id="make-submission-@(assignment.Id)">
+                                            <button hx-get
+                                                    hx-controller="Homework"
+                                                    hx-action="GetMakeSubmissionModal"
+                                                    hx-route-id="@assignment.Id"
+                                                    hx-target="#modal"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modal"
+                                                    class="btn btn-primary">
+                                                Submit Homework
+                                            </button>
+                                        </div>
+                                    }
                                 }
                             </div>
                         </div>
+                        </a>
                     }
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
