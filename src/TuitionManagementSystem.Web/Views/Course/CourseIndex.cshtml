@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using System.Collections.Generic
 @using System.Linq
+@using System.Text.Encodings.Web
 
 @{
     ViewData["Title"] = "Courses";
@@ -43,6 +44,14 @@
 
     #bulkActionBar.visible {
         transform: translateY(0);
+    }
+    .action-buttons form {
+        display: inline-flex;
+        margin: 0;
+    }
+
+    .action-buttons form button {
+        height: 100%;
     }
 </style>
 
@@ -185,29 +194,26 @@
 
                         <td class="action-cell text-center">
                             <div class="d-flex align-items-center justify-content-center gap-2">
-                                <div class="btn-group btn-group-sm action-buttons">
-                                    <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-outline-secondary px-3">Edit</a>
-                                    <a asp-action="Delete" asp-route-id="@c.Id" class="btn btn-outline-danger px-3">Delete</a>
-                                </div>
+                                <a asp-action="Edit" asp-route-id="@c.Id"
+                                   class="btn btn-sm btn-outline-primary px-3 shadow-sm action-btns-@c.Id">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
 
                                 <button type="button"
-                                        class="btn btn-sm btn-warning text-white btn-update-row shadow-sm"
-                                        style="display:none;"
-                                        onclick="saveRowChanges(@c.Id)">
+                                        class="btn btn-sm btn-outline-danger px-3 shadow-sm action-btns-@c.Id"
+                                        onclick="window.deleteCourse(@c.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(c.Name))')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+
+                                <button type="button" class="btn btn-sm btn-warning text-white btn-update-row shadow-sm" style="display:none;" onclick="saveRowChanges(@c.Id)">
                                     Update
                                 </button>
 
-                                <button type="button"
-                                        class="btn btn-sm btn-light border btn-reset-row"
-                                        style="display:none;"
-                                        onclick="resetRowChanges(@c.Id)">
-                                    <i class="bi bi-x-lg"></i>
+                                <button type="button" class="btn btn-sm btn-light border btn-reset-row" style="display:none;" onclick="resetRowChanges(@c.Id)">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Undo
                                 </button>
 
-                                <div class="spinner-border spinner-border-sm text-primary row-spinner"
-                                     style="display:none;"
-                                     role="status">
-                                </div>
+                                <div class="spinner-border spinner-border-sm text-danger row-spinner-@c.Id" style="display:none;" role="status"></div>
                             </div>
                         </td>
                     </tr>
@@ -287,11 +293,13 @@
 @section Scripts {
 <script>
 (() => {
+    // 1. Token and Variables (Scope: Private to this block)
     const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
     const actionBar = document.getElementById('bulkActionBar');
     const changeCountLabel = document.getElementById('changeCount');
     let changedRowIds = new Set();
 
+    // --- EXISTING UTILITY FUNCTIONS ---
     async function postJson(url, body) {
         return await fetch(url, {
             method: 'POST',
@@ -306,17 +314,12 @@
     function checkForChanges() {
         changedRowIds.clear();
         const allRows = document.querySelectorAll('tbody tr');
-
         allRows.forEach(row => {
             const rowId = row.dataset.rowId;
             let isRowChanged = false;
-
             row.querySelectorAll('.course-input').forEach(input => {
-                if (input.value !== input.dataset.original) {
-                    isRowChanged = true;
-                }
+                if (input.value !== input.dataset.original) isRowChanged = true;
             });
-
 
             const resetBtn = row.querySelector('.btn-reset-row');
             if (isRowChanged) {
@@ -328,23 +331,19 @@
                 if (resetBtn) resetBtn.style.display = 'none';
             }
         });
-
         updateActionBarVisibility();
     }
 
     function updateActionBarVisibility() {
         changeCountLabel.innerText = changedRowIds.size;
-
-        if (changedRowIds.size > 0) {
-            actionBar.classList.add('visible');
-        } else {
-            actionBar.classList.remove('visible');
-        }
+        if (changedRowIds.size > 0) actionBar.classList.add('visible');
+        else actionBar.classList.remove('visible');
     }
+
+    // --- WINDOW FUNCTIONS (Assigned inside scope to use 'token') ---
 
     window.discardAllChanges = () => {
         if (!confirm("Discard all pending changes?")) return;
-
         changedRowIds.forEach(id => {
             const row = document.querySelector(`tr[data-row-id="${id}"]`);
             row.querySelectorAll('.course-input').forEach(input => {
@@ -354,7 +353,6 @@
             const resetBtn = row.querySelector('.btn-reset-row');
             if (resetBtn) resetBtn.style.display = 'none';
         });
-
         changedRowIds.clear();
         updateActionBarVisibility();
     };
@@ -363,61 +361,37 @@
         const btn = document.getElementById('btnSaveAll');
         const spinner = btn.querySelector('.spinner-border');
         const text = btn.querySelector('.normal-text');
-
         btn.disabled = true;
         spinner.classList.remove('d-none');
         text.innerText = "Saving...";
 
         try {
             const promises = [];
-
             changedRowIds.forEach(id => {
                 const row = document.querySelector(`tr[data-row-id="${id}"]`);
                 const subEl = row.querySelector('.subject-select');
                 const classEl = row.querySelector('.classroom-select');
                 const teachEl = row.querySelector('.teacher-select');
 
-                const lookupsModified = subEl.value !== subEl.dataset.original ||
-                    classEl.value !== classEl.dataset.original;
-                const teacherModified = teachEl.value !== teachEl.dataset.original;
-
-                if (lookupsModified) {
-                    promises.push(
-                        postJson(`/courses/${id}/inline-lookups`, {
-                            subjectId: Number(subEl.value),
-                            preferredClassroomId: Number(classEl.value)
-                        }).then(res => {
-                            if(res.ok) {
-                                subEl.dataset.original = subEl.value;
-                                classEl.dataset.original = classEl.value;
-                            }
-                        })
-                    );
+                if (subEl.value !== subEl.dataset.original || classEl.value !== classEl.dataset.original) {
+                    promises.push(postJson(`/Courses/${id}/inline-lookups`, {
+                        subjectId: Number(subEl.value),
+                        preferredClassroomId: Number(classEl.value)
+                    }).then(res => { if(res.ok) { subEl.dataset.original = subEl.value; classEl.dataset.original = classEl.value; } }));
                 }
-
-                if (teacherModified) {
-                    promises.push(
-                        postJson(`/courses/${id}/inline-teacher`, {
-                            teacherId: teachEl.value ? Number(teachEl.value) : null
-                        }).then(res => {
-                            if(res.ok) {
-                                teachEl.dataset.original = teachEl.value;
-                            }
-                        })
-                    );
+                if (teachEl.value !== teachEl.dataset.original) {
+                    promises.push(postJson(`/Courses/${id}/inline-teacher`, {
+                        teacherId: teachEl.value ? Number(teachEl.value) : null
+                    }).then(res => { if(res.ok) teachEl.dataset.original = teachEl.value; }));
                 }
             });
-
             await Promise.all(promises);
-
             changedRowIds.clear();
             document.querySelectorAll('.row-changed').forEach(r => r.classList.remove('row-changed'));
             updateActionBarVisibility();
             alert("Changes saved successfully!");
-
         } catch (err) {
-            console.error(err);
-            alert("Error saving changes. Check console.");
+            alert("Error saving changes.");
         } finally {
             btn.disabled = false;
             spinner.classList.add('d-none');
@@ -425,17 +399,56 @@
         }
     };
 
+    // --- THE FIXED DELETE FUNCTION ---
+    window.deleteCourse = async (id, name) => {
+        if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+
+        const row = document.querySelector(`tr[data-row-id="${id}"]`);
+        // Updated selectors to match your HTML classes exactly
+        const buttons = row.querySelectorAll(`.action-btns-${id}`);
+        const spinner = row.querySelector(`.row-spinner-${id}`);
+
+        try {
+            buttons.forEach(b => b.classList.add('d-none'));
+            if (spinner) spinner.style.display = 'inline-block';
+
+            const response = await fetch(`/Courses/${id}/delete`, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': token,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (response.ok) {
+                row.style.transition = "all 0.3s ease";
+                row.style.opacity = "0";
+                row.style.transform = "translateX(20px)";
+                setTimeout(() => {
+                    row.remove();
+                    changedRowIds.delete(String(id));
+                    updateActionBarVisibility();
+                }, 300);
+            } else {
+                throw new Error("Server rejected delete");
+            }
+        } catch (err) {
+            alert("Could not delete. The course might be linked to other records.");
+            buttons.forEach(b => b.classList.remove('d-none'));
+            if (spinner) spinner.style.display = 'none';
+        }
+    };
+
+    // Initialize Event Listeners
     document.querySelectorAll('.course-input').forEach(input => {
         input.addEventListener('change', checkForChanges);
     });
-    checkForChanges();
 
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {
         filterForm.querySelectorAll('select').forEach(s => {
             s.addEventListener('change', () => {
-                const pageInput = document.getElementById('pageInput');
-                if (pageInput) pageInput.value = '1';
+                document.getElementById('pageInput').value = '1';
                 filterForm.submit();
             });
         });
@@ -443,28 +456,18 @@
 
     window.resetRowChanges = (id) => {
         const row = document.querySelector(`tr[data-row-id="${id}"]`);
-        if (!row) return;
-
         row.querySelectorAll('.course-input').forEach(input => {
             input.value = input.dataset.original ?? '';
-            input.dispatchEvent(new Event('change'));
         });
-
-        const resetBtn = row.querySelector('.btn-reset-row');
-        if (resetBtn) resetBtn.style.display = 'none';
-        row.classList.remove('row-changed');
-
-        changedRowIds.delete(String(id));
-        updateActionBarVisibility();
+        checkForChanges();
     };
 
     window.resetFilters = () => {
-        if (!filterForm) return;
         filterForm.querySelectorAll('select').forEach(s => s.value = '');
-        const pageInput = document.getElementById('pageInput');
-        if (pageInput) pageInput.value = '1';
         filterForm.submit();
     };
-})();
+
+    checkForChanges();
+})(); // End of IIFE
 </script>
 }

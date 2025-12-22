@@ -2,16 +2,83 @@
 @{
     ViewData["Title"] = "Course Details";
 }
-<h2>Course Details</h2>
-<dl class="row">
-    <dt class="col-sm-3">Name</dt><dd class="col-sm-9">@Model.Name</dd>
-    <dt class="col-sm-3">Description</dt><dd class="col-sm-9">@Model.Description</dd>
-    <dt class="col-sm-3">Price</dt><dd class="col-sm-9">@Model.Price.ToString("C")</dd>
-    <dt class="col-sm-3">Subject</dt><dd class="col-sm-9">@Model.SubjectName</dd>
-    <dt class="col-sm-3">Preferred Classroom</dt><dd class="col-sm-9">@Model.PreferredClassroomLocation</dd>
-</dl>
 
-<p>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary">Back</a>
-</p>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-primary">
+                        <i class="bi bi-book-half me-2"></i>Course Details
+                    </h5>
+                    </div>
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start mb-4 border-bottom pb-3">
+                        <div>
+                            <label class="small text-muted text-uppercase fw-bold mb-1">Course Name</label>
+                            <h2 class="fw-bold text-dark mb-0">@Model.Name</h2>
+                        </div>
+                        <div class="text-end">
+                            <label class="small text-muted text-uppercase fw-bold mb-1">Price</label>
+                            <div class="h3 text-success fw-bold mb-0">
+                                @Model.Price.ToString("C")
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+
+                        <div class="col-12">
+                            <label class="small text-muted text-uppercase fw-bold mb-2">Description</label>
+                            <div class="p-3 bg-light rounded-3 text-secondary">
+                                @if(string.IsNullOrEmpty(Model.Description))
+                                {
+                                    <span class="fst-italic text-muted">No description provided.</span>
+                                }
+                                else
+                                {
+                                    @Model.Description
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="small text-muted text-uppercase fw-bold mb-1">Subject</label>
+                            <div class="d-flex align-items-center">
+                                <div class="icon-square bg-primary bg-opacity-10 text-primary rounded-2 me-3 p-2">
+                                    <i class="bi bi-collection fs-4"></i>
+                                </div>
+                                <span class="fs-5 fw-medium">@Model.SubjectName</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="small text-muted text-uppercase fw-bold mb-1">Preferred Classroom</label>
+                            <div class="d-flex align-items-center">
+                                <div class="icon-square bg-info bg-opacity-10 text-info rounded-2 me-3 p-2">
+                                    <i class="bi bi-geo-alt fs-4"></i>
+                                </div>
+                                <span class="fs-5 fw-medium">@Model.PreferredClassroomLocation</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white py-3 border-top">
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back to List
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary px-4">
+                            <i class="bi bi-pencil-square me-1"></i> Edit Course
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

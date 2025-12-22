@@ -81,15 +81,26 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
             }
         }
 
-        var created = await mediator.Send(new CreateCourse(
-            vm.Name,
-            vm.Description,
-            vm.Price,
-            vm.SubjectId,
-            vm.PreferredClassroomId), ct);
+        try
+        {
+            var created = await mediator.Send(new CreateCourse(
+                vm.Name,
+                vm.Description,
+                vm.Price,
+                vm.SubjectId,
+                vm.PreferredClassroomId), ct);
 
-
-        return RedirectToAction("Details", new { id = created.Id });
+            return RedirectToAction("Details", new { id = created.Id });
+        }
+        catch (DbUpdateException ex) when (
+            ex.InnerException is Npgsql.PostgresException p &&
+            p.SqlState == "23505" &&
+            p.ConstraintName == "IX_Courses_Name")
+        {
+            ModelState.AddModelError(nameof(vm.Name), "A course with that name already exists.");
+            await LoadLookups(ct);
+            return View("CourseCreate", vm);
+        }
     }
 
     [HttpGet("{id:int}/edit")]
@@ -136,17 +147,29 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
             }
         }
 
-        var ok = await mediator.Send(new UpdateCourse(
-            vm.Id,
-            vm.Name,
-            vm.Description,
-            vm.Price,
-            vm.SubjectId,
-            vm.PreferredClassroomId), ct);
+        try
+        {
+            var ok = await mediator.Send(new UpdateCourse(
+                vm.Id,
+                vm.Name,
+                vm.Description,
+                vm.Price,
+                vm.SubjectId,
+                vm.PreferredClassroomId), ct);
 
-        if (!ok) return NotFound();
+            if (!ok) return NotFound();
 
-        return RedirectToAction("Details", new { id = vm.Id });
+            return RedirectToAction("Details", new { id = vm.Id });
+        }
+        catch (DbUpdateException ex) when (
+            ex.InnerException is Npgsql.PostgresException p &&
+            p.SqlState == "23505" &&
+            p.ConstraintName == "IX_Courses_Name")
+        {
+            ModelState.AddModelError(nameof(vm.Name), "A course with that name already exists.");
+            await LoadLookups(ct);
+            return View("CourseEdit", vm);
+        }
     }
 
     [HttpPost("{id:int}/delete")]
@@ -154,6 +177,14 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
         var ok = await mediator.Send(new DeleteCourse(id), ct);
+
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
+            Request.Headers["Accept"].ToString().Contains("application/json"))
+        {
+            if (!ok) return NotFound();
+            return Ok();
+        }
+
         if (!ok) return NotFound();
         return RedirectToAction(nameof(Index));
     }
