@@ -1,6 +1,8 @@
 @model IEnumerable<TuitionManagementSystem.Web.Features.Classroom.ClassroomResponse>
 @{
     ViewData["Title"] = "Classrooms";
+    var currentQ = ViewContext.HttpContext.Request.Query["q"].ToString();
+
 }
 
 <style>
@@ -28,9 +30,6 @@
 </div>
 
 <!-- Search form -->
-@{
-    var currentQ = ViewContext.HttpContext.Request.Query["q"].ToString();
-}
 <form method="get" asp-action="Index" id="searchForm" class="mb-3">
     <div class="input-group input-group-sm">
         <input id="searchInput" name="q" type="search" class="form-control" placeholder="Search location" value="@currentQ" />

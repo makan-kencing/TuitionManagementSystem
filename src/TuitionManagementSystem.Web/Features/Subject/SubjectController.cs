@@ -18,13 +18,22 @@ public class SubjectController(IMediator mediator, ApplicationDbContext db) : Co
     private readonly ApplicationDbContext _db = db;
     // GET ALL SUBJECTS
     [HttpGet("")]
-    public async Task<IActionResult> Index([FromQuery] bool showArchivedOnly = false)
+    public async Task<IActionResult> Index([FromQuery] bool showArchivedOnly = false, [FromQuery] string? q = null)
     {
         ViewData["ShowArchivedOnly"] = showArchivedOnly;
-        var subjects = await mediator.Send(new GetSubjects(IncludeArchived: true)); // get all, filter in view
+        var subjects = (await mediator.Send(new GetSubjects(IncludeArchived: true))).ToList(); // get all
+
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            var qq = q.Trim();
+            subjects = subjects.Where(s =>
+                (!string.IsNullOrEmpty(s.Name) && s.Name.Contains(qq, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(s.Description) && s.Description.Contains(qq, StringComparison.OrdinalIgnoreCase))
+            ).ToList();
+        }
+
         return View("SubjectIndex", subjects);
     }
-
     //GET SUBJECT BY ID
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetSubject(int id)

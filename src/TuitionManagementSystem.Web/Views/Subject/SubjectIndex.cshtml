@@ -1,6 +1,8 @@
 @model IEnumerable<TuitionManagementSystem.Web.Features.Subject.SubjectResponse>
 @{
   ViewData["Title"] = "Subjects";
+  var currentQ = ViewContext.HttpContext.Request.Query["q"].ToString();
+  var showArchivedQuery = ViewContext.HttpContext.Request.Query["showArchivedOnly"].ToString();
 }
 
 <h2>Subjects</h2>
@@ -16,6 +18,17 @@
     </div>
   </form>
 </div>
+
+<form method="get" asp-action="Index" id="subjectSearchForm" class="mb-3">
+    <div class="input-group input-group-sm" style="max-width:640px;">
+        <input id="subjectSearchInput" name="q" type="search" class="form-control" placeholder="Search subject name" value="@currentQ" />
+        @if (!string.IsNullOrEmpty(showArchivedQuery)) {
+            <input type="hidden" name="showArchivedOnly" value="@showArchivedQuery" />
+        }
+        <button class="btn btn-outline-secondary" type="submit">Search</button>
+        <button class="btn btn-light" type="button" onclick="document.getElementById('subjectSearchInput').value=''; document.getElementById('subjectSearchForm').submit();">Reset</button>
+    </div>
+</form>
 
 <table class="table table-striped mt-3">
     <thead>

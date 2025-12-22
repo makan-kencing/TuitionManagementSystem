@@ -9,9 +9,18 @@ using Microsoft.AspNetCore.Mvc;
 public class ClassroomController(IMediator mediator) : Controller
 {
     [HttpGet("")]
-    public async Task<IActionResult> Index()
-        => View("ClassroomIndex", await mediator.Send(new GetClassrooms()));
+    public async Task<IActionResult> Index([FromQuery] string? q = null)
+    {
+        var items = (await mediator.Send(new GetClassrooms())).ToList();
 
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            var qq = q.Trim();
+            items = items.Where(c => !string.IsNullOrEmpty(c.Location) && c.Location.Contains(qq, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+        return View("ClassroomIndex", items);
+    }
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Details(int id)
     {
