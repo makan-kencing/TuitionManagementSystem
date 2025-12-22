@@ -1,10 +1,13 @@
 namespace TuitionManagementSystem.Web.Services
 {
+    using System.Net.Mail;
     using Ardalis.Result;
+    using Email;
     using Infrastructure.Persistence;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using MediatR;
+    using Models.Notification;
     using Models.Payment;
     using TuitionManagementSystem.Web.Features.Invoice.CreateInvoice;
 
@@ -12,21 +15,27 @@ namespace TuitionManagementSystem.Web.Services
     {
         Task<Result<Invoice>> UpdateInvoiceStatusAsync(int invoiceId, InvoiceStatus newStatus,
             CancellationToken cancellationToken);
+
         Task CheckAndCreateOverdueInvoicesAsync(IMediator mediator, CancellationToken cancellationToken);
         Task GenerateMonthlyInvoicesAsync(IMediator mediator, CancellationToken cancellationToken);
-        Task<Result> MarkInvoicesAsPaidAsync(IReadOnlyCollection<int> invoiceIds, int paymentId, CancellationToken cancellationToken);
+
+        Task<Result> MarkInvoicesAsPaidAsync(IReadOnlyCollection<int> invoiceIds, int paymentId,
+            CancellationToken cancellationToken);
     }
 
     public class InvoiceService : IInvoiceService
     {
         private readonly ApplicationDbContext _db;
         private readonly ILogger<InvoiceService> _logger;
+        private readonly IEmailService _emailService;
 
-        public InvoiceService(ApplicationDbContext db, ILogger<InvoiceService> logger)
+        public InvoiceService(ApplicationDbContext db, ILogger<InvoiceService> logger, IEmailService emailService)
         {
             _db = db;
             _logger = logger;
+            _emailService = emailService;
         }
+
 
         public async Task<Result<Invoice>> UpdateInvoiceStatusAsync(
             int invoiceId,
@@ -100,11 +109,9 @@ namespace TuitionManagementSystem.Web.Services
                             !i.CancelledAt.HasValue)
                 .ToListAsync(cancellationToken);
 
-            _logger.LogInformation("Found {Count} pending invoices that are overdue", overduePendingInvoices.Count);
-
-            int createdCount = 0;
-            int skippedCount = 0;
-            int errorCount = 0;
+            _logger.LogInformation(
+                "Found {Count} pending invoices that are overdue",
+                overduePendingInvoices.Count);
 
             foreach (var invoice in overduePendingInvoices)
             {
@@ -120,50 +127,114 @@ namespace TuitionManagementSystem.Web.Services
                             cancellationToken);
 
                     if (existingOverdueInvoice != null)
-                    {
-                        _logger.LogDebug(
-                            "Overdue invoice already exists for invoice {InvoiceId} (billing period: {InvoicedAt} to {DueAt}). Skipping.",
-                            invoice.Id, invoice.InvoicedAt.Date, invoice.DueAt);
-                        skippedCount++;
                         continue;
-                    }
 
-                    _logger.LogInformation(
-                        "Creating overdue invoice from original invoice {InvoiceId} (Amount: {Amount}, Due: {DueAt})",
-                        invoice.Id, invoice.Amount, invoice.DueAt);
-
-                    var result = await mediator.Send(
+                    await mediator.Send(
                         new CreateInvoiceRequest { OverdueFromInvoiceId = invoice.Id },
                         cancellationToken);
-
-                    if (result.IsSuccess)
-                    {
-                        _logger.LogInformation(
-                            "Successfully created overdue invoice {NewInvoiceId} from original invoice {OriginalInvoiceId}",
-                            result.Value.Id, invoice.Id);
-                        createdCount++;
-                    }
-                    else
-                    {
-                        _logger.LogError("Failed to create overdue invoice from invoice {InvoiceId}. Errors: {Errors}",
-                            invoice.Id, string.Join(", ", result.Errors));
-                        errorCount++;
-                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing overdue invoice creation for invoice {InvoiceId}",
+                    _logger.LogError(
+                        ex,
+                        "Error creating overdue invoice from invoice {InvoiceId}",
                         invoice.Id);
-                    errorCount++;
                 }
             }
 
-            _logger.LogInformation(
-                "Overdue invoice check completed. Created: {Created}, Skipped: {Skipped}, Errors: {Errors}",
-                createdCount, skippedCount, errorCount);
+            var overdueInvoices = await _db.Invoices
+                .Include(i => i.Enrollment)
+                .ThenInclude(e => e.Student)
+                .ThenInclude(s => s.Account)
+                .Where(i =>
+                    i.Status == InvoiceStatus.Overdue &&
+                    i.CancelledAt == null &&
+                    i.DueAt < DateTime.UtcNow)
+                .ToListAsync(cancellationToken);
+
+            var groupedByStudent = overdueInvoices
+                .GroupBy(i => i.Enrollment.Student);
+
+            foreach (var group in groupedByStudent)
+            {
+                var student = group.Key;
+                var account = student.Account;
+
+                if (string.IsNullOrWhiteSpace(account?.Email))
+                    continue;
+
+                try
+                {
+                    var rows = string.Join("", group.Select(i => $@"
+                        <tr>
+                            <td style='border:1px solid #ddd;padding:8px;'>{i.InvoicedAt:dd MMM yyyy}</td>
+                            <td style='border:1px solid #ddd;padding:8px;'>{i.DueAt:dd MMM yyyy}</td>
+                            <td style='border:1px solid #ddd;padding:8px;'>RM {i.Amount:F2}</td>
+                            <td style='border:1px solid #ddd;padding:8px;color:#dc3545;font-weight:bold;'>Overdue</td>
+                        </tr>
+                    "));
+
+                    var mail = new MailMessage
+                    {
+                        Subject = "⚠️ Overdue Invoice Summary - Horizon Tuition Center", IsBodyHtml = true
+                    };
+                    mail.To.Add(account.Email);
+
+                    mail.Body = $@"
+                    <html>
+                    <body style='font-family:Arial,sans-serif;'>
+                        <div style='max-width:700px;margin:auto;border:1px solid #ddd;padding:20px;border-radius:10px;'>
+                            <h2 style='color:#dc3545;'>Overdue Invoice Summary</h2>
+
+                            <p>Dear <strong>{account.Name}</strong>,</p>
+
+                            <p>The following invoices are currently overdue:</p>
+
+                            <table style='width:100%;border-collapse:collapse;'>
+                                <thead>
+                                    <tr style='background:#f8f9fa;'>
+                                        <th style='border:1px solid #ddd;padding:8px;'>Invoice Date</th>
+                                        <th style='border:1px solid #ddd;padding:8px;'>Due Date</th>
+                                        <th style='border:1px solid #ddd;padding:8px;'>Amount</th>
+                                        <th style='border:1px solid #ddd;padding:8px;'>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {rows}
+                                </tbody>
+                            </table>
+
+                            <p style='margin-top:20px;'>
+                                Please settle your outstanding invoices as soon as possible.
+                            </p>
+
+                            <p style='text-align:center;margin-top:25px;'>
+                                <a href='https://localhost:8081/invoice/list'
+                                   style='background:#dc3545;color:#fff;padding:10px 20px;border-radius:5px;text-decoration:none;'>
+                                    View Invoices
+                                </a>
+                            </p>
+
+                            <p>Thank you,<br/><strong>Horizon Tuition Center</strong></p>
+                        </div>
+                    </body>
+                    </html>";
+
+                    await _emailService.SendAsync(mail, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                        ex,
+                        "Failed to send overdue invoice summary to student {StudentId}",
+                        student.Id);
+                }
+            }
+
+            _logger.LogInformation("Overdue invoice check completed");
         }
 
-        public async Task GenerateMonthlyInvoicesAsync(
+         public async Task GenerateMonthlyInvoicesAsync(
             IMediator mediator,
             CancellationToken cancellationToken)
         {
