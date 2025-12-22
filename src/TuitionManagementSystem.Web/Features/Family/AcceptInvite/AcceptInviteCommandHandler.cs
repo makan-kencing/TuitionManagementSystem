@@ -22,8 +22,9 @@ public class AcceptInviteCommandHandler(ApplicationDbContext db) : IRequestHandl
         }
 
         invite.Status = InviteStatus.Accepted;
-        invite.Family.Members.Add(new FamilyMember
+        db.FamilyMembers.Add(new FamilyMember
         {
+            FamilyId = invite.FamilyId,
             UserId = invite.UserId
         });
 
