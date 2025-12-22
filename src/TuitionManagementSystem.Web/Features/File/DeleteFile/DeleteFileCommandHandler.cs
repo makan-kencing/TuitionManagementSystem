@@ -4,8 +4,10 @@ using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Services.File;
 
-public class DeleteFileCommandHandler(ApplicationDbContext db) : IRequestHandler<DeleteFileCommand, Result>
+public class DeleteFileCommandHandler(ApplicationDbContext db, IFileService fileService)
+    : IRequestHandler<DeleteFileCommand, Result>
 {
     public async Task<Result> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
     {
@@ -24,6 +26,17 @@ public class DeleteFileCommandHandler(ApplicationDbContext db) : IRequestHandler
 
         db.Files.Remove(file);
         await db.SaveChangesAsync(cancellationToken);
+
+        if (file.CanonicalPath is not null)
+        {
+            try
+            {
+                await fileService.DeleteFileAsync(file.CanonicalPath);
+            }
+            catch (Exception)
+            {
+            }
+        }
 
         return Result.Success();
     }
