@@ -12,9 +12,10 @@
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --attendance-gradient: linear-gradient(135deg, #00b09b, #96c93d);
+            --enrollment-gradient: linear-gradient(135deg, #00b09b, #96c93d);
             --schedule-gradient: linear-gradient(135deg, #1e3c72, #2a5298);
             --homework-gradient: linear-gradient(135deg, #ff7e5f, #feb47b);
-            --students-gradient: linear-gradient(135deg, #3498db, #2ecc71);
+            --billing-gradient: linear-gradient(135deg, #ff416c, #ff4b2b);
         }
 
         .dashboard-header {
@@ -38,16 +39,6 @@
             background-size: 30px 30px;
             opacity: 0.3;
             animation: float 20s linear infinite;
-        }
-
-        @@keyframes float {
-            from {
-                transform: translate(0, 0) rotate(0deg);
-            }
-            to {
-                transform: translate(30px, 30px) rotate(360deg);
-            }
-
         }
 
         .welcome-text h2 {
@@ -100,13 +91,13 @@
             background: var(--homework-gradient);
         }
 
-        .card-students::before {
-            background: var(--students-gradient);
+        .card-billing::before {
+            background: var(--billing-gradient);
         }
 
         .dashboard-card:hover {
             transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
 
         .card-body {
@@ -137,8 +128,8 @@
             background: var(--homework-gradient);
         }
 
-        .card-students .card-icon {
-            background: var(--students-gradient);
+        .card-billing .card-icon {
+            background: var(--billing-gradient);
         }
 
         .card-value {
@@ -177,19 +168,45 @@
             transition: width 1s ease;
         }
 
-        .chart-container {
-            position: relative;
-            height: 300px;
+        .quick-action-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
         }
 
+        .quick-action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
 
         .btn-schedule {
             background: var(--schedule-gradient);
-            color: white;
-        }
-
-        .btn-enrollment {
-            background: var(--attendance-gradient);
             color: white;
         }
 
@@ -198,9 +215,42 @@
             color: white;
         }
 
+        .btn-enrollment {
+            background: var(--enrollment-gradient);
+            color: white;
+        }
+
         .btn-pay {
             background: var(--billing-gradient);
             color: white;
+        }
+
+        .stat-info h6 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        @@keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            100% {
+                transform: translate(30px, 30px) rotate(360deg);
+            }
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
         }
 
         @@media (max-width: 768px) {
@@ -215,20 +265,6 @@
             .card-value {
                 font-size: 2rem;
             }
-
-        }
-
-        @@keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
-
-        .pulse-animation {
-            animation: pulse 2s infinite;
         }
     </style>
 }
@@ -298,10 +334,27 @@
             <div class="col-md-6 col-lg-3">
                 <div class="dashboard-card card-students">
                     <div class="card-body">
-                        <div class="card-icon"><i class="bi bi-people"></i></div>
+                        <div class="card-icon"><i class="bi bi-credit-card"></i></div>
                         <div class="card-value">@Model.PendingInvoices.Total</div>
                         <div class="card-label">Total Due</div>
-                        <div class="card-subtext">@Model.PendingInvoices.Count invoices</div>
+                        <div class="card-subtext">
+                            <div class="card-subtext">
+                                @if (Model.PendingInvoices.Count > 0)
+                                {
+                                    <span class="text-warning">
+                                        <i class="bi bi-clock me-1"></i>
+                                        @Model.PendingInvoices.Count invoices pending
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-success">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        All paid up
+                                    </span>
+                                }
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -315,22 +368,22 @@
                 <div class="col-md-4">
                     <div class="text-center p-3 rounded-3" style="background: rgba(52, 152, 219, 0.1);">
                         <div class="action-icon mb-3" style="background: var(--schedule-gradient);">
-                            <i class="fa-solid fa-people-group"></i>
+                            <i class="fa-solid fa-people-group text-white"></i>
                         </div>
                         <h6 class="fw-bold mb-3">Manage Family</h6>
                         <a asp-controller="Family" asp-action="Index" class="btn btn-schedule action-btn">
-                            Go to Schedule
+                            Go to Family
                         </a>
                     </div>
                 </div>
 
                 <div class="col-md-4">
-                    <div class="text-center p-3 rounded-3" style="background: rgba(52, 152, 219, 0.1);">
-                        <div class="action-icon mb-3" style="background: var(--attendance-gradient);">
-                            <i class="fa-solid fa-book"></i>
+                    <div class="text-center p-3 rounded-3" style="background: rgba(91, 192, 94, 0.1);">
+                        <div class="action-icon mb-3" style="background: var(--enrollment-gradient);">
+                            <i class="fa-solid fa-book text-white"></i>
                         </div>
                         <h6 class="fw-bold mb-3">Enroll</h6>
-                        <a asp-controller="Family" asp-action="Index" class="btn btn-enrollment action-btn">
+                        <a asp-controller="Child" asp-action="Enrollment" class="btn btn-enrollment action-btn">
                             Enroll Courses
                         </a>
                     </div>
@@ -421,7 +474,7 @@
     {
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                if (@(Model.ChildrenAttendanceRate.Count > 0))
+                if (@(Model.ChildrenAttendanceRate.Count > 0 ? 1 : 0))
                 {
                     const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
                     const courseNames = @Html.Raw(Model.ChildrenSubmissionRate.Keys.ToJson());
@@ -565,7 +618,7 @@
                         '<div class="text-center py-5"><p class="text-muted">No attendance data available</p></div>';
                 }
 
-                if (@(Model.ChildrenSubmissionRate.Count > 0)) {
+                if (@(Model.ChildrenSubmissionRate.Count > 0 ? 1 : 0)) {
                     const submissionCtx = document.getElementById('submissionChart').getContext('2d');
 
                     const submissionChildrenNames = @Html.Raw(Model.ChildrenSubmissionRate.Keys.ToJson());

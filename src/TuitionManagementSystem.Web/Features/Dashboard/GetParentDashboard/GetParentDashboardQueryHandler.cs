@@ -30,10 +30,10 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
         var stats = new GetParentDashboardResponse
         {
             TotalChildren = await db.Students
-                .Where(s => s.Family == family)
+                .Where(s => s.Family.Id == family.FamilyId)
                 .CountAsync(cancellationToken),
             PendingClasses = await db.Students
-                .Where(s => s.Family == family)
+                .Where(s => s.Family.Id == family.FamilyId)
                 .SelectMany(s => s.Enrollments)
                 .SelectMany(e => e.Course.Sessions)
                 .Where(s => hour0 <= s.StartAt && s.StartAt <= hour24)
@@ -48,7 +48,7 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
                          JOIN "Courses" c  on c."Id" = e."CourseId"
                              JOIN "Announcements" a on a."CourseId" = c."Id"
                                  LEFT JOIN "Submissions" s on s."StudentId" = u."Id" and s."AssignmentId" = a."Id"
-                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.Id} AND a."Discriminator" = 'Assignment'
+                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.FamilyId} AND a."Discriminator" = 'Assignment'
                      """)
                 .FirstAsync(cancellationToken),
             PendingInvoices = await db.Database
@@ -58,7 +58,7 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
                      FROM "Users" AS u
                               LEFT JOIN "FamilyMembers" AS f ON u."Id" = f."UserId"
                               INNER JOIN "Invoices" AS i ON u."Id" = i."StudentId"
-                     WHERE u."Discriminator" = 'Student' AND f."Id" = {family.Id}
+                     WHERE u."Discriminator" = 'Student' AND f."Id" = {family.FamilyId}
                      """)
                 .FirstAsync(cancellationToken),
             ChildrenAttendanceRate = await db.Database
@@ -72,7 +72,7 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
                          JOIN "Courses" c  on c."Id" = e."CourseId"
                              JOIN "Sessions" s on s."CourseId" = c."Id"
                                  LEFT JOIN "Attendances" a on a."StudentId" = u."Id" and a."SessionId" = s."Id"
-                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.Id}
+                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.FamilyId}
                      GROUP BY acc."DisplayName", acc."Username"
                      """)
                 .ToDictionaryAsync(g => g.Name, g => g.Rate, cancellationToken),
@@ -87,7 +87,7 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
                          JOIN "Courses" c  on c."Id" = e."CourseId"
                              JOIN "Announcements" a on a."CourseId" = c."Id"
                                  LEFT JOIN "Submissions" s on s."StudentId" = u."Id" and s."AssignmentId" = a."Id"
-                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.Id} AND a."Discriminator" = 'Assignment'
+                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.FamilyId} AND a."Discriminator" = 'Assignment'
                      GROUP BY acc."DisplayName", acc."Username"
                      """)
                 .ToDictionaryAsync(g => g.Name, g => g.Rate, cancellationToken)
