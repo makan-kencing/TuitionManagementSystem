@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Models.Class;
-using TuitionManagementSystem.Web.Features.Classroom;
-using TuitionManagementSystem.Web.Features.Subject;
+using Classroom;
+using Subject;
 using TuitionManagementSystem.Web.ViewModels.Course;
 
 [Route("courses")]
@@ -19,7 +19,7 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
     private readonly ApplicationDbContext _db = db;
 
     [HttpGet("")]
-    public async Task<IActionResult> Index(CancellationToken ct)
+    public async Task<IActionResult> Index(int? subjectId, int? classroomId, int? teacherId, CancellationToken ct, int page = 1, int pageSize = 10)
     {
         ViewBag.Subjects = (await mediator.Send(new GetSubjects(), ct))
             .Select(s => new SelectListItem { Value = s.Id.ToString(), Text = s.Name })
@@ -33,8 +33,12 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
             .Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.FullName })
             .ToList();
 
-        var rows = await mediator.Send(new GetCourseIndexRows(), ct);
-        return View("CourseIndex", rows);
+        var query = new GetCourseIndexRowsFiltered(subjectId, classroomId, teacherId);
+        var allRows = await mediator.Send(query, ct);
+        ViewBag.TotalCount = allRows.Count;
+        ViewBag.PageSize = pageSize;
+        var pagedRows = allRows.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        return View("CourseIndex", pagedRows);
     }
 
     [HttpGet("{id:int}")]
@@ -63,6 +67,20 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
             return View("CourseCreate", vm);
         }
 
+        if (vm.SubjectId != 0)
+        {
+            var subj = await _db.Subjects
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(s => s.Id == vm.SubjectId, ct);
+
+            if (subj is not null && subj.DeletedAt != null)
+            {
+                ModelState.AddModelError(nameof(vm.SubjectId), "Selected subject is archived and cannot be used to create a course.");
+                await LoadLookups(ct);
+                return View("CourseCreate", vm);
+            }
+        }
+
         var created = await mediator.Send(new CreateCourse(
             vm.Name,
             vm.Description,
@@ -79,6 +97,7 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
     {
         var item = await mediator.Send(new GetCourseById(id), ct);
         if (item is null) return NotFound();
+
 
         var vm = new CourseFormVm
         {
@@ -104,6 +123,17 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
         {
             await LoadLookups(ct);
             return View("CourseEdit", vm);
+        }
+
+        if (vm.SubjectId != 0)
+        {
+            var subj = await _db.Subjects.IgnoreQueryFilters().FirstOrDefaultAsync(s => s.Id == vm.SubjectId, ct);
+            if (subj is not null && subj.DeletedAt != null)
+            {
+                ModelState.AddModelError(nameof(vm.SubjectId), "Selected subject is archived and cannot be assigned to a course.");
+                await LoadLookups(ct);
+                return View("CourseEdit", vm);
+            }
         }
 
         var ok = await mediator.Send(new UpdateCourse(
@@ -168,7 +198,6 @@ public class CourseController(IMediator mediator, ApplicationDbContext db) : Con
         return Json(new { ok = true });
     }
 
-    // Optional: keep as API, but fix route + parameter usage
     [HttpGet("api/by-subject/{subjectId:int}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetCoursesBySubject(int subjectId,

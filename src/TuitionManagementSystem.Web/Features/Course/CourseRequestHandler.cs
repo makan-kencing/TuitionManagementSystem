@@ -13,6 +13,7 @@ public class CourseRequestHandler(ApplicationDbContext db) :
     IRequestHandler<GetCourses, IEnumerable<CourseResponse>>,
     IRequestHandler<GetCourseById, CourseResponse?>,
     IRequestHandler<GetCourseIndexRows, IReadOnlyList<CourseIndexRowResponse>>,
+    IRequestHandler<GetCourseIndexRowsFiltered, IReadOnlyList<CourseIndexRowResponse>>,
     IRequestHandler<UpdateCourseLookupsInline, bool>,
     IRequestHandler<UpdateCourseTeacherInline, bool>,
     IRequestHandler<GetTeacherLookups, IReadOnlyList<TeacherLookupResponse>>
@@ -146,10 +147,19 @@ public class CourseRequestHandler(ApplicationDbContext db) :
         return courses.Select(c =>
         {
             teachersByCourse.TryGetValue(c.Id, out var tlist);
-            tlist ??= [];
+            string teacherNames;
+            int? teacherId;
 
-            var teacherNames = tlist.Count == 0 ? "-" : string.Join(", ", tlist.Select(x => x.TeacherName));
-            int? teacherId = tlist.Count == 0 ? null : tlist[0].TeacherId;
+            if (tlist == null || tlist.Count == 0)
+            {
+                teacherNames = "-";
+                teacherId = null;
+            }
+            else
+            {
+                teacherNames = string.Join(", ", tlist.Select(x => x.TeacherName));
+                teacherId = tlist[0].TeacherId;
+            }
 
             return new CourseIndexRowResponse(
                 c.Id,
@@ -163,6 +173,94 @@ public class CourseRequestHandler(ApplicationDbContext db) :
                 teacherId
             );
         }).ToList();
+    }
+
+    public async Task<IReadOnlyList<CourseIndexRowResponse>> Handle(GetCourseIndexRowsFiltered request, CancellationToken ct)
+    {
+        var query = db.Courses
+            .AsNoTracking()
+            .Include(c => c.Subject)
+            .Include(c => c.PreferredClassroom)
+            .AsQueryable();
+
+        if (request.SubjectId.HasValue)
+            query = query.Where(c => c.Subject.Id == request.SubjectId.Value);
+        if (request.ClassroomId.HasValue)
+            query = query.Where(c => c.PreferredClassroom.Id == request.ClassroomId.Value);
+
+        var courses = await query
+            .Select(c => new
+            {
+                c.Id,
+                c.Name,
+                c.Price,
+                SubjectId = c.Subject.Id,
+                SubjectName = c.Subject.Name,
+                PreferredClassroomId = c.PreferredClassroom.Id,
+                PreferredClassroomLocation = c.PreferredClassroom.Location
+            })
+            .ToListAsync(ct);
+
+        var courseIds = courses.Select(c => c.Id).ToList();
+
+        var teacherRows = await (
+            from ctRow in db.CourseTeachers.AsNoTracking()
+            join teacher in db.Users.OfType<Teacher>().AsNoTracking() on ctRow.TeacherId equals teacher.Id
+            join acc in db.Accounts.AsNoTracking() on teacher.AccountId equals acc.Id
+            where courseIds.Contains(ctRow.CourseId)
+                  && acc.DeletedAt == null
+            select new
+            {
+                ctRow.CourseId,
+                TeacherId = teacher.Id,
+                TeacherName = (acc.DisplayName ?? acc.Username)
+            }
+        ).ToListAsync(ct);
+
+        var teachersByCourse = teacherRows
+            .GroupBy(x => x.CourseId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderBy(x => x.TeacherName).ToList()
+            );
+
+        var result = courses.Select(c =>
+        {
+            teachersByCourse.TryGetValue(c.Id, out var tlist);
+
+            string teacherNames;
+            int? teacherId;
+
+            if (tlist == null || tlist.Count == 0)
+            {
+                teacherNames = "-";
+                teacherId = null;
+            }
+            else
+            {
+                teacherNames = string.Join(", ", tlist.Select(x => x.TeacherName));
+                teacherId = tlist[0].TeacherId;
+            }
+
+            return new CourseIndexRowResponse(
+                c.Id,
+                c.Name,
+                c.Price,
+                c.SubjectId,
+                c.SubjectName,
+                c.PreferredClassroomId,
+                c.PreferredClassroomLocation,
+                teacherNames,
+                teacherId
+            );
+        }).ToList();
+
+        if (request.TeacherId.HasValue)
+        {
+            result = result.Where(r => r.TeacherId == request.TeacherId.Value).ToList();
+        }
+
+        return result;
     }
 
     public async Task<bool> Handle(UpdateCourseLookupsInline request, CancellationToken ct)
@@ -225,7 +323,6 @@ public class CourseRequestHandler(ApplicationDbContext db) :
     }
     public async Task<IReadOnlyList<TeacherLookupResponse>> Handle(GetTeacherLookups request, CancellationToken ct)
     {
-        // Teacher = discriminator row (TPH)
         return await db.Users
             .OfType<Teacher>()
             .AsNoTracking()
@@ -238,5 +335,7 @@ public class CourseRequestHandler(ApplicationDbContext db) :
             ))
             .ToListAsync(ct);
     }
+
+
 }
 
