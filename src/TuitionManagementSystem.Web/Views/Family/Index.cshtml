@@ -24,8 +24,7 @@
             {
                 if (member.User.Type == nameof(Student))
                 {
-                    <a id="member-@(member.User.Id)" class="list-group-item list-group-item-action d-flex"
-                         asp-controller="Child" asp-action="Index" asp-route-id="@member.User.Id">
+                    <div id="member-@(member.User.Id)" class="list-group-item list-group-item-action d-flex">
                         <div>
                             <img src="@member.User.AccountProfileImageUri" alt=""
                                  class="rounded-circle" width="30" height="30"/>
@@ -55,7 +54,7 @@
                                 </button>
                             </div>
                         }
-                    </a>
+                    </div>
                 }
                 else
                 {

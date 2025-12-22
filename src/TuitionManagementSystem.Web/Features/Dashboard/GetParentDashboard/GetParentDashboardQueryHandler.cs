@@ -4,7 +4,6 @@ using Ardalis.Result;
 using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Models.Class.Announcement;
 using Schedule;
 
 public class GetParentDashboardQueryHandler(ApplicationDbContext db)
@@ -15,7 +14,7 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
     {
         var family = await db.Users
             .Where(u => u.Id == request.UserId)
-            .Select(u => u.Family)
+            .Select(u => u.Family.Family)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (family is null)
@@ -30,10 +29,10 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
         var stats = new GetParentDashboardResponse
         {
             TotalChildren = await db.Students
-                .Where(s => s.Family.Id == family.FamilyId)
+                .Where(s => s.Family.Family.Id == family.Id)
                 .CountAsync(cancellationToken),
             PendingClasses = await db.Students
-                .Where(s => s.Family.Id == family.FamilyId)
+                .Where(s => s.Family.Family.Id == family.Id)
                 .SelectMany(s => s.Enrollments)
                 .SelectMany(e => e.Course.Sessions)
                 .Where(s => hour0 <= s.StartAt && s.StartAt <= hour24)
@@ -48,7 +47,7 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
                          JOIN "Courses" c  on c."Id" = e."CourseId"
                              JOIN "Announcements" a on a."CourseId" = c."Id"
                                  LEFT JOIN "Submissions" s on s."StudentId" = u."Id" and s."AssignmentId" = a."Id"
-                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.FamilyId} AND a."Discriminator" = 'Assignment'
+                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.Id} AND a."Discriminator" = 'Assignment'
                      """)
                 .FirstAsync(cancellationToken),
             PendingInvoices = await db.Database
@@ -56,9 +55,9 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
                     $"""
                      SELECT COALESCE(sum(i."Amount"), 0.0) AS "Total", count(*)::int AS "Count"
                      FROM "Users" AS u
-                              LEFT JOIN "FamilyMembers" AS f ON u."Id" = f."UserId"
+                              LEFT JOIN "FamilyMembers" AS fm ON u."Id" = fm."UserId"
                               INNER JOIN "Invoices" AS i ON u."Id" = i."StudentId"
-                     WHERE u."Discriminator" = 'Student' AND f."Id" = {family.FamilyId} AND i."Status" != 1
+                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.Id} AND i."Status" != 1
                      """)
                 .FirstAsync(cancellationToken),
             ChildrenAttendanceRate = await db.Database
@@ -72,7 +71,7 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
                          JOIN "Courses" c  on c."Id" = e."CourseId"
                              JOIN "Sessions" s on s."CourseId" = c."Id"
                                  LEFT JOIN "Attendances" a on a."StudentId" = u."Id" and a."SessionId" = s."Id"
-                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.FamilyId}
+                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.Id}
                      GROUP BY acc."DisplayName", acc."Username"
                      """)
                 .ToDictionaryAsync(g => g.Name, g => g.Rate, cancellationToken),
@@ -87,7 +86,7 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
                          JOIN "Courses" c  on c."Id" = e."CourseId"
                              JOIN "Announcements" a on a."CourseId" = c."Id"
                                  LEFT JOIN "Submissions" s on s."StudentId" = u."Id" and s."AssignmentId" = a."Id"
-                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.FamilyId} AND a."Discriminator" = 'Assignment'
+                     WHERE u."Discriminator" = 'Student' AND fm."FamilyId" = {family.Id} AND a."Discriminator" = 'Assignment'
                      GROUP BY acc."DisplayName", acc."Username"
                      """)
                 .ToDictionaryAsync(g => g.Name, g => g.Rate, cancellationToken)
