@@ -25,7 +25,9 @@ public sealed class GetAttendanceHistoryRequestHandler(ApplicationDbContext db)
             {
                 CourseName = c.Name,
                 EnrollmentAt = enrollmentAt,
-                Sessions = c.Sessions.Select(s => new SessionAttendanceItem
+                Sessions = c.Sessions
+                    .Where(s => s.StartAt >= enrollmentAt)
+                    .Select(s => new SessionAttendanceItem
                     {
                         SessionId = s.Id,
                         StartAt = s.StartAt,

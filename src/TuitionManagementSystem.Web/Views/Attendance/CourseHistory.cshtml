@@ -39,39 +39,23 @@
             <tbody>
             @foreach (var session in Model.Sessions)
             {
-                if (session.StartAt >= Model.EnrollmentAt)
-                {
-                    <tr>
-                        <td>
-                            @TimeZoneInfo.ConvertTimeFromUtc(session.StartAt,timezone)
-                        </td>
-                        <td>
-                            @TimeZoneInfo.ConvertTimeFromUtc(session.EndAt,timezone)
-                        </td>
-                        <td>
-                            @if (session.IsValid)
-                            {
-                                <span class="badge bg-success px-3 py-2">
-                                    Attended
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger px-3 py-2">
-                                    Absent
-                                </span>
-                            }
-                        </td>
-                    </tr>
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="3">Dont have session history data</td>
-                    </tr>
-                }
+                <tr>
+                    <td>@TimeZoneInfo.ConvertTimeFromUtc(session.StartAt, timezone)</td>
+                    <td>@TimeZoneInfo.ConvertTimeFromUtc(session.EndAt, timezone)</td>
+                    <td>
+                        @if (session.IsValid)
+                        {
+                            <span class="badge bg-success px-3 py-2">Attended</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger px-3 py-2">Absent</span>
+                        }
+                    </td>
+                </tr>
             }
             </tbody>
+
         </table>
     }
 </div>
