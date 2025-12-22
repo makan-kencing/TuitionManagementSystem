@@ -20,6 +20,7 @@ public class ListInvoiceRequestHandler : IRequestHandler<ListInvoiceRequest, Res
     {
         var query = db.Invoices
             .Include(i => i.Student)
+            .Include(i => i.Student.Account)
             .Include(i => i.Enrollment)
             .ThenInclude(e => e.Course)
             .ThenInclude(c => c.Subject)
