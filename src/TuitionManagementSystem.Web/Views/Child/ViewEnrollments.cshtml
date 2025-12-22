@@ -1,5 +1,4 @@
 @model TuitionManagementSystem.Web.Models.ViewModels.EnrollmentViewModel
-@using TuitionManagementSystem.Web.Services.Auth.Extensions
 
 @{
 Layout = "_Layout";
@@ -259,7 +258,7 @@ Layout = "_Layout";
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Enrollments for @Model</h2>
+        <h2 class="mb-0">Enrollments for @ViewBag.StudentName</h2>
         <button class="btn btn-primary" id="newEnrollmentBtn">
             <i class="fas fa-plus-circle"></i>&nbsp; New Enrollment
         </button>
@@ -295,7 +294,7 @@ Layout = "_Layout";
 @section Scripts {
 <script>
     $(function () {
-        const studentId = @User.GetUserId();
+        const studentId = @Model.StudentId;
 
         function loadEnrollments() {
             $("#enrollmentsContainer").load(`/child/${studentId}/enrollment/view`);

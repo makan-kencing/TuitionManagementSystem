@@ -18,15 +18,35 @@ public class ChildController(IMediator mediator, ApplicationDbContext db) : WebC
     [Route("~/[controller]/{id:int:required}/enrollment")]
     public async Task<IActionResult> Enrollment(int id, CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(
-            new ViewEnrollmentRequest(id),
-            cancellationToken);
+        var family = await db.Parents
+            .AsNoTracking()
+            .Where(p => p.Id == this.User.GetUserId())
+            .Select(p => p.Family.Family)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        var model = result.IsSuccess
-            ? result.Value
-            : new List<ViewEnrollmentResponse>();
+        if (family is null)
+        {
+            return this.NotFound();
+        }
 
-        return this.View("ViewEnrollments", model);
+        var student = await db.Students
+            .AsNoTracking()
+            .Where(s => s.Id == id)
+            .Where(s => s.Family.Family.Id == family.Id)
+            .Include(s => s.Account)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (student is null)
+        {
+            return this.NotFound();
+        }
+
+        this.ViewBag.StudentName = student.Account.Name;
+
+        return this.View("ViewEnrollments", new EnrollmentViewModel
+        {
+            StudentId = id
+        });
     }
 
     [HttpGet]

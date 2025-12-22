@@ -37,7 +37,7 @@
 
                         @if (User.GetUserType() == nameof(Parent) && member.User.Id != User.GetUserId())
                         {
-                            <div class="ms-auto d-flex">
+                            <div class="ms-auto d-flex align-items-center">
                                 <a asp-controller="Child" asp-action="Enrollment" asp-route-id="@member.User.Id" class="btn" title="View Enrollment">
                                     <i class="fa-solid fa-book"></i>
                                 </a>
