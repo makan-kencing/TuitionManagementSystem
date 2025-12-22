@@ -402,14 +402,18 @@ public class SeedData
             .Select(c => c.Schedule!.ToICalendarEvent()
                 .GetOccurrences()
                 .TakeWhileBefore(CalDateTime.UtcNow)
-                .Select(o => new Session
+                .Select(o =>
+                {
+                    var session = new Session
                     {
                         Course = c,
                         Classroom = c.PreferredClassroom,
                         StartAt = o.Period.StartTime.AsUtc,
                         EndAt = o.Period.EffectiveEndTime!.AsUtc
-                    }
-                ))
+                    };
+                    c.Sessions.Add(session);
+                    return session;
+                }))
             .SelectMany(i => i)
             .ToList();
 
@@ -471,8 +475,8 @@ public class SeedData
             .Select(a => a.Course.Enrollments
                 .Select(e => this.random.Next(1, 10) switch
                 {
-                    1 => new Submission { Student = e.Student, Assignment = a, Content = "Homework completed" },
-                    _ => null
+                    1 => null,
+                    _ => new Submission { Student = e.Student, Assignment = a, Content = "Homework completed" }
                 }))
             .SelectMany(i => i)
             .OfType<Submission>()
