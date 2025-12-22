@@ -35,7 +35,7 @@ public class FamilyController(IMediator mediator) : Controller
         {
             return this.User.GetUserType() switch
             {
-                nameof(Family) => this.View("CreateFamily"),
+                nameof(Parent) => this.View("CreateFamily"),
                 _ => this.View("NoFamily")
             };
         }
