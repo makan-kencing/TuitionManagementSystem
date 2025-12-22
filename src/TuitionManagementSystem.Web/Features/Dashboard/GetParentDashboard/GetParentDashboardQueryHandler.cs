@@ -58,7 +58,7 @@ public class GetParentDashboardQueryHandler(ApplicationDbContext db)
                      FROM "Users" AS u
                               LEFT JOIN "FamilyMembers" AS f ON u."Id" = f."UserId"
                               INNER JOIN "Invoices" AS i ON u."Id" = i."StudentId"
-                     WHERE u."Discriminator" = 'Student' AND f."Id" = {family.FamilyId}
+                     WHERE u."Discriminator" = 'Student' AND f."Id" = {family.FamilyId} AND i."Status" != 1
                      """)
                 .FirstAsync(cancellationToken),
             ChildrenAttendanceRate = await db.Database
