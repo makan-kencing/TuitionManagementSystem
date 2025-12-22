@@ -32,7 +32,7 @@ public class AccountController(ApplicationDbContext db, IMediator mediator) : Co
 
                ProfileImageUrl = a.ProfileImage != null
                    ? a.ProfileImage.Uri
-                   : "/assets/uploads/DefaultProfile.png"
+                   : "/assets/img/DefaultProfile.png"
 
            })
            .FirstOrDefaultAsync(cancellationToken);
