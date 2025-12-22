@@ -17,26 +17,60 @@
 
             localizedDt = DateTime.SpecifyKind(localizedDt, DateTimeKind.Local);
 
-            <div id="notification-@notification.Id"
-                 class="list-group-item list-group-item-action d-flex justify-content-between">
+            @if (notification.ActionUrl is not null)
+            {
+                <a id="notification-@notification.Id" href="@notification.ActionUrl"
+                     class="list-group-item list-group-item-action d-flex justify-content-between">
 
-                <div>
-                    <h5>@notification.Message</h5>
-                    <small class="text-muted">
-                        <time datetime="@localizedDt.ToString("o")">
-                            @localizedDt.Humanize()
-                        </time>
-                    </small>
+                    <div>
+                        <h5>@notification.Message</h5>
+                        <small class="text-muted">
+                            <time datetime="@localizedDt.ToString("o")">
+                                @localizedDt.Humanize()
+                            </time>
+                        </small>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            hx-post
+                            hx-controller="Notification"
+                            hx-route-id="@notification.Id"
+                            hx-action="DismissNotification"
+                            hx-target="#notification-drawer"
+                            hx-swap="innerHTML"
+                            aria-label="Dismiss">
+                    </button>
+                </a>
+            }
+            else
+            {
+
+                <div id="notification-@notification.Id"
+                     class="list-group-item d-flex justify-content-between">
+
+                    <div>
+                        <h5>@notification.Message</h5>
+                        <small class="text-muted">
+                            <time datetime="@localizedDt.ToString("o")">
+                                @localizedDt.Humanize()
+                            </time>
+                        </small>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            hx-post
+                            hx-controller="Notification"
+                            hx-route-id="@notification.Id"
+                            hx-action="DismissNotification"
+                            hx-target="#notification-drawer"
+                            hx-swap="innerHTML"
+                            aria-label="Dismiss">
+                    </button>
                 </div>
+            }
 
-                <button type="button"
-                        class="btn-close"
-                        hx-post="/Notification/dismiss/@notification.Id"
-                        hx-target="#notification-drawer"
-                        hx-swap="innerHTML"
-                        aria-label="Dismiss">
-                </button>
-            </div>
         }
     </div>
 
