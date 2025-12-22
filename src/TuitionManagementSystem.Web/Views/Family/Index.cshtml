@@ -26,8 +26,15 @@
                 {
                     <div id="member-@(member.User.Id)" class="list-group-item list-group-item-action d-flex">
                         <div>
-                            <img src="@member.User.AccountProfileImageUri" alt=""
-                                 class="rounded-circle" width="30" height="30"/>
+                            @if (member.User.AccountProfileImageUri is not null)
+                            {
+                                <img src="@member.User.AccountProfileImageUri" alt=""
+                                    class="rounded-circle" width="30" height="30"/>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-user-circle me-1"></i>
+                            }
                         </div>
 
                         <div>
@@ -60,8 +67,15 @@
                 {
                     <div id="member-@(member.User.Id)" class="list-group-item d-flex">
                         <div>
-                            <img src="@member.User.AccountProfileImageUri" alt=""
-                                 class="rounded-circle" width="30" height="30"/>
+                            @if (member.User.AccountProfileImageUri is not null)
+                            {
+                                <img src="@member.User.AccountProfileImageUri" alt=""
+                                     class="rounded-circle" width="30" height="30"/>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-user-circle me-1"></i>
+                            }
                         </div>
 
                         <div>
