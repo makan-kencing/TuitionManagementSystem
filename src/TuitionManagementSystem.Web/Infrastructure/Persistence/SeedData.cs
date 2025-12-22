@@ -419,7 +419,7 @@ public class SeedData
 
         this.attendances = this.enrollments
             .Select(e => e.Course.Sessions
-                .Select(s => this.random.Next(1, 11) switch
+                .Select(s => this.random.Next(1, 5) switch
                 {
                     1 => null,
                     _ => new Attendance
@@ -473,7 +473,7 @@ public class SeedData
         this.submissions = this.announcements
             .OfType<Assignment>()
             .Select(a => a.Course.Enrollments
-                .Select(e => this.random.Next(1, 10) switch
+                .Select(e => this.random.Next(1, 5) switch
                 {
                     1 => null,
                     _ => new Submission { Student = e.Student, Assignment = a, Content = "Homework completed" }
