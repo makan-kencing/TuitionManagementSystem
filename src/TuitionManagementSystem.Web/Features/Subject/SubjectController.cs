@@ -127,14 +127,20 @@ public class SubjectController(IMediator mediator, ApplicationDbContext db) : Co
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id, [FromQuery] bool showArchivedOnly = false)
     {
-        var entity = await _db.Subjects
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(s => s.Id == id);
+        try
+        {
+            await _db.Subjects
+                .IgnoreQueryFilters()
+                .Where(s => s.Id == id)
+                .ExecuteDeleteAsync();
 
-        if (entity is null) return NotFound();
+            TempData["SuccessMessage"] = "Subject was permanently deleted.";
+        }
+        catch (Exception)
+        {
+            TempData["ErrorMessage"] = "Cannot delete: this subject is linked to other records.";
+        }
 
-        _db.Subjects.Remove(entity);
-        await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { showArchivedOnly });
     }
 
