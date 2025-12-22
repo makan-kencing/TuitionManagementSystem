@@ -178,7 +178,7 @@
     const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
     const actionBar = document.getElementById('bulkActionBar');
     const changeCountLabel = document.getElementById('changeCount');
-    let dirtyRowIds = new Set();
+    let changedRowIds = new Set();
 
     async function postJson(url, body) {
         return await fetch(url, {
@@ -192,23 +192,23 @@
     }
 
     function checkForChanges() {
-        dirtyRowIds.clear();
+        changedRowIds.clear();
         const allRows = document.querySelectorAll('tbody tr');
 
         allRows.forEach(row => {
             const rowId = row.dataset.rowId;
-            let isRowDirty = false;
+            let isRowChanged = false;
 
             row.querySelectorAll('.course-input').forEach(input => {
                 if (input.value !== input.dataset.original) {
-                    isRowDirty = true;
+                    isRowChanged = true;
                 }
             });
 
 
             const resetBtn = row.querySelector('.btn-reset-row');
-            if (isRowDirty) {
-                dirtyRowIds.add(rowId);
+            if (isRowChanged) {
+                changedRowIds.add(rowId);
                 row.classList.add('row-changed');
                 if (resetBtn) resetBtn.style.display = '';
             } else {
@@ -221,9 +221,9 @@
     }
 
     function updateActionBarVisibility() {
-        changeCountLabel.innerText = dirtyRowIds.size;
+        changeCountLabel.innerText = changedRowIds.size;
 
-        if (dirtyRowIds.size > 0) {
+        if (changedRowIds.size > 0) {
             actionBar.classList.add('visible');
         } else {
             actionBar.classList.remove('visible');
@@ -233,7 +233,7 @@
     window.discardAllChanges = () => {
         if (!confirm("Discard all pending changes?")) return;
 
-        dirtyRowIds.forEach(id => {
+        changedRowIds.forEach(id => {
             const row = document.querySelector(`tr[data-row-id="${id}"]`);
             row.querySelectorAll('.course-input').forEach(input => {
                 input.value = input.dataset.original;
@@ -243,7 +243,7 @@
             if (resetBtn) resetBtn.style.display = 'none';
         });
 
-        dirtyRowIds.clear();
+        changedRowIds.clear();
         updateActionBarVisibility();
     };
 
@@ -259,7 +259,7 @@
         try {
             const promises = [];
 
-            dirtyRowIds.forEach(id => {
+            changedRowIds.forEach(id => {
                 const row = document.querySelector(`tr[data-row-id="${id}"]`);
                 const subEl = row.querySelector('.subject-select');
                 const classEl = row.querySelector('.classroom-select');
@@ -298,8 +298,7 @@
 
             await Promise.all(promises);
 
-            // Clean up UI after success
-            dirtyRowIds.clear();
+            changedRowIds.clear();
             document.querySelectorAll('.row-changed').forEach(r => r.classList.remove('row-changed'));
             updateActionBarVisibility();
             alert("Changes saved successfully!");
