@@ -2,12 +2,22 @@
 @{
     ViewData["Title"] = "Classroom Details";
 }
-<h2>Classroom Details</h2>
-<dl class="row">
-    <dt class="col-sm-3">Location</dt><dd class="col-sm-9">@Model.Location</dd>
-    <dt class="col-sm-3">Max Capacity</dt><dd class="col-sm-9">@Model.MaxCapacity</dd>
-</dl>
-<p>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back</a>
-</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 mb-0 text-gray-800">Classroom Details</h2>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm me-2">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary btn-sm">Back</a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Location</dt>
+            <dd class="col-sm-9 fw-bold">@Model.Location</dd>
+
+            <dt class="col-sm-3">Max Capacity</dt>
+            <dd class="col-sm-9">@Model.MaxCapacity</dd>
+        </dl>
+    </div>
+</div>

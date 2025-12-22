@@ -1,11 +1,18 @@
 @model TuitionManagementSystem.Web.Features.Classroom.ClassroomFormVM
-<div class="mb-3">
-    <label asp-for="Location" class="form-label"></label>
-    <input asp-for="Location" class="form-control" />
-    <span asp-validation-for="Location" class="text-danger"></span>
-</div>
-<div class="mb-3">
-    <label asp-for="MaxCapacity" class="form-label"></label>
-    <input asp-for="MaxCapacity" class="form-control" type="number" min="1" />
-    <span asp-validation-for="MaxCapacity" class="text-danger"></span>
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label asp-for="Location" class="form-label"></label>
+            <input asp-for="Location" class="form-control form-control-sm" />
+            <span asp-validation-for="Location" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="mb-3">
+            <label asp-for="MaxCapacity" class="form-label"></label>
+            <input asp-for="MaxCapacity" class="form-control form-control-sm" type="number" min="1" />
+            <span asp-validation-for="MaxCapacity" class="text-danger"></span>
+        </div>
+    </div>
 </div>
