@@ -1,5 +1,9 @@
-@using Microsoft.AspNetCore.Mvc.Rendering
+
 @model IReadOnlyList<TuitionManagementSystem.Web.Features.Course.CourseIndexRowResponse>
+
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Collections.Generic
+@using System.Linq
 
 @{
     ViewData["Title"] = "Courses";
@@ -15,6 +19,15 @@
         transition: background-color 0.3s ease;
     }
 
+    .teacher-subtext {
+        font-size: .85rem;
+        color: #6c757d;
+        margin-top: .25rem;
+    }
+
+    .table-sm th, .table-sm td { padding: .45rem .75rem; }
+
+    .action-cell .action-buttons a { min-width: 64px; }
     #bulkActionBar {
         position: fixed;
         bottom: 0;
@@ -23,7 +36,7 @@
         background: white;
         box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
         z-index: 1000;
-        transform: translateY(100%); /* Hidden below screen */
+        transform: translateY(100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-top: 1px solid #dee2e6;
     }
@@ -40,6 +53,63 @@
     </a>
 </div>
 
+<div class="card mb-3">
+    <div class="card-body p-3">
+        <form method="get" class="row g-3 align-items-end mb-0" id="filterForm">
+    <div class="col-md-3">
+        <label for="subjectFilter" class="form-label mb-1">Subject</label>
+        <select id="subjectFilter" name="subjectId" class="form-select form-select-sm">
+            <option value="">All Subjects</option>
+            @foreach (var s in subjects)
+            {
+                <option value="@s.Value" selected="@(ViewContext.HttpContext.Request.Query["subjectId"] == s.Value ? "selected" : null)">@s.Text</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="classroomFilter" class="form-label mb-1">Classroom</label>
+        <select id="classroomFilter" name="classroomId" class="form-select form-select-sm">
+            <option value="">All Classrooms</option>
+            @foreach (var c in classrooms)
+            {
+                <option value="@c.Value" selected="@(ViewContext.HttpContext.Request.Query["classroomId"] == c.Value ? "selected" : null)">@c.Text</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="teacherFilter" class="form-label mb-1">Teacher</label>
+        <select id="teacherFilter" name="teacherId" class="form-select form-select-sm">
+            <option value="">All Teachers</option>
+            @foreach (var t in teachers)
+            {
+                <option value="@t.Value" selected="@(ViewContext.HttpContext.Request.Query["teacherId"] == t.Value ? "selected" : null)">@t.Text</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label for="pageSize" class="form-label mb-1">Page Size</label>
+        <select id="pageSize" name="pageSize" class="form-select form-select-sm">
+            @{ var currentSize = ViewContext.HttpContext.Request.Query["pageSize"].ToString();
+               if (string.IsNullOrEmpty(currentSize) && ViewBag.PageSize != null) currentSize = ViewBag.PageSize.ToString(); }
+            <option value="10" selected="@(currentSize == "10" ? "selected" : null)">10</option>
+            <option value="15" selected="@(currentSize == "15" ? "selected" : null)">15</option>
+            <option value="20" selected="@(currentSize == "20" ? "selected" : null)">20</option>
+            <option value="25" selected="@(currentSize == "25" ? "selected" : null)">25</option>
+        </select>
+    </div>
+    <input type="hidden" name="page" value="1" id="pageInput" />
+    <div class="col-md-1 d-flex align-items-center">
+        <div class="d-grid gap-2">
+            <button type="button"
+                    class="btn btn-light btn-sm text-danger border-danger border-opacity-25 shadow-sm fw-bold"
+                    onclick="window.resetFilters()">
+                Clear Filters
+            </button>
+        </div>
+    </div>
+        </form>
+    </div>
+</div>
 <form id="antiForgeryForm" method="post" class="d-none">
     @Html.AntiForgeryToken()
 </form>
@@ -47,7 +117,7 @@
 <div class="card border-0 shadow-sm rounded-3">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover table-sm align-middle mb-0">
                 <thead class="bg-light">
                 <tr>
                     <th class="ps-4 py-3">Name</th>
@@ -171,6 +241,48 @@
         </div>
     </div>
 </div>
+
+<!-- Pagination Controls -->
+@{
+    int pageSize = 10;
+    var qsPageSize = ViewContext.HttpContext.Request.Query["pageSize"].ToString();
+    if (!string.IsNullOrEmpty(qsPageSize) && int.TryParse(qsPageSize, out var ps)) pageSize = ps;
+    else if (ViewBag.PageSize != null) pageSize = (int)ViewBag.PageSize;
+
+    int totalCount = ViewBag.TotalCount ?? Model.Count;
+    int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+    int page = 1;
+    var qsPage = ViewContext.HttpContext.Request.Query["page"].ToString();
+    if (!string.IsNullOrEmpty(qsPage)) int.TryParse(qsPage, out page);
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+
+    var currentQuery = ViewContext.HttpContext.Request.Query.ToDictionary(k => k.Key, v => v.Value.ToString());
+    Func<int, string> buildPageUrl = (p) =>
+    {
+        var q = new Dictionary<string, string>(currentQuery, StringComparer.OrdinalIgnoreCase);
+        q["page"] = p.ToString();
+        q["pageSize"] = pageSize.ToString();
+        return QueryHelpers.AddQueryString(ViewContext.HttpContext.Request.Path.Value ?? "/", q);
+    };
+}
+
+<nav aria-label="Course pagination" class="mt-3">
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(page == 1 ? "disabled" : null)">
+            <a class="page-link" href="@buildPageUrl(page - 1)">Previous</a>
+        </li>
+        @for (int i = 1; i <= totalPages; i++)
+        {
+            <li class="page-item @(i == page ? "active" : null)">
+                <a class="page-link" href="@buildPageUrl(i)">@i</a>
+            </li>
+        }
+        <li class="page-item @(page == totalPages ? "disabled" : null)">
+            <a class="page-link" href="@buildPageUrl(page + 1)">Next</a>
+        </li>
+    </ul>
+</nav>
 
 @section Scripts {
 <script>
@@ -318,6 +430,41 @@
     });
     checkForChanges();
 
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) {
+        filterForm.querySelectorAll('select').forEach(s => {
+            s.addEventListener('change', () => {
+                const pageInput = document.getElementById('pageInput');
+                if (pageInput) pageInput.value = '1';
+                filterForm.submit();
+            });
+        });
+    }
+
+    window.resetRowChanges = (id) => {
+        const row = document.querySelector(`tr[data-row-id="${id}"]`);
+        if (!row) return;
+
+        row.querySelectorAll('.course-input').forEach(input => {
+            input.value = input.dataset.original ?? '';
+            input.dispatchEvent(new Event('change'));
+        });
+
+        const resetBtn = row.querySelector('.btn-reset-row');
+        if (resetBtn) resetBtn.style.display = 'none';
+        row.classList.remove('row-changed');
+
+        changedRowIds.delete(String(id));
+        updateActionBarVisibility();
+    };
+
+    window.resetFilters = () => {
+        if (!filterForm) return;
+        filterForm.querySelectorAll('select').forEach(s => s.value = '');
+        const pageInput = document.getElementById('pageInput');
+        if (pageInput) pageInput.value = '1';
+        filterForm.submit();
+    };
 })();
 </script>
 }

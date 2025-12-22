@@ -8,6 +8,7 @@ public record DeleteCourse(int Id) : IRequest<bool>;
 public record GetCourses() : IRequest<IEnumerable<CourseResponse>>;
 public record GetCourseById(int Id) : IRequest<CourseResponse?>;
 public record GetCourseIndexRows() : IRequest<IReadOnlyList<CourseIndexRowResponse>>;
+public record GetCourseIndexRowsFiltered(int? SubjectId, int? ClassroomId, int? TeacherId) : IRequest<IReadOnlyList<CourseIndexRowResponse>>;
 public record UpdateCourseLookupsInline(int CourseId, int SubjectId, int PreferredClassroomId) : IRequest<bool>;
 public record UpdateCourseTeacherInline(int CourseId, int? TeacherId) : IRequest<bool>;
 public record GetTeacherLookups() : IRequest<IReadOnlyList<TeacherLookupResponse>>;

@@ -47,6 +47,10 @@ public class ScheduleIndexVm
     public int Year { get; set; }
     public int Month { get; set; }
     public int? CourseId { get; set; }
+
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public int PageSize { get; set; } = 20; // Default items per page
     public IEnumerable<TuitionManagementSystem.Web.Features.Schedule.ScheduleOccurrence> Occurrences { get; set; } = [];
 }
 
