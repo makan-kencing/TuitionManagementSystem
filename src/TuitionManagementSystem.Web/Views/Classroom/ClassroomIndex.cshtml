@@ -3,6 +3,27 @@
     ViewData["Title"] = "Classrooms";
     var currentQ = ViewContext.HttpContext.Request.Query["q"].ToString();
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <div>@TempData["SuccessMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <div>@TempData["ErrorMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 }
 
 <style>
@@ -53,8 +74,13 @@
                 @foreach (var c in Model)
                 {
                     <tr>
+                        @* 1. Add the Location cell back *@
                         <td class="ps-4 fw-bold text-dark">@c.Location</td>
+
+                        @* 2. Add the Max Capacity cell back *@
                         <td>@c.MaxCapacity</td>
+
+                        @* 3. The Actions cell (your existing code) *@
                         <td class="action-cell text-end">
                             <div class="d-flex align-items-center justify-content-end gap-2">
                                 <div class="btn-group btn-group-sm action-buttons" role="group" aria-label="Actions">
@@ -62,10 +88,14 @@
                                     <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-outline-secondary px-3">Edit</a>
                                 </div>
 
-                                <form asp-action="Delete" asp-route-id="@c.Id" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-outline-danger px-3">Delete</button>
-                                </form>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger px-3"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal"
+                                        data-id="@c.Id"
+                                        data-location="@c.Location">
+                                    Delete
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -75,3 +105,51 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <form id="deleteForm" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title" id="deleteModalLabel fw-bold">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <p class="mb-1">Are you sure you want to delete the classroom at:</p>
+                    <h5 id="deleteLocationDisplay" class="fw-bold text-dark mb-3"></h5>
+                    <p class="text-muted small">This action cannot be undone and may affect scheduled classes.</p>
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger px-4">Delete Permanently</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal) {
+                deleteModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+
+                    const classroomId = button.getAttribute('data-id');
+                    const location = button.getAttribute('data-location');
+
+                    const displayLocation = deleteModal.querySelector('#deleteLocationDisplay');
+                    const form = deleteModal.querySelector('#deleteForm');
+
+                    displayLocation.textContent = location;
+
+
+                    form.action = `/Classroom/Delete/${classroomId}`;
+                });
+            }
+        });
+    </script>
+}
