@@ -1,5 +1,6 @@
 @model IEnumerable<TuitionManagementSystem.Web.Features.Enrollment.ViewEnrollment.ViewEnrollmentResponse>
 @using TuitionManagementSystem.Web.Models.Class
+@using TuitionManagementSystem.Web.Services.Auth.Extensions
 
 @{
     var ordered = Model
@@ -97,14 +98,10 @@
         const action = $(this).data("action");
 
         const actionText = action === "Cancelled" ? "cancel" : "withdraw";
-        const actionTitle = action === "Cancelled" ? "Cancel" : "Withdraw";
 
         const confirmed = await Swal.fire({
             title: "Are you sure?",
-            text: `This will ${actionText} the enrollment.` +
-                (action === "Withdrawn"
-                    ? " Note: Withdrawal is only allowed after 2 weeks of enrollment."
-                    : ""),
+            text: `This will ${actionText} the enrollment.`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: action === "Cancelled" ? "#f39c12" : "#d33",
@@ -116,52 +113,30 @@
         const res = await fetch("/enrollment/mark", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ enrollmentId: id, status: action })
+            body: JSON.stringify({
+                enrollmentId: id,
+                status: action,
+                currentUserType: '@User.GetUserType()'
+            })
         });
 
         const data = await res.json();
 
         if (res.ok) {
-            Swal.fire("Success", data.message, "success")
+            Swal.fire("Success", data.message ?? "Enrollment updated", "success")
                 .then(() => location.reload());
         } else {
-            const msg = data?.message || data?.errors?.join(", ") || "Failed";
-            Swal.fire("Error", msg, "error");
-        }
-    });
+            const errorMessage =
+                data?.message ||
+                (Array.isArray(data?.errors) ? data.errors.join("\n") : null) ||
+                "Action failed";
 
-    $(document).on("click", ".markEnrollmentBtn", async function () {
-        const id = $(this).data("enrollment-id");
-        const action = $(this).data("action");
-
-
-        const confirmed = await Swal.fire({
-            title: "Are you sure?",
-            text: `The enrollment will be ${action.toLowerCase()}`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes"
-        });
-
-
-        if (!confirmed.isConfirmed) return;
-
-
-        const res = await fetch("/enrollment/mark", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({enrollmentId: id, status: action})
-        });
-
-
-        const data = await res.json();
-
-
-        if (res.ok) {
-            Swal.fire("Success", data.message, "success")
-                .then(() => location.reload());
-        } else {
-            Swal.fire("Error", data.message || "Failed", "error");
+            Swal.fire({
+                title: "Action Not Allowed",
+                html: errorMessage,
+                icon: "error"
+            });
         }
     });
 </script>
+

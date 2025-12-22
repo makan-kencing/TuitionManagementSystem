@@ -86,7 +86,7 @@ public class EnrollmentController : Controller
             return BadRequest(new { error = "Status is required (Cancelled or Withdrawn)" });
 
         var result = await _mediator.Send(
-            new MarkEnrollmentRequest { EnrollmentId = model.EnrollmentId.Value, Status = model.Status.Value },
+            new MarkEnrollmentRequest { EnrollmentId = model.EnrollmentId.Value, Status = model.Status.Value, CurrentUserType = model.CurrentUserType},
             cancellationToken);
 
         if (!result.IsSuccess)

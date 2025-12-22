@@ -8,5 +8,6 @@ namespace TuitionManagementSystem.Web.Features.Enrollment.MarkEnrollment
     {
         public int EnrollmentId { get; set; }
         public Enrollment.EnrollmentStatus Status { get; set; }
+        public string? CurrentUserType { get; set; }
     }
 }

@@ -14,5 +14,7 @@ public class EnrollmentViewModel
     public DateTime? EnrolledAt { get; set; }
 
     public Enrollment.EnrollmentStatus? Status { get; set; }
+
+    public string? CurrentUserType { get; set; }
 }
 

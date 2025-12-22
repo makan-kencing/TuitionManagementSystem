@@ -1,3 +1,4 @@
+@using TuitionManagementSystem.Web.Services.Auth.Extensions
 @model dynamic
 @{
 ViewData["Title"] = "Course Enrollments";
@@ -472,10 +473,12 @@ Layout = "_Layout";
                 contentType: 'application/json',
                 data: JSON.stringify({
                     enrollmentId: currentEnrollmentId,
-                    status: status
+                    status: status,
+                    currentUserType: '@User.GetUserType()'
                 }),
                 success: function(response) {
                     resolve(response);
+                    window.location.reload();
                 },
                 error: function(xhr) {
                     reject(xhr.responseJSON?.errors || 'Action failed');

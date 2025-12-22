@@ -155,7 +155,7 @@ public class MakeEnrollmentRequestHandler
             {
                 UserId = student.Id,
                 Message = $"You have successfully enrolled in course {course.Name}.",
-                ActionUrl = $"/enrollment/view/{enrollment.Id}"
+                ActionUrl = $"/enrollment"
             };
             _db.Notifications.Add(notification);
             await _db.SaveChangesAsync(cancellationToken);
