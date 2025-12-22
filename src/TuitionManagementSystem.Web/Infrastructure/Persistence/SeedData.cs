@@ -2,8 +2,8 @@ namespace TuitionManagementSystem.Web.Infrastructure.Persistence;
 
 using System.Globalization;
 using EFCore.BulkExtensions;
-using Htmx.Net.Toast.Helpers;
 using Ical.Net;
+using Ical.Net.DataTypes;
 using Microsoft.EntityFrameworkCore;
 using Models.Class;
 using Models.User;
@@ -25,7 +25,6 @@ public class SeedData
     private readonly List<Family> families;
     private readonly List<Course> courses;
     private readonly List<Enrollment> enrollments;
-    private readonly List<Schedule> schedules;
     private readonly List<Session> sessions;
     private readonly List<Attendance> attendances;
     private readonly List<CourseTeacher> courseTeachers;
@@ -84,8 +83,8 @@ public class SeedData
                 Price = 100.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(14),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
+                    Start = DateTime.UtcNow.Date.AddDays(-1).AddHours(14),
+                    End = DateTime.UtcNow.Date.AddDays(-1).AddHours(16),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -93,22 +92,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Monday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(2).AddHours(14),
-                        EndAt = DateTime.UtcNow.Date.AddDays(2).AddHours(16),
-                        Classroom = this.classrooms[0]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(9).AddHours(14),
-                        EndAt = DateTime.UtcNow.Date.AddDays(9).AddHours(16),
-                        Classroom = this.classrooms[0]
-                    }
-                ]
+                }
             },
 
             new Course
@@ -119,8 +103,8 @@ public class SeedData
                 Price = 120.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(10),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(12),
+                    Start = DateTime.UtcNow.Date.AddDays(-5).AddHours(10),
+                    End = DateTime.UtcNow.Date.AddDays(-5).AddHours(12),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -128,22 +112,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Wednesday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(4).AddHours(10),
-                        EndAt = DateTime.UtcNow.Date.AddDays(4).AddHours(12),
-                        Classroom = this.classrooms[1]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(11).AddHours(10),
-                        EndAt = DateTime.UtcNow.Date.AddDays(11).AddHours(12),
-                        Classroom = this.classrooms[1]
-                    }
-                ]
+                }
             },
 
             new Course
@@ -154,8 +123,8 @@ public class SeedData
                 Price = 110.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(17).AddMinutes(30),
+                    Start = DateTime.UtcNow.Date.AddDays(-13).AddHours(16),
+                    End = DateTime.UtcNow.Date.AddDays(-13).AddHours(17).AddMinutes(30),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -163,22 +132,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Tuesday, DayOfWeek.Thursday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(3).AddHours(16),
-                        EndAt = DateTime.UtcNow.Date.AddDays(3).AddHours(17).AddMinutes(30),
-                        Classroom = this.classrooms[2]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(5).AddHours(16),
-                        EndAt = DateTime.UtcNow.Date.AddDays(5).AddHours(17).AddMinutes(30),
-                        Classroom = this.classrooms[2]
-                    }
-                ]
+                }
             },
 
             new Course
@@ -189,8 +143,8 @@ public class SeedData
                 Price = 95.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(9),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(11),
+                    Start = DateTime.UtcNow.Date.AddDays(-9).AddHours(9),
+                    End = DateTime.UtcNow.Date.AddDays(-9).AddHours(11),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -198,22 +152,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Friday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(6).AddHours(9),
-                        EndAt = DateTime.UtcNow.Date.AddDays(6).AddHours(11),
-                        Classroom = this.classrooms[6]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(13).AddHours(9),
-                        EndAt = DateTime.UtcNow.Date.AddDays(13).AddHours(11),
-                        Classroom = this.classrooms[6]
-                    }
-                ]
+                }
             },
 
             new Course
@@ -224,8 +163,8 @@ public class SeedData
                 Price = 130.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(18),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(21),
+                    Start = DateTime.UtcNow.Date.AddDays(-6).AddHours(18),
+                    End = DateTime.UtcNow.Date.AddDays(-6).AddHours(21),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -233,16 +172,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Monthly, ByDay = [DayOfWeek.Monday], BySetPosition = [1]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(15).AddHours(18),
-                        EndAt = DateTime.UtcNow.Date.AddDays(15).AddHours(21),
-                        Classroom = this.classrooms[4]
-                    }
-                ]
+                }
             },
 
             new Course
@@ -253,8 +183,8 @@ public class SeedData
                 Price = 140.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(13),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
+                    Start = DateTime.UtcNow.Date.AddDays(-7).AddHours(13),
+                    End = DateTime.UtcNow.Date.AddDays(-7).AddHours(16),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -262,22 +192,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Saturday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(7).AddHours(13),
-                        EndAt = DateTime.UtcNow.Date.AddDays(7).AddHours(16),
-                        Classroom = this.classrooms[7]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(14).AddHours(13),
-                        EndAt = DateTime.UtcNow.Date.AddDays(14).AddHours(16),
-                        Classroom = this.classrooms[7]
-                    }
-                ]
+                }
             },
 
             new Course
@@ -288,8 +203,8 @@ public class SeedData
                 Price = 150.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(19),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(21),
+                    Start = DateTime.UtcNow.Date.AddDays(-8).AddHours(19),
+                    End = DateTime.UtcNow.Date.AddDays(-8).AddHours(21),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -297,22 +212,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Tuesday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(3).AddHours(19),
-                        EndAt = DateTime.UtcNow.Date.AddDays(3).AddHours(21),
-                        Classroom = this.classrooms[5]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(10).AddHours(19),
-                        EndAt = DateTime.UtcNow.Date.AddDays(10).AddHours(21),
-                        Classroom = this.classrooms[5]
-                    }
-                ]
+                }
             },
 
             new Course
@@ -323,8 +223,8 @@ public class SeedData
                 Price = 105.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(15),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(17),
+                    Start = DateTime.UtcNow.Date.AddDays(-15).AddHours(15),
+                    End = DateTime.UtcNow.Date.AddDays(-15).AddHours(17),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -332,22 +232,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Thursday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(5).AddHours(15),
-                        EndAt = DateTime.UtcNow.Date.AddDays(5).AddHours(17),
-                        Classroom = this.classrooms[8]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(12).AddHours(15),
-                        EndAt = DateTime.UtcNow.Date.AddDays(12).AddHours(17),
-                        Classroom = this.classrooms[8]
-                    }
-                ]
+                }
             },
 
 
@@ -359,8 +244,8 @@ public class SeedData
                 Price = 115.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(9),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(12),
+                    Start = DateTime.UtcNow.Date.AddDays(-17).AddHours(9),
+                    End = DateTime.UtcNow.Date.AddDays(-17).AddHours(12),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -368,22 +253,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Saturday, DayOfWeek.Sunday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(7).AddHours(9),
-                        EndAt = DateTime.UtcNow.Date.AddDays(7).AddHours(12),
-                        Classroom = this.classrooms[7]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(8).AddHours(9),
-                        EndAt = DateTime.UtcNow.Date.AddDays(8).AddHours(12),
-                        Classroom = this.classrooms[7]
-                    }
-                ]
+                }
             },
 
             new Course
@@ -394,8 +264,8 @@ public class SeedData
                 Price = 135.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(14),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
+                    Start = DateTime.UtcNow.Date.AddDays(-10).AddHours(14),
+                    End = DateTime.UtcNow.Date.AddDays(-10).AddHours(16),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -403,22 +273,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Monday, DayOfWeek.Wednesday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(2).AddHours(14),
-                        EndAt = DateTime.UtcNow.Date.AddDays(2).AddHours(16),
-                        Classroom = this.classrooms[4]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(4).AddHours(14),
-                        EndAt = DateTime.UtcNow.Date.AddDays(4).AddHours(16),
-                        Classroom = this.classrooms[4]
-                    }
-                ]
+                }
             },
 
             new Course
@@ -429,8 +284,8 @@ public class SeedData
                 Price = 125.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(18),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(20),
+                    Start = DateTime.UtcNow.Date.AddDays(-4).AddHours(18),
+                    End = DateTime.UtcNow.Date.AddDays(-4).AddHours(20),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -438,22 +293,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Friday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(6).AddHours(18),
-                        EndAt = DateTime.UtcNow.Date.AddDays(6).AddHours(20),
-                        Classroom = this.classrooms[3]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(13).AddHours(18),
-                        EndAt = DateTime.UtcNow.Date.AddDays(13).AddHours(20),
-                        Classroom = this.classrooms[3]
-                    }
-                ]
+                }
             },
 
             new Course
@@ -464,8 +304,8 @@ public class SeedData
                 Price = 110.00m,
                 Schedule = new Schedule
                 {
-                    Start = DateTime.UtcNow.Date.AddDays(1).AddHours(16),
-                    End = DateTime.UtcNow.Date.AddDays(1).AddHours(18),
+                    Start = DateTime.UtcNow.Date.AddDays(-12).AddHours(16),
+                    End = DateTime.UtcNow.Date.AddDays(-12).AddHours(18),
                     RecurrencePatterns =
                     [
                         new ScheduleRecurrencePattern
@@ -473,22 +313,7 @@ public class SeedData
                             FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Wednesday]
                         }
                     ]
-                },
-                Sessions =
-                [
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(4).AddHours(16),
-                        EndAt = DateTime.UtcNow.Date.AddDays(4).AddHours(18),
-                        Classroom = this.classrooms[9]
-                    },
-                    new Session
-                    {
-                        StartAt = DateTime.UtcNow.Date.AddDays(11).AddHours(16),
-                        EndAt = DateTime.UtcNow.Date.AddDays(11).AddHours(18),
-                        Classroom = this.classrooms[9]
-                    }
-                ]
+                }
             }
         ];
 
@@ -574,33 +399,19 @@ public class SeedData
             .ToList();
 
         this.sessions = this.courses
-            .Select(c => Enumerable.Range(1, 5)
-                .Select(i =>
-                {
-                    var start = DateTime.UtcNow.Date
-                        .AddDays(i * 2);
-
-                    return new Session
+            .Where(c => c.Schedule != null)
+            .Select(c => c.Schedule!.ToICalendarEvent()
+                .GetOccurrences()
+                .TakeWhileBefore(CalDateTime.UtcNow)
+                .Select(o => new Session
                     {
-                        Course = c, Classroom = c.PreferredClassroom, StartAt = start, EndAt = start.AddHours(2)
-                    };
-                }))
+                        Course = c,
+                        Classroom = c.PreferredClassroom,
+                        StartAt = o.Period.StartTime.AsUtc,
+                        EndAt = o.Period.EffectiveEndTime!.AsUtc
+                    }
+                ))
             .SelectMany(i => i)
-            .ToList();
-
-        this.schedules = this.courses
-            .Select(c =>
-            {
-                var start = DateTime.UtcNow.Date.AddDays(1);
-                return new Schedule
-                {
-                    Summary = null,
-                    Description = null,
-                    Start = start,
-                    End = start.AddHours(2),
-                    Course = c
-                };
-            })
             .ToList();
 
         this.attendances = this.enrollments
@@ -675,7 +486,6 @@ public class SeedData
         await this.Seed(this.subjects, cancellationToken);
         await this.Seed(this.classrooms, cancellationToken);
         await this.Seed(this.courses, cancellationToken);
-        await this.Seed(this.schedules, cancellationToken);
         await this.Seed(this.Users, cancellationToken);
         await this.Seed(this.families, cancellationToken);
         await this.Seed(this.enrollments, cancellationToken);
