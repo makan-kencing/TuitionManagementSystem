@@ -1,8 +1,10 @@
 @model TuitionManagementSystem.Web.Models.ViewModels.EnrollmentViewModel
+@using Microsoft.AspNetCore.Components.Web
 @using TuitionManagementSystem.Web.Services.Auth.Extensions
 
 @{
-Layout = "_Layout";
+    ViewData["Title"] = "My Enrollments";
+    Layout = "_Layout";
 }
 
 @section Styles {
