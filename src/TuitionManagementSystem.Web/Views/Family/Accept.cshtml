@@ -14,7 +14,7 @@
         <h4 class="card-title">You have been invited to @Model.Invite.Family.Name</h4>
         <small>by @Model.Invite.Requester.AccountDisplayName</small>
 
-        <div class="d-flex">
+        <div class="d-flex gap-2 mt-2">
             <form asp-controller="Family" asp-action="Decline">
                 <button type="submit" class="btn btn-danger text-white">Decline</button>
             </form>
