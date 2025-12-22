@@ -5,9 +5,10 @@ using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Abstractions;
 using Infrastructure.Persistence;
-using Microsoft.Build.Experimental.ProjectCache;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Models.Payment;
+using OnCheckoutSuccess;
 using Options;
 using Services;
 using Stripe;
@@ -20,8 +21,12 @@ public class CheckoutController : WebController
     private readonly StripeClient client;
     private readonly ApplicationDbContext db;
     private readonly IInvoiceService invoiceService;
+    private readonly IMediator mediator;
 
-    public CheckoutController(IConfiguration configuration, ApplicationDbContext db, IInvoiceService invoiceService)
+    public CheckoutController(IConfiguration configuration,
+        ApplicationDbContext db,
+        IInvoiceService invoiceService,
+        IMediator mediator)
     {
         this.options = configuration.GetSection("Stripe")
                            .Get<StripeOptions>()
@@ -29,6 +34,7 @@ public class CheckoutController : WebController
         this.client = new StripeClient(this.options.SecretKey);
         this.db = db;
         this.invoiceService = invoiceService;
+        this.mediator = mediator;
     }
 
     [HttpPost]
@@ -164,6 +170,9 @@ public class CheckoutController : WebController
                 invoiceIds,
                 payment.Id,
                 this.HttpContext.RequestAborted);
+
+            await this.mediator.Publish(new OnCheckoutSuccessEvent(payment.Id, session.CustomerDetails.Email,
+                session.CustomerDetails.Name, this.ControllerContext));
 
             if (!result.IsSuccess)
             {

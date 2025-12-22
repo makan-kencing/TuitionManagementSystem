@@ -1,0 +1,64 @@
+@using Microsoft.AspNetCore.Mvc.Routing
+@model TuitionManagementSystem.Web.Features.Checkout.OnCheckoutSuccess.PaymentSuccessViewModel
+
+@{
+    Layout = null;
+    var urlHelperFactory = Model.ControllerContext.HttpContext.RequestServices.GetRequiredService<IUrlHelperFactory>();
+    var urlHelper = urlHelperFactory.GetUrlHelper(Model.ControllerContext);
+}
+
+<body style='font-family: Arial, sans-serif; line-height:1.6; color:#333;'>
+<div style='max-width:600px; margin:auto; padding:20px; border:1px solid #ddd; border-radius:10px;'>
+    <h2 style='color:#0d6efd;'>Payment Receipt</h2>
+    <p>Dear <strong>@(Model.Name ?? Model.Email)</strong>,</p>
+    <p>Thank you for making your payment at <strong>Horizon Tuition Centre.</strong></p>
+    <p>Below is the itemized list of the purchases.</p>
+
+    <table style='width:100%; border-collapse:collapse; margin:20px 0;'>
+        <thead>
+        <tr>
+            <th>Course</th>
+            <th>Student</th>
+            <th>Amount (RM)</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        @{
+            var total = 0m;
+        }
+        @foreach (var invoice in Model.Invoices)
+        {
+            total += invoice.Amount;
+            <tr>
+                <td style='padding:8px; border:1px solid #ddd;'><strong>@invoice.Enrollment.CourseName</strong></td>
+                <td style='padding:8px; border:1px solid #ddd;'>@invoice.Student.Name</td>
+                <td style='padding:8px; border:1px solid #ddd;'>@invoice.Amount.ToString("0.00")</td>
+            </tr>
+        }
+        <tr>
+            <td style='padding:8px; border:1px solid #ddd;' colspan="2">Surcharge (2%)</td>
+            <td style='padding:8px; border:1px solid #ddd;'>@((total * 0.02m).ToString("0.00"))</td>
+        </tr>
+        </tbody>
+
+        <tfoot>
+        <tr>
+            <td style='padding:8px; border:1px solid #ddd;' colspan="2"></td>
+            <td style='padding:8px; border:1px solid #ddd;'><strong>@((total * 1.02m).ToString("0.00"))</strong></td>
+        </tr>
+        </tfoot>
+    </table>
+
+    <p>To view your payments, click the button below:</p>
+    <p style='text-align:center;'>
+        <a href="@urlHelper.Action(controller: "Invoice", action: "ListInvoices", protocol: Model.ControllerContext.HttpContext.Request.Scheme, values: null)">
+            View Invoices
+        </a>
+    </p>
+
+    <p>If you have any questions, feel free to contact our support team.</p>
+    <p>Best regards,<br/><strong>Horizon Tuition Centre</strong></p>
+</div>
+</body>
+
