@@ -22,8 +22,7 @@
 
     .invoice-card.paid { border-left-color: #198754; background-color: #f8fff9; }
     .invoice-card.cancelled { border-left-color: #6c757d; background-color: #f8f9fa; }
-    .invoice-card.withdrawn { border-left-color: #dc3545; background-color: #fff5f5; }
-
+    .invoice-card.withdrawn { border-left-color: #ffc107; background-color: #fff3cd; }
     .status-badge { font-size: 0.7rem; padding: 0.2rem 0.4rem; }
 </style>
 }
@@ -106,7 +105,7 @@
                                         <p class="text-muted small">@invoice.StudentName</p>
                                         <span class="badge @(invoice.Status == InvoiceStatus.Paid ? "bg-success" :
                                                            invoice.Status == InvoiceStatus.Cancelled ? "bg-secondary" :
-                                                           "bg-danger") status-badge">
+                                                           "bg-warning") status-badge">
                                             @invoice.Status
                                         </span>
                                     </div>
@@ -129,7 +128,7 @@
                                         else if (invoice.Status != InvoiceStatus.Paid)
                                         {
                                             <p class="mb-1 small text-muted">Due</p>
-                                            <p class="mb-1">@invoice.DueAt?.ToString("MMM dd, yyyy") ?? "N/A"</p>
+                                            <p class="mb-1">@(invoice.DueAt?.ToString("MMM dd, yyyy") ?? "N/A")</p>
                                         }
 
                                         <h5 class="text-primary mt-1">RM@(invoice.Amount.ToString("0.00"))</h5>
