@@ -1,11 +1,11 @@
-@using TuitionManagementSystem.Web.Features.Family.CheckInvite
+@using TuitionManagementSystem.Web.Models.User
 @using TuitionManagementSystem.Web.Services.Auth.Extensions
 @model TuitionManagementSystem.Web.Features.Family.FamilyController.EditFamilyNameViewModel
 
 <div hx-target="this" hx-swap="outerHTML" class="d-flex gap-3">
     <h2 class="mb-0">@Model.Name</h2>
 
-    @if (User.GetUserType() == nameof(Family))
+    @if (User.GetUserType() == nameof(Parent))
     {
         <button hx-get hx-controller="Family" hx-action="GetEditName" class="btn">
             <i class="fa-solid fa-pen-to-square"></i>
