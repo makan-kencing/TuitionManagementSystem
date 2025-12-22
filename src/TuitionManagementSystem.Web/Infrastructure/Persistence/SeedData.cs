@@ -387,7 +387,7 @@ public class SeedData
         }
 
         this.announcements = this.courses
-            .Select(c => Enumerable.Range(1, this.random.Next(5))
+            .Select(c => Enumerable.Range(1, this.random.Next(10))
                 .Select(i => this.random.Next(1, 3) switch
                 {
                     1 => new Announcement
