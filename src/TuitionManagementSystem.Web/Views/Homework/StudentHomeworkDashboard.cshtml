@@ -60,7 +60,7 @@
                     {
                         if (announcement is AssignmentInfo assignment)
                         {
-                            @if (assignment.DueAt > now)
+                            if (assignment.DueAt > now || assignment.DueAt < now )
                             {
                                 <a asp-controller="Homework"
                                    asp-action="AnnouncementDetail"

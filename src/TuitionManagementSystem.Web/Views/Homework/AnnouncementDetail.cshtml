@@ -78,7 +78,7 @@
 
                 <h6 class="fw-semibold mb-3">Your work</h6>
 
-                @if (Model.Submission == null)
+                @if (Model.Submission == null && now < Model.DueAt)
                 {
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="badge bg-success">Pending</span>
