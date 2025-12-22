@@ -83,15 +83,10 @@ public class SeedData
         Price = 85.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-1).AddHours(14),
-            End = DateTime.UtcNow.Date.AddDays(-1).AddHours(16),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Monday]
-                }
-            ]
+            // UTC 6:00 -> Local 2:00 PM
+            Start = DateTime.UtcNow.Date.AddDays(-1).AddHours(6),
+            End = DateTime.UtcNow.Date.AddDays(-1).AddHours(8),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Monday] } ]
         }
     },
 
@@ -103,15 +98,10 @@ public class SeedData
         Price = 75.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-5).AddHours(10),
-            End = DateTime.UtcNow.Date.AddDays(-5).AddHours(12),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Wednesday]
-                }
-            ]
+            // UTC 2:00 -> Local 10:00 AM
+            Start = DateTime.UtcNow.Date.AddDays(-5).AddHours(2),
+            End = DateTime.UtcNow.Date.AddDays(-5).AddHours(4),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Wednesday] } ]
         }
     },
 
@@ -123,15 +113,10 @@ public class SeedData
         Price = 89.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-13).AddHours(16),
-            End = DateTime.UtcNow.Date.AddDays(-13).AddHours(17).AddMinutes(30),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Tuesday, DayOfWeek.Thursday]
-                }
-            ]
+            // UTC 8:00 -> Local 4:00 PM
+            Start = DateTime.UtcNow.Date.AddDays(-13).AddHours(8),
+            End = DateTime.UtcNow.Date.AddDays(-13).AddHours(9).AddMinutes(30),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Tuesday, DayOfWeek.Thursday] } ]
         }
     },
 
@@ -143,15 +128,10 @@ public class SeedData
         Price = 65.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-9).AddHours(9),
-            End = DateTime.UtcNow.Date.AddDays(-9).AddHours(11),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Friday]
-                }
-            ]
+            // UTC 1:00 -> Local 9:00 AM
+            Start = DateTime.UtcNow.Date.AddDays(-9).AddHours(1),
+            End = DateTime.UtcNow.Date.AddDays(-9).AddHours(3),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Friday] } ]
         }
     },
 
@@ -163,15 +143,10 @@ public class SeedData
         Price = 99.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-6).AddHours(18),
-            End = DateTime.UtcNow.Date.AddDays(-6).AddHours(21),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Monthly, ByDay = [DayOfWeek.Monday], BySetPosition = [1]
-                }
-            ]
+            // UTC 10:00 -> Local 6:00 PM
+            Start = DateTime.UtcNow.Date.AddDays(-6).AddHours(10),
+            End = DateTime.UtcNow.Date.AddDays(-6).AddHours(13),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Monthly, ByDay = [DayOfWeek.Monday], BySetPosition = [1] } ]
         }
     },
 
@@ -183,15 +158,10 @@ public class SeedData
         Price = 82.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-7).AddHours(13),
-            End = DateTime.UtcNow.Date.AddDays(-7).AddHours(16),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Saturday]
-                }
-            ]
+            // UTC 5:00 -> Local 1:00 PM
+            Start = DateTime.UtcNow.Date.AddDays(-7).AddHours(5),
+            End = DateTime.UtcNow.Date.AddDays(-7).AddHours(8),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Saturday] } ]
         }
     },
 
@@ -203,15 +173,10 @@ public class SeedData
         Price = 95.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-8).AddHours(19),
-            End = DateTime.UtcNow.Date.AddDays(-8).AddHours(21),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Tuesday]
-                }
-            ]
+            // UTC 11:00 -> Local 7:00 PM
+            Start = DateTime.UtcNow.Date.AddDays(-8).AddHours(11),
+            End = DateTime.UtcNow.Date.AddDays(-8).AddHours(13),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Tuesday] } ]
         }
     },
 
@@ -223,15 +188,10 @@ public class SeedData
         Price = 70.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-15).AddHours(15),
-            End = DateTime.UtcNow.Date.AddDays(-15).AddHours(17),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Thursday]
-                }
-            ]
+            // UTC 7:00 -> Local 3:00 PM
+            Start = DateTime.UtcNow.Date.AddDays(-15).AddHours(7),
+            End = DateTime.UtcNow.Date.AddDays(-15).AddHours(9),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Thursday] } ]
         }
     },
 
@@ -243,15 +203,10 @@ public class SeedData
         Price = 98.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-17).AddHours(9),
-            End = DateTime.UtcNow.Date.AddDays(-17).AddHours(12),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Saturday, DayOfWeek.Sunday]
-                }
-            ]
+            // UTC 1:00 -> Local 9:00 AM
+            Start = DateTime.UtcNow.Date.AddDays(-17).AddHours(1),
+            End = DateTime.UtcNow.Date.AddDays(-17).AddHours(4),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Saturday, DayOfWeek.Sunday] } ]
         }
     },
 
@@ -263,15 +218,10 @@ public class SeedData
         Price = 94.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-10).AddHours(14),
-            End = DateTime.UtcNow.Date.AddDays(-10).AddHours(16),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Monday, DayOfWeek.Wednesday]
-                }
-            ]
+            // UTC 6:00 -> Local 2:00 PM
+            Start = DateTime.UtcNow.Date.AddDays(-10).AddHours(6),
+            End = DateTime.UtcNow.Date.AddDays(-10).AddHours(8),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Monday, DayOfWeek.Wednesday] } ]
         }
     },
 
@@ -283,15 +233,10 @@ public class SeedData
         Price = 88.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-4).AddHours(18),
-            End = DateTime.UtcNow.Date.AddDays(-4).AddHours(20),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Friday]
-                }
-            ]
+            // UTC 10:00 -> Local 6:00 PM
+            Start = DateTime.UtcNow.Date.AddDays(-4).AddHours(10),
+            End = DateTime.UtcNow.Date.AddDays(-4).AddHours(12),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Friday] } ]
         }
     },
 
@@ -303,15 +248,10 @@ public class SeedData
         Price = 79.00m,
         Schedule = new Schedule
         {
-            Start = DateTime.UtcNow.Date.AddDays(-12).AddHours(16),
-            End = DateTime.UtcNow.Date.AddDays(-12).AddHours(18),
-            RecurrencePatterns =
-            [
-                new ScheduleRecurrencePattern
-                {
-                    FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Wednesday]
-                }
-            ]
+            // UTC 8:00 -> Local 4:00 PM
+            Start = DateTime.UtcNow.Date.AddDays(-12).AddHours(8),
+            End = DateTime.UtcNow.Date.AddDays(-12).AddHours(10),
+            RecurrencePatterns = [ new ScheduleRecurrencePattern { FrequencyType = FrequencyType.Weekly, ByDay = [DayOfWeek.Wednesday] } ]
         }
     }
 ];
