@@ -50,14 +50,18 @@
                             else
                             {
 
+                                var percentage = course.Stats.AttendancePercentage;
+
+                                var barClass = percentage < 80 ? "bg-danger" : "bg-success";
+
                                 <div class="progress" style="height:20px;">
-                                    <div class="progress-bar bg-success"
+                                    <div class="progress-bar @barClass"
                                          role="progressbar"
-                                         style="width:@($"{course.Stats.AttendancePercentage}%");"
-                                         aria-valuenow="@course.Stats.AttendancePercentage"
+                                         style="width:@($"{percentage}%");"
+                                         aria-valuenow="@percentage"
                                          aria-valuemin="0"
                                          aria-valuemax="100">
-                                        @course.Stats.AttendancePercentage%
+                                        @percentage%
                                     </div>
                                 </div>
 
