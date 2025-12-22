@@ -9,6 +9,7 @@ using TuitionManagementSystem.Web.Services.Auth.Extensions;
 
 namespace TuitionManagementSystem.Web.Features.Home;
 
+using Dashboard.GetParentDashboard;
 using Dashboard.TeacherDashboard;
 
 public class HomeController(IMediator mediator) : Controller
@@ -16,38 +17,45 @@ public class HomeController(IMediator mediator) : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        if (User.IsInRole(nameof(AccessRoles.Administrator)))
+        if (this.User.IsInRole(nameof(AccessRoles.Administrator)))
         {
-            return RedirectToAction("AdminDashBoard", "Admin");
+            return this.RedirectToAction("AdminDashBoard", "Admin");
         }
 
-        switch (User.GetUserType())
+        switch (this.User.GetUserType())
         {
             case nameof(Student):
             {
                 var response = await mediator.Send(
-                    new StudentDashboardRequest { StudentId = User.GetUserId() },
+                    new StudentDashboardRequest { StudentId = this.User.GetUserId() },
                     cancellationToken
                 );
 
-                return View("StudentDashboard", response);
+                return this.View("StudentDashboard", response);
             }
 
             case nameof(Teacher):
             {
                 var response = await mediator.Send(
-                    new TeacherDashboardRequest { TeacherId = User.GetUserId() },
+                    new TeacherDashboardRequest { TeacherId = this.User.GetUserId() },
                     cancellationToken
                 );
 
-                return View("TeacherDashboard", response);
+                return this.View("TeacherDashboard", response);
             }
 
             case nameof(Parent):
-                return View("ParentDashboard");
+            {
+                var response = await mediator.Send(
+                    new GetParentDashboardQuery(this.User.GetUserId()),
+                    cancellationToken
+                );
+
+                return this.View("ParentDashboard", response.Value);
+            }
 
             default:
-                return View("GuestDashboard");
+                return this.View("GuestDashboard");
         }
     }
 
@@ -56,8 +64,8 @@ public class HomeController(IMediator mediator) : Controller
     [IgnoreAntiforgeryToken]
     public IActionResult NotFoundPage()
     {
-        Response.StatusCode = 404;
-        return View("404");
+        this.Response.StatusCode = 404;
+        return this.View("404");
     }
 
     [AllowAnonymous]
@@ -65,11 +73,11 @@ public class HomeController(IMediator mediator) : Controller
     [IgnoreAntiforgeryToken]
     public IActionResult ServerError()
     {
-        Response.StatusCode = 500;
-        return View("500");
+        this.Response.StatusCode = 500;
+        return this.View("500");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() =>
-        View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        this.View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier });
 }

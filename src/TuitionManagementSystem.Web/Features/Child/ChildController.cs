@@ -34,4 +34,22 @@ public class ChildController(IMediator mediator) : WebController
     {
         public required GetChildResponse Child { get; set; }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Enrollment()
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Homework()
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Invoice()
+    {
+        throw new NotImplementedException();
+    }
 }
