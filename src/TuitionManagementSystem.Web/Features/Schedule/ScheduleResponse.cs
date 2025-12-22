@@ -25,7 +25,7 @@ public record ScheduleOccurrence(
     int ScheduleId,
     int CourseId,
     string CourseName,
-    int ClassroomId,
-    string ClassroomName,
+    int? ClassroomId,
+    string? ClassroomName,
     DateTime Start,
     DateTime End);

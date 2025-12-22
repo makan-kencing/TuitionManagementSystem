@@ -1,53 +1,197 @@
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using Microsoft.AspNetCore.WebUtilities
 @model TuitionManagementSystem.Web.ViewModels.Schedule.ScheduleIndexVm
+@{
+    ViewData["Title"] = "Schedule Management";
 
-<h2>Schedules</h2>
 
-<form method="get" asp-action="Index" asp-controller="Schedule">
-    <label>Course</label>
-    <select asp-for="CourseId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Courses">
-        <option value="">All</option>
-    </select>
+    int pageSize = 10;
+    var qsPageSize = ViewContext.HttpContext.Request.Query["pageSize"].ToString();
+    if (!string.IsNullOrEmpty(qsPageSize) && int.TryParse(qsPageSize, out var ps)) pageSize = ps;
+    else if (ViewBag.PageSize != null) pageSize = (int)ViewBag.PageSize;
 
-    <label>Year</label>
-    <input asp-for="Year" type="number" min="2000" max="2100" />
+    int totalCount = ViewBag.TotalCount ?? Model.Occurrences.Count();
+    int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+    int page = 1;
+    var qsPage = ViewContext.HttpContext.Request.Query["page"].ToString();
+    if (!string.IsNullOrEmpty(qsPage)) int.TryParse(qsPage, out page);
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
 
-    <label>Month</label>
-    <input asp-for="Month" type="number" min="1" max="12" />
+    var currentQuery = ViewContext.HttpContext.Request.Query
+        .ToDictionary(k => k.Key, v => (string?)v.Value.ToString());
 
-    <button type="submit">Go</button>
-    <a href="/schedules/create">Create</a>
-    <a href="/schedules/calendar">Open Timetable</a>
-
-    @if (Model.CourseId.HasValue)
+    Func<int, string> buildPageUrl = (p) =>
     {
-        <a href="/schedules/calendar/course/@Model.CourseId.Value">Timetable</a>
-    }
-</form>
+        var q = new Dictionary<string, string?>(currentQuery);
+        q["page"] = p.ToString();
+        q["pageSize"] = pageSize.ToString();
+        return QueryHelpers.AddQueryString(ViewContext.HttpContext.Request.Path.Value ?? "/", q);
+    };
+}
 
-<hr />
-
-<table class="table">
-    <thead>
-    <tr>
-        <th>Course</th>
-        <th>Classroom</th>
-        <th>Start</th>
-        <th>End</th>
-        <th>Schedule</th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var o in Model.Occurrences.OrderBy(x => x.Start))
-    {
-        <tr>
-            <td>@o.CourseName</td>
-            <td>@o.ClassroomName</td>
-            <td>@o.Start.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-            <td>@o.End.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-            <td>
-                <a href="/schedules/@o.ScheduleId/edit">Edit</a>
-            </td>
-        </tr>
+<style>
+    .hover-shadow:hover {
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+        border-color: #dee2e6;
     }
-    </tbody>
-</table>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,.02);
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-primary">
+                <i class="bi bi-calendar-week me-2"></i>Schedules
+            </h5>
+            <div>
+                <a href="/schedules/calendar" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-calendar3"></i> Full Timetable
+                </a>
+                @if (Model.CourseId.HasValue)
+                {
+                    <a href="/schedules/calendar/course/@Model.CourseId.Value" class="btn btn-outline-info btn-sm me-2">
+                        @ViewBag.CourseName View
+                    </a>
+                }
+                <a href="/schedules/create" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg"></i> Create New
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <form method="get" asp-action="Index" asp-controller="Schedule" id="scheduleFilterForm" class="mb-4">
+                <div class="row g-3 align-items-center p-3 bg-light rounded-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted text-uppercase fw-bold">Course</label>
+                        <select asp-for="CourseId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Courses" class="form-select form-select-sm border-0 shadow-none">
+                            <option value="">All Courses</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small text-muted text-uppercase fw-bold">Year</label>
+                        <input asp-for="Year" type="number" min="2000" max="2100" class="form-control form-control-sm border-0 shadow-none" placeholder="YYYY" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small text-muted text-uppercase fw-bold">Month</label>
+                        <select asp-for="Month" class="form-select form-select-sm border-0 shadow-none">
+                            <option value="">All Months</option>
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                <option value="@i">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 offset-md-3 text-end">
+                         <label class="form-label small text-muted text-uppercase fw-bold d-block">Rows</label>
+                         <select id="pageSize" name="pageSize" class="form-select form-select-sm border-0 shadow-none d-inline-block w-auto">
+                            @{ var currentSize = ViewContext.HttpContext.Request.Query["pageSize"].ToString();
+                               if (string.IsNullOrEmpty(currentSize) && ViewBag.PageSize != null) currentSize = ViewBag.PageSize.ToString(); }
+                            <option value="10" selected="@(currentSize == "10" ? "selected" : null)">10</option>
+                            <option value="15" selected="@(currentSize == "15" ? "selected" : null)">15</option>
+                            <option value="20" selected="@(currentSize == "20" ? "selected" : null)">20</option>
+                            <option value="25" selected="@(currentSize == "25" ? "selected" : null)">25</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th scope="col" class="ps-3">Course</th>
+                        <th scope="col">Classroom</th>
+                        <th scope="col">Start Time</th>
+                        <th scope="col">End Time</th>
+                        <th scope="col" class="text-end pe-3">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                    @foreach (var o in Model.Occurrences.OrderBy(x => x.Start))
+                    {
+                        <tr>
+                            <td class="ps-3 fw-bold text-dark">@o.CourseName</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-geo-alt-fill text-muted me-1"></i>@o.ClassroomName
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-dark">@o.Start.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                                    <small class="text-muted">@o.Start.ToLocalTime().ToString("h:mm tt")</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-dark">@o.End.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                                    <small class="text-muted">@o.End.ToLocalTime().ToString("h:mm tt")</small>
+                                </div>
+                            </td>
+                            <td class="text-end pe-3">
+                                <a href="/schedules/@o.ScheduleId/edit" class="btn btn-sm btn-light text-primary hover-shadow">
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Occurrences.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-x display-6 mb-3 d-block"></i>
+                                No schedules found for the selected criteria.
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4 border-top pt-3">
+                <div class="text-muted small">
+                    Showing page <strong>@(page)</strong> of <strong>@totalPages</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    const form = document.getElementById('scheduleFilterForm');
+    if (!form) return;
+
+    form.querySelectorAll('select, input[type="number"], input[type="text"], input[type="search"]').forEach(el => {
+        el.addEventListener('change', () => form.submit());
+    });
+})();
+</script>
+
+
+<nav aria-label="Schedule pagination" class="mt-3">
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(page == 1 ? "disabled" : null)">
+            <a class="page-link" href="@buildPageUrl(page - 1)">Previous</a>
+        </li>
+        @for (int i = 1; i <= totalPages; i++)
+        {
+            <li class="page-item @(i == page ? "active" : null)">
+                <a class="page-link" href="@buildPageUrl(i)">@i</a>
+            </li>
+        }
+        <li class="page-item @(page == totalPages ? "disabled" : null)">
+            <a class="page-link" href="@buildPageUrl(page + 1)">Next</a>
+        </li>
+    </ul>
+</nav>

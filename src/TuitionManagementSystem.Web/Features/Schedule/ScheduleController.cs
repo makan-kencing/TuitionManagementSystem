@@ -2,6 +2,7 @@ namespace TuitionManagementSystem.Web.Features.Schedule;
 
 using System.Globalization;
 using System.Linq.Expressions;
+
 using Course;
 using Classroom;
 using MediatR;
@@ -17,7 +18,7 @@ public sealed class ScheduleController(IMediator mediator) : Controller
 {
     [HttpGet("")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> Index(int? year, int? month, int? CourseId)
+    public async Task<IActionResult> Index(int? year, int? month, int? CourseId, int page = 1, int pageSize = 10)
     {
         var now = DateTime.Now;
         var y = year ?? now.Year;
@@ -25,11 +26,18 @@ public sealed class ScheduleController(IMediator mediator) : Controller
 
         await LoadCourses(CourseId);
 
-        var occ = await mediator.Send(new GetScheduleOccurrencesByMonth(
+        var occAll = (await mediator.Send(new GetScheduleOccurrencesByMonth(
             CourseId: CourseId,
             Year: y,
             Month: m
-        ));
+        ))).ToList();
+
+        var totalCount = occAll.Count;
+        ViewBag.TotalCount = totalCount;
+        ViewBag.PageSize = pageSize;
+        ViewBag.Page = page;
+
+        var occ = occAll.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
         var vm = new ScheduleIndexVm
         {
@@ -113,6 +121,7 @@ public sealed class ScheduleController(IMediator mediator) : Controller
             return View("ScheduleCreate", vm);
         }
     }
+
 
     [HttpGet("{id:int}/edit")]
     [Authorize(Roles = "Administrator")]
@@ -213,11 +222,13 @@ public sealed class ScheduleController(IMediator mediator) : Controller
         var byDay = vm.ByDay?.Distinct().ToList() ?? [];
         if (byDay.Count == 0) byDay = [vm.Start.DayOfWeek];
 
+        var safetyUntil = vm.Until ?? vm.Start.AddYears(2);
+
         return
         [
             new RecurrencePatternDto(
                 FrequencyType: Ical.Net.FrequencyType.Weekly,
-                Until: vm.Until,
+                Until: safetyUntil,
                 Count: null,
                 Interval: vm.Interval <= 0 ? 1 : vm.Interval,
                 ByDay: byDay)
@@ -289,8 +300,8 @@ public sealed class ScheduleController(IMediator mediator) : Controller
             {
                 id = $"{x.ScheduleId}:{startLocal:O}",
                 title = x.CourseName,
-                start = startLocal,
-                end = endLocal,
+                start = startLocal.ToString("O"),
+                end = endLocal.ToString("O"),
                 extendedProps = new
                 {
                     scheduleId = x.ScheduleId,
@@ -305,6 +316,12 @@ public sealed class ScheduleController(IMediator mediator) : Controller
     private async Task LoadCourses(int? selectedCourseId)
     {
         var courses = await mediator.Send(new GetCourses());
+        if (selectedCourseId.HasValue)
+        {
+            var activeCourse = courses.FirstOrDefault(c => c.Id == selectedCourseId.Value);
+            ViewBag.CourseName = activeCourse?.Name;
+        }
+
         ViewBag.Courses = courses.Select(c => new SelectListItem
         {
             Value = c.Id.ToString(),

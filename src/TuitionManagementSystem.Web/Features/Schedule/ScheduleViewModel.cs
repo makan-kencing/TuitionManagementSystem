@@ -47,6 +47,7 @@ public class ScheduleIndexVm
     public int Year { get; set; }
     public int Month { get; set; }
     public int? CourseId { get; set; }
+    public int? CourseName { get; set; }
 
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }

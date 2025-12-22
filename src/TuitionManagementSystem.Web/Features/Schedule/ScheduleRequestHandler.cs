@@ -150,6 +150,7 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
     }
 
 
+
     public async Task<IEnumerable<ScheduleOccurrence>> Handle(GetScheduleOccurrencesByMonth request, CancellationToken ct)
     {
         var fromLocal = new DateTime(request.Year, request.Month, 1, 0, 0, 0, DateTimeKind.Local);
@@ -237,13 +238,13 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
 
         foreach (var o in occ)
         {
-            var startLocal = o.Period.StartTime?.Value ?? default;
-            if (startLocal == default) continue;
+            var startUtcOcc = o.Period.StartTime?.AsUtc ?? default;
+            if (startUtcOcc == default) continue;
 
-            var endLocal = o.Period.EndTime?.Value ?? startLocal + duration;
+            var endUtcOcc = o.Period.EndTime?.AsUtc ?? startUtcOcc + duration;
 
-            if (startLocal >= toUtc) break;
-            if (endLocal <= fromUtc) continue;
+            if (startUtcOcc >= toUtc) break;
+            if (endUtcOcc <= fromUtc) continue;
 
             list.Add(new ScheduleOccurrence(
                 ScheduleId: s.Id,
@@ -251,8 +252,8 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
                 CourseName: s.Course.Name,
                 ClassroomId: s.Course.PreferredClassroom.Id,
                 ClassroomName: s.Course.PreferredClassroom.Location,
-                Start: startLocal,
-                End: endLocal
+                Start: startUtcOcc,
+                End: endUtcOcc
             ));
         }
     }
@@ -317,62 +318,81 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
 
     if (course?.PreferredClassroomId == null) return;
 
-    var candidate = new Schedule
-    {
-        Start = startUtc,
-        End = endUtc,
-        RecurrencePatterns = patterns.Select(p => new ScheduleRecurrencePattern
-        {
-            FrequencyType = p.FrequencyType,
-            Interval = p.Interval,
-            Until = p.Until,
-            Count = p.Count,
-            ByDay = p.ByDay.ToList()
-        }).ToList(),
+    var preferredRoomId = course.PreferredClassroomId;
 
-        RecurrenceDates = recurrenceDates.ToList(),
-        ExceptionDates = exceptionDates.ToList()
-    };
 
-    var candidateEvent = candidate.ToICalendarEvent();
-    var candidateDuration = endUtc - startUtc;
-    var checkStart = new CalDateTime(startUtc);
-
-    var maxCheckDate = startUtc.AddYears(2);
-
-    var otherSchedules = await db.Schedules
+    var conflictingSchedulesQuery = db.Schedules
         .AsNoTracking()
         .Include(s => s.RecurrencePatterns)
         .Include(s => s.Course)
-        .Where(s => s.Id != currentScheduleId &&
-                    s.Course.PreferredClassroomId == course.PreferredClassroomId)
-        .ToListAsync(ct);
+        .Where(s => s.Id != currentScheduleId)
+        .Where(s => s.Course.PreferredClassroomId == preferredRoomId );
 
-    foreach (var candOcc in candidateEvent.GetOccurrences(checkStart))
+    var existingSchedules = await conflictingSchedulesQuery.ToListAsync(ct);
+
+    if (existingSchedules.Count == 0) return;
+
+
+    var candidate = new Schedule
+    {
+        Id = currentScheduleId ?? 0,
+        CourseId = courseId,
+        Start = startUtc,
+        End = endUtc,
+        RecurrencePatterns = patterns.Select(MapPatternUtc).ToList(),
+        RecurrenceDates = DateTimeUtc.ToUtcAssumingLocal(
+            recurrenceDates.Select(d => NormalizeExceptionOrRDate(d, startUtc.ToLocalTime())).ToList()),
+        ExceptionDates = DateTimeUtc.ToUtcAssumingLocal(
+            exceptionDates.Select(d => NormalizeExceptionOrRDate(d, startUtc.ToLocalTime())).ToList())
+    };
+
+
+    var candidateDuration = endUtc - startUtc;
+
+
+    var candidateEvent = candidate.ToICalendarEvent();
+
+    var searchStart = new CalDateTime(startUtc.AddDays(-1));
+    var searchEnd = startUtc.AddYears(2);
+
+
+    var candidateOccurrences = candidateEvent.GetOccurrences(searchStart);
+    foreach (var candOcc in candidateOccurrences)
     {
         var cStart = candOcc.Period.StartTime.AsUtc;
-        if (cStart > maxCheckDate) break;
-
         var cEnd = candOcc.Period.EndTime?.AsUtc ?? cStart.Add(candidateDuration);
 
-        foreach (var other in otherSchedules)
+
+        foreach (var existing in existingSchedules)
         {
-            var otherEvent = other.ToICalendarEvent();
-            var otherDuration = other.End - other.Start;
 
-            foreach (var existingOcc in otherEvent.GetOccurrences(checkStart))
+            if (existing.RecurrencePatterns.Count == 0 && existing.End < cStart) continue;
+
+            var existingEvent = existing.ToICalendarEvent();
+            var existingDuration = existing.End - existing.Start;
+
+
+            var checkWindowStart = new CalDateTime(cStart.AddDays(-1));
+            var checkWindowEnd = new CalDateTime(cEnd.AddDays(1));
+
+            var existingOccurrences = existingEvent.GetOccurrences(checkWindowStart)
+                .TakeWhile(o => o.Period.StartTime.AsUtc < checkWindowEnd.AsUtc);
+
+            foreach (var exOcc in existingOccurrences)
             {
-                var oStart = existingOcc.Period.StartTime.AsUtc;
-                if (oStart > maxCheckDate) break;
-
-                var oEnd = existingOcc.Period.EndTime?.AsUtc ?? oStart.Add(otherDuration);
+                var oStart = exOcc.Period.StartTime.AsUtc;
+                var oEnd = exOcc.Period.EndTime?.AsUtc ?? oStart.Add(existingDuration);
 
 
                 if (cStart < oEnd && cEnd > oStart)
                 {
+
+                    var dateStr = cStart.ToLocalTime().ToString("dd MMM yyyy (ddd)", CultureInfo.InvariantCulture);
+                    var timeStr = $"{cStart.ToLocalTime():h:mm tt} - {cEnd.ToLocalTime():h:mm tt}";
+
                     throw new InvalidOperationException(
-                        $"Classroom Conflict: Room is busy for '{other.Summary}' " +
-                        $"on {cStart.ToLocalTime():MMM dd, yyyy} at {cStart.ToLocalTime():HH:mm}.");
+                        $"Conflict detected! The classroom '{course.PreferredClassroom?.Location}' is already booked by " +
+                        $"'{existing.Course.Name}' on {dateStr} at {timeStr}.");
                 }
             }
         }

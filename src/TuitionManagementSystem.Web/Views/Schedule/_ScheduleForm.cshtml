@@ -11,15 +11,6 @@
         </select>
         <span asp-validation-for="CourseId" class="text-danger"></span>
     </div>
-
-
-    <div class="col-md-6 mb-3">
-        <label asp-for="ClassId" class="form-label">Classroom (Optional)</label>
-        <select asp-for="ClassId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Classrooms" class="form-select">
-            <option value="">-- Use Course Default Room --</option>
-        </select>
-        <span asp-validation-for="ClassId" class="text-danger"></span>
-    </div>
 </div>
 
 <div class="mb-3">
