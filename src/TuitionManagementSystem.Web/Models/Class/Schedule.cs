@@ -53,6 +53,18 @@ public class Schedule
 
 public static class ICalExtensions
 {
-    public static CalDateTime ToCalDateTime(this DateTime dateTime) => new(dateTime);
+    public static CalDateTime ToCalDateTime(this DateTime dateTime)
+    {
+        var safeDt = dateTime.Kind == DateTimeKind.Local
+            ? dateTime.ToUniversalTime()
+            : dateTime;
+
+        if (safeDt.Kind == DateTimeKind.Unspecified)
+        {
+            safeDt = DateTime.SpecifyKind(safeDt, DateTimeKind.Utc);
+        }
+
+        return new CalDateTime(safeDt);
+    }
     public static WeekDay ToWeekDay(this DayOfWeek dayOfWeek) => new(dayOfWeek);
 }

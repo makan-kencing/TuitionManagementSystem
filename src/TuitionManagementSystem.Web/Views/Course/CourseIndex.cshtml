@@ -293,13 +293,11 @@
 @section Scripts {
 <script>
 (() => {
-    // 1. Token and Variables (Scope: Private to this block)
     const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
     const actionBar = document.getElementById('bulkActionBar');
     const changeCountLabel = document.getElementById('changeCount');
     let changedRowIds = new Set();
 
-    // --- EXISTING UTILITY FUNCTIONS ---
     async function postJson(url, body) {
         return await fetch(url, {
             method: 'POST',
@@ -340,7 +338,6 @@
         else actionBar.classList.remove('visible');
     }
 
-    // --- WINDOW FUNCTIONS (Assigned inside scope to use 'token') ---
 
     window.discardAllChanges = () => {
         if (!confirm("Discard all pending changes?")) return;
@@ -399,12 +396,10 @@
         }
     };
 
-    // --- THE FIXED DELETE FUNCTION ---
     window.deleteCourse = async (id, name) => {
         if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
 
         const row = document.querySelector(`tr[data-row-id="${id}"]`);
-        // Updated selectors to match your HTML classes exactly
         const buttons = row.querySelectorAll(`.action-btns-${id}`);
         const spinner = row.querySelector(`.row-spinner-${id}`);
 
@@ -439,7 +434,6 @@
         }
     };
 
-    // Initialize Event Listeners
     document.querySelectorAll('.course-input').forEach(input => {
         input.addEventListener('change', checkForChanges);
     });
@@ -468,6 +462,6 @@
     };
 
     checkForChanges();
-})(); // End of IIFE
+})();
 </script>
 }

@@ -320,18 +320,15 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
 
     var preferredRoomId = course.PreferredClassroomId;
 
-
-    var conflictingSchedulesQuery = db.Schedules
+    var existingSchedules = await db.Schedules
         .AsNoTracking()
         .Include(s => s.RecurrencePatterns)
         .Include(s => s.Course)
         .Where(s => s.Id != currentScheduleId)
-        .Where(s => s.Course.PreferredClassroomId == preferredRoomId );
-
-    var existingSchedules = await conflictingSchedulesQuery.ToListAsync(ct);
+        .Where(s => s.Course.PreferredClassroomId == preferredRoomId)
+        .ToListAsync(ct);
 
     if (existingSchedules.Count == 0) return;
-
 
     var candidate = new Schedule
     {
@@ -346,47 +343,49 @@ public class ScheduleRequestHandler(ApplicationDbContext db) :
             exceptionDates.Select(d => NormalizeExceptionOrRDate(d, startUtc.ToLocalTime())).ToList())
     };
 
-
     var candidateDuration = endUtc - startUtc;
-
-
     var candidateEvent = candidate.ToICalendarEvent();
 
+    // 3. Define the Search Window (e.g., check conflicts for the next 2 years only)
     var searchStart = new CalDateTime(startUtc.AddDays(-1));
-    var searchEnd = startUtc.AddYears(2);
+    var searchEnd   = startUtc.AddYears(2);
 
+    // 4. CRITICAL FIX: Use TakeWhile to stop the loop manually
+    // We pass 'searchStart' to skip past events, but use TakeWhile to stop future events.
+    var candidateOccurrences = candidateEvent
+        .GetOccurrences(searchStart)
+        .TakeWhile(o => o.Period.StartTime.AsUtc < searchEnd);
 
-    var candidateOccurrences = candidateEvent.GetOccurrences(searchStart);
     foreach (var candOcc in candidateOccurrences)
     {
         var cStart = candOcc.Period.StartTime.AsUtc;
         var cEnd = candOcc.Period.EndTime?.AsUtc ?? cStart.Add(candidateDuration);
 
-
         foreach (var existing in existingSchedules)
         {
-
+            // Optimization: Skip existing schedules that ended before this occurrence starts
             if (existing.RecurrencePatterns.Count == 0 && existing.End < cStart) continue;
 
             var existingEvent = existing.ToICalendarEvent();
             var existingDuration = existing.End - existing.Start;
 
-
+            // Define a narrow window for the existing event check to improve performance
             var checkWindowStart = new CalDateTime(cStart.AddDays(-1));
-            var checkWindowEnd = new CalDateTime(cEnd.AddDays(1));
+            var checkWindowEnd = cStart.AddDays(1); // Only check 1 day ahead
 
-            var existingOccurrences = existingEvent.GetOccurrences(checkWindowStart)
-                .TakeWhile(o => o.Period.StartTime.AsUtc < checkWindowEnd.AsUtc);
+            // Check existing occurrences
+            var existingOccurrences = existingEvent
+                .GetOccurrences(checkWindowStart)
+                .TakeWhile(o => o.Period.StartTime.AsUtc < checkWindowEnd);
 
             foreach (var exOcc in existingOccurrences)
             {
                 var oStart = exOcc.Period.StartTime.AsUtc;
                 var oEnd = exOcc.Period.EndTime?.AsUtc ?? oStart.Add(existingDuration);
 
-
+                // INTERSECTION CHECK
                 if (cStart < oEnd && cEnd > oStart)
                 {
-
                     var dateStr = cStart.ToLocalTime().ToString("dd MMM yyyy (ddd)", CultureInfo.InvariantCulture);
                     var timeStr = $"{cStart.ToLocalTime():h:mm tt} - {cEnd.ToLocalTime():h:mm tt}";
 

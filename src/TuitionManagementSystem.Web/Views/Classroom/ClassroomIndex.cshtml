@@ -50,7 +50,6 @@
     </a>
 </div>
 
-<!-- Search form -->
 <form method="get" asp-action="Index" id="searchForm" class="mb-3">
     <div class="input-group input-group-sm">
         <input id="searchInput" name="q" type="search" class="form-control" placeholder="Search location" value="@currentQ" />
@@ -74,13 +73,10 @@
                 @foreach (var c in Model)
                 {
                     <tr>
-                        @* 1. Add the Location cell back *@
                         <td class="ps-4 fw-bold text-dark">@c.Location</td>
 
-                        @* 2. Add the Max Capacity cell back *@
                         <td>@c.MaxCapacity</td>
 
-                        @* 3. The Actions cell (your existing code) *@
                         <td class="action-cell text-end">
                             <div class="d-flex align-items-center justify-content-end gap-2">
                                 <div class="btn-group btn-group-sm action-buttons" role="group" aria-label="Actions">

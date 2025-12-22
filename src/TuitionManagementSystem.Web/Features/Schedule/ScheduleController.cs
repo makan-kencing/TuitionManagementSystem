@@ -99,7 +99,6 @@ public sealed class ScheduleController(IMediator mediator) : Controller
         }
         catch (InvalidOperationException ex)
         {
-            // 4. This catches classroom conflicts and logic errors from the Handler
             ModelState.AddModelError(string.Empty, ex.Message);
 
             await LoadCourses(vm.CourseId);

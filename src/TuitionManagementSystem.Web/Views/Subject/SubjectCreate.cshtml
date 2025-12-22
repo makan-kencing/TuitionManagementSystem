@@ -8,7 +8,6 @@
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
 
-    @* Now the Model being passed here is a SubjectFormVm, which matches the Partial *@
     @await Html.PartialAsync("_Form", Model)
 
     <div class="mt-3">
