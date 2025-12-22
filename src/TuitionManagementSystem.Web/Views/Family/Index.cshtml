@@ -39,6 +39,10 @@
                         @if (User.GetUserType() == nameof(Parent) && member.User.Id != User.GetUserId())
                         {
                             <div class="ms-auto d-flex">
+                                <a asp-controller="Child" asp-route="Enrollment" class="btn" title="View Enrollment">
+                                    <i class="fa-solid fa-book text-white"></i>
+                                </a>
+
                                 <button hx-get
                                         hx-controller="Family"
                                         hx-action="GetRemoveMember"

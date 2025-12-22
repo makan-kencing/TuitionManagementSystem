@@ -1,54 +1,79 @@
 namespace TuitionManagementSystem.Web.Features.Child;
 
 using Abstractions;
-using Ardalis.Result;
-using GetChild;
-using GetChildrenEnrollment;
+using Enrollment.MakeEnrollment;
+using Enrollment.ViewEnrollment;
 using Infrastructure.Persistence;
 using Invoice.ListInvoice;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Payment;
-using Models.User;
 using Models.ViewModels;
 using Services.Auth.Extensions;
 
 public class ChildController(IMediator mediator, ApplicationDbContext db) : WebController
 {
     [HttpGet]
-    public async Task<IActionResult> Index(int id)
+    [Route("~/[controller]/{id:int:required}/enrollment")]
+    public async Task<IActionResult> Enrollment(int id, CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(new GetChildQuery(this.User.GetUserId(), id));
+        var result = await mediator.Send(
+            new ViewEnrollmentRequest(id),
+            cancellationToken);
 
-        if (result.IsNotFound())
-        {
-            return this.NotFound();
-        }
+        var model = result.IsSuccess
+            ? result.Value
+            : new List<ViewEnrollmentResponse>();
 
-        if (result.IsForbidden())
-        {
-            return this.Forbid();
-        }
-
-        return this.View(new ChildViewModel { Child = result.Value });
-    }
-
-    public class ChildViewModel
-    {
-        public required GetChildResponse Child { get; set; }
+        return this.View("ViewEnrollments", model);
     }
 
     [HttpGet]
-    public async Task<IActionResult> Enrollment()
+    [Route("~/[controller]/{id:int:required}/enrollment/view")]
+    public async Task<IActionResult> ViewEnrollment(int id, CancellationToken cancellationToken)
     {
-        var response = await mediator.Send(new GetChildrenEnrollmentQuery(this.User.GetUserId()));
-        if (response.IsNotFound())
-        {
-            return this.NotFound();
-        }
+        var result = await mediator.Send(
+            new ViewEnrollmentRequest(id),
+            cancellationToken);
 
-        return this.View(response.Value);
+        var model = result.IsSuccess
+            ? result.Value
+            : new List<ViewEnrollmentResponse>();
+
+        if (!result.IsSuccess)
+            this.ViewBag.Message = "No enrollments found for this student.";
+
+        return this.PartialView("../Enrollment/_ViewEnrollment", model);
+    }
+
+    [HttpPost("make")]
+    [Route("~/[controller]/enrollment/make")]
+    public async Task<IActionResult> MakeEnrollment(
+        [FromBody] EnrollmentViewModel model,
+        CancellationToken cancellationToken)
+    {
+        if (!model.StudentId.HasValue || !model.CourseId.HasValue)
+            return this.BadRequest(new { message = "Student and Course are required." });
+
+        var result = await mediator.Send(
+            new MakeEnrollmentRequest(
+                model.StudentId.Value,
+                model.CourseId.Value),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+            return this.BadRequest(new { errors = result.Errors });
+
+        var response = new EnrollmentViewModel
+        {
+            EnrollmentId = result.Value.EnrollmentId,
+            StudentId = result.Value.StudentId,
+            CourseId = result.Value.CourseId,
+            EnrolledAt = result.Value.EnrolledAt
+        };
+
+        return this.Ok(new { message = "Enrollment created successfully", enrollment = response });
     }
 
     [HttpGet]
