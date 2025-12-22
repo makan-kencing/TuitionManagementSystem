@@ -54,7 +54,7 @@ public class AdminController(ApplicationDbContext db,  IFileService fileService,
             Email = account.Email,
             ProfileImageUrl = account.ProfileImage != null
                 ? account.ProfileImage.Uri
-                : "/assets/uploads/DefaultProfile.png"
+                : "/assets/img/DefaultProfile.png"
         };
 
         return View(model);

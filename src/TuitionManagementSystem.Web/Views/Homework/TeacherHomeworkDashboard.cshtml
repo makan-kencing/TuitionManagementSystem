@@ -6,9 +6,17 @@
     var now = DateTime.UtcNow;
     var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kuala_Lumpur");
 }
-}
+
 
 <div class="container py-4">
+    <div class="mb-3">
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+                onclick="window.history.back();">
+            <i class="fas fa-arrow-left"></i>
+            Back
+        </button>
+    </div>
     <div class="bg-light p-4 rounded shadow-sm mb-3">
         <div class="d-flex flex-wrap align-items-center justify-content-between">
             <div>
