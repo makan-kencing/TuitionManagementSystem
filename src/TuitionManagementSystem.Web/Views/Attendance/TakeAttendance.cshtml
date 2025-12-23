@@ -16,7 +16,7 @@
     <form hx-post hx-controller="Attendance" hx-action="TakeAttendanceHtmx" hx-target="#modal">
         <div class="mb-3 mt-3">
             <label for="code" class="form-label">Attendance Code:</label>
-            <input type="text" class="form-control" id="code" placeholder="Enter Attendance Code" name="code">
+            <input type="text" class="form-control" id="code" placeholder="Enter Attendance Code" name="code"  value="@(Context.Request.Query["code"])">
         </div>
 
         <button type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">
